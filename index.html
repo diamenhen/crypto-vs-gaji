@@ -125,7 +125,7 @@
           Connect Wallet
         </button>
         <div style="margin-top:10px;font-size:11px;color:#4a5568">
-          Support: Jupiter Wallet &middot; Phantom &middot; Solflare &middot; Backpack &middot; Zerion
+          Support: Phantom &middot; Solflare &middot; Backpack
         </div>
       </div>
       <div id="isConn" style="display:none">
@@ -159,7 +159,7 @@
       <div><div class="fact-t">INSIGHT</div><div class="fact-b" id="factTxt"></div></div>
     </div>
 
-    <footer>DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA JUPITER API &middot; REFRESH 30 DETIK</footer>
+    <footer>DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
   </div>
 
   <script>
@@ -195,20 +195,12 @@
       { title:'Manajer Bank Swasta',      company:'BCA / BRI / Mandiri',      salary:30000000,  pct:20  },
     ];
 
-    // Fetch harga SOL pakai Jupiter Price API (support CORS)
+    // Pakai Binance API — support CORS, tidak perlu key
     async function fetchPrice() {
       try {
-        const SOL_MINT = 'So11111111111111111111111111111111111111112';
-        const USDT_MINT = 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB';
-
-        // Jupiter Price API v2
-        const r = await fetch('https://api.jup.ag/price/v2?ids=' + SOL_MINT + ',' + USDT_MINT);
+        const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
         const d = await r.json();
-
-        solUSD = parseFloat(d.data[SOL_MINT]?.price || 0);
-        const usdtPrice = parseFloat(d.data[USDT_MINT]?.price || 1);
-
-        // Hitung IDR: SOL/USDT * kurs USD/IDR
+        solUSD = parseFloat(d.price);
         solIDR = Math.round(solUSD * USD_IDR);
 
         document.getElementById('tIdr').textContent = fi(solIDR);
@@ -221,7 +213,6 @@
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
 
       } catch(e) {
-        // Fallback ke harga estimasi
         solIDR = 2850000; solUSD = 174.85;
         document.getElementById('tIdr').textContent = 'Rp 2.850.000*';
         document.getElementById('tUsd').textContent = '$174.85*';
@@ -230,30 +221,7 @@
       }
     }
 
-    // Deteksi semua wallet yang mungkin terinstall
     const WALLETS = [
-      {
-        name: 'Jupiter Wallet', desc: 'Jupiter Extension Wallet',
-        icon: '&#129001;', bg: '#0d1a0d',
-        get: () => {
-          // Coba semua kemungkinan inject point Jupiter
-          if (window.jupiter)          return window.jupiter;
-          if (window.jupiterWallet)    return window.jupiterWallet;
-          if (window.jup)              return window.jup;
-          // Cek Wallet Standard API
-          try {
-            const ws = window.navigator?.wallets;
-            if (ws) {
-              const arr = [...ws.get()];
-              const jup = arr.find(w => w.name?.toLowerCase().includes('jupiter'));
-              if (jup) return jup;
-            }
-          } catch(e) {}
-          // Cek apakah window.solana adalah Jupiter
-          if (window.solana?.isJupiter) return window.solana;
-          return null;
-        }
-      },
       {
         name: 'Phantom', desc: 'Phantom Wallet',
         icon: '&#128123;', bg: '#1a1535',
@@ -272,17 +240,6 @@
         name: 'Backpack', desc: 'Backpack Wallet',
         icon: '&#127890;', bg: '#1a1a1a',
         get: () => window.backpack?.solana || null
-      },
-      {
-        name: 'Zerion', desc: 'Zerion Wallet',
-        icon: '&#9711;', bg: '#0a1628',
-        get: () => {
-          // Zerion inject ke window.solana
-          if (window.solana && !window.solana.isPhantom && !window.solana.isSolflare) {
-            return window.solana;
-          }
-          return null;
-        }
       },
     ];
 
