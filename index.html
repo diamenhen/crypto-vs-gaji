@@ -311,17 +311,29 @@
 
     async function loadBalance(publicKey) {
       try {
-        const r = await fetch('https://api.mainnet-beta.solana.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0', id: 1,
-            method: 'getBalance',
-            params: [publicKey, { commitment: 'confirmed' }]
-          })
-        });
-        const data = await r.json();
-        const sol = (data.result?.value || 0) / 1e9;
+        // Coba beberapa RPC fallback
+        const RPCS = [
+          'https://api.mainnet-beta.solana.com',
+          'https://rpc.ankr.com/solana',
+          'https://solana-api.projectserum.com',
+        ];
+        let data = null;
+        for (const rpc of RPCS) {
+          try {
+            const r = await fetch(rpc, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                jsonrpc: '2.0', id: 1,
+                method: 'getBalance',
+                params: [publicKey, { commitment: 'confirmed' }]
+              })
+            });
+            data = await r.json();
+            if (data.result?.value !== undefined) break;
+          } catch(e) { continue; }
+        }
+        const sol = (data?.result?.value || 0) / 1e9;
         total = sol * (solIDR || 2850000);
         document.getElementById('wSol').textContent  = sol.toFixed(4) + ' SOL';
         document.getElementById('wSolV').textContent = fi(total);
