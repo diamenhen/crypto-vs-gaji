@@ -313,9 +313,8 @@
       try {
         // Coba beberapa RPC fallback
         const RPCS = [
+          'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55',
           'https://api.mainnet-beta.solana.com',
-          'https://rpc.ankr.com/solana',
-          'https://solana-api.projectserum.com',
         ];
         let data = null;
         for (const rpc of RPCS) {
