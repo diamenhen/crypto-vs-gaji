@@ -87,6 +87,8 @@
     .spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,0.15); border-top-color:#fff; border-radius:50%; animation:sp 0.6s linear infinite; vertical-align:middle; margin-right:6px; }
     @keyframes sp { to{transform:rotate(360deg)} }
     footer { text-align:center; margin-top:40px; font-size:10px; color:var(--text3); letter-spacing:1.5px; border-top:1px solid var(--bdr); padding-top:20px; }
+    .lang-btn { background:rgba(255,255,255,0.05); border:1px solid var(--bdr2); border-radius:8px; padding:5px 12px; color:var(--text); font-family:'DM Mono',monospace; font-size:12px; cursor:pointer; transition:all 0.2s; letter-spacing:1px; }
+    .lang-btn:hover { background:rgba(153,69,255,0.15); border-color:var(--sol); color:var(--sol); }
     @media(max-width:600px){ .ticker{grid-template-columns:1fr 1fr} .hero-v{font-size:34px} .job{flex-direction:column} .jr{width:100%;min-width:unset;text-align:left} }
   </style>
 </head>
@@ -110,7 +112,10 @@
           <div class="logo-sub">IDR REALTIME TRACKER</div>
         </div>
       </div>
-      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      </div>
     </header>
 
     <div class="ticker">
@@ -353,16 +358,18 @@
     }
 
     function renderJobs() {
+      const t   = T[lang];
+      const src = lang === 'id' ? JOBS : JOBS_EN;
       const box = document.getElementById('jobsBox');
       box.innerHTML = '';
-      JOBS.forEach(job => {
+      src.forEach(job => {
         const perDetik = job.salary / 30 / 24 / 3600;
         const perJam   = job.salary / 30 / 24;
         const perHari  = job.salary / 30;
         const perMinggu= job.salary / 4.33;
         const perBulan = job.salary;
         const perTahun = job.salary * 12;
-        const per10thn = job.salary * 420;
+        const per35thn = job.salary * 420;
         const days     = total > 0 ? total / perHari : null;
         const uid      = 'b' + job.pct;
         const div      = document.createElement('div');
@@ -372,20 +379,20 @@
             '<div class="jt">' + job.title + '</div>' +
             '<div class="jc">' + job.company + '</div>' +
             '<div class="jgrid">' +
-              '<div><div class="jnl">PER DETIK</div><div class="jnv">' + fi(perDetik) + '</div></div>' +
-              '<div><div class="jnl">PER JAM</div><div class="jnv">' + fi(Math.round(perJam)) + '</div></div>' +
-              '<div><div class="jnl">PER HARI</div><div class="jnv">' + fi(Math.round(perHari)) + '</div></div>' +
-              '<div><div class="jnl">PER MINGGU</div><div class="jnv">' + fi(Math.round(perMinggu)) + '</div></div>' +
-              '<div><div class="jnl">PER BULAN</div><div class="jnv">' + fi(perBulan) + '</div></div>' +
-              '<div><div class="jnl">PER TAHUN</div><div class="jnv">' + fi(perTahun) + '</div></div>' +
-              '<div><div class="jnl">35 TAHUN</div><div class="jnv">' + fi(per10thn) + '</div></div>' +
+              '<div><div class="jnl">' + t.perDetik  + '</div><div class="jnv">' + fi(perDetik) + '</div></div>' +
+              '<div><div class="jnl">' + t.perJam    + '</div><div class="jnv">' + fi(Math.round(perJam)) + '</div></div>' +
+              '<div><div class="jnl">' + t.perHari   + '</div><div class="jnv">' + fi(Math.round(perHari)) + '</div></div>' +
+              '<div><div class="jnl">' + t.perMinggu + '</div><div class="jnv">' + fi(Math.round(perMinggu)) + '</div></div>' +
+              '<div><div class="jnl">' + t.perBulan  + '</div><div class="jnv">' + fi(perBulan) + '</div></div>' +
+              '<div><div class="jnl">' + t.perTahun  + '</div><div class="jnv">' + fi(perTahun) + '</div></div>' +
+              '<div><div class="jnl">' + t.per35thn  + '</div><div class="jnv">' + fi(per35thn) + '</div></div>' +
             '</div>' +
             '<div class="bw"><div class="bf" id="' + uid + '" style="width:0%"></div></div>' +
           '</div>' +
           '<div class="jr">' +
-            '<div class="jrl">HARUS KERJA</div>' +
+            '<div class="jrl">' + t.harusKerja + '</div>' +
             '<div class="jrv">' + (days ? fd(days) : '--') + '</div>' +
-            '<div class="jrs">' + (total > 0 ? '~' + (total/perBulan).toFixed(1) + ' bln gaji' : 'connect wallet') + '</div>' +
+            '<div class="jrs">' + (total > 0 ? '~' + (total/perBulan).toFixed(1) + ' ' + t.blnGaji : t.connectWallet) + '</div>' +
           '</div>';
         box.appendChild(div);
         setTimeout(() => { const b=document.getElementById(uid); if(b) b.style.width=job.pct+'%'; }, 150);
@@ -396,10 +403,115 @@
       if (total <= 0) { document.getElementById('factBox').style.display='none'; return; }
       document.getElementById('factBox').style.display = 'flex';
       const days = Math.ceil(total / (JOBS[3].salary / 30));
-      document.getElementById('factTxt').innerHTML =
-        'Kamu punya <strong>' + sol.toFixed(4) + ' SOL</strong> senilai <strong>' + fi(total) + '</strong> -- ' +
-        'setara <strong>' + fd(days) + ' kerja</strong> seorang Software Engineer Senior di GoTo, ' +
-        'tanpa harus buka laptop sekalipun. &#128640;';
+      document.getElementById('factTxt').innerHTML = T[lang].insightText(sol, total, days);
+    }
+
+    // ── Translations ─────────────────────────────────────────
+    let lang = 'id';
+
+    const T = {
+      id: {
+        title:        'CryptovGaji',
+        subtitle:     'IDR REALTIME TRACKER',
+        connectLabel: 'CONNECT WALLET',
+        connectBtn:   'Connect Wallet',
+        disconnect:   'DISCONNECT',
+        support:      'Support: Phantom &middot; Solflare &middot; Backpack',
+        heroLabel:    'TOTAL NILAI CRYPTO KAMU (IDR)',
+        heroSub:      'Connect wallet untuk melihat perbandingan realtime',
+        heroSubConn:  'Nilai SOL wallet kamu',
+        network:      'NETWORK',
+        nilaiIdr:     'NILAI IDR',
+        secLabel:     'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',
+        harusKerja:   'HARUS KERJA',
+        perDetik:     'PER DETIK',
+        perJam:       'PER JAM',
+        perHari:      'PER HARI',
+        perMinggu:    'PER MINGGU',
+        perBulan:     'PER BULAN',
+        perTahun:     'PER TAHUN',
+        per35thn:     '35 TAHUN',
+        connectWallet:'connect wallet',
+        blnGaji:      'bln gaji',
+        insightTitle: 'INSIGHT',
+        insightText:  (sol, total, days) => 'Kamu punya <strong>' + sol.toFixed(4) + ' SOL</strong> senilai <strong>' + fi(total) + '</strong> -- setara <strong>' + fd(days) + ' kerja</strong> seorang Software Engineer Senior di GoTo, tanpa harus buka laptop sekalipun. &#128640;',
+        footer:       'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',
+        pilihWallet:  'Pilih Wallet',
+        walletSub:    'Wallet yang terinstall di browser kamu',
+        batal:        'Batal',
+        terdeteksi:   'Terdeteksi',
+        belumInstall: 'Belum install',
+        modalLabel:   'CONNECT WALLET',
+      },
+      en: {
+        title:        'CryptovsSalary',
+        subtitle:     'IDR REALTIME TRACKER',
+        connectLabel: 'CONNECT WALLET',
+        connectBtn:   'Connect Wallet',
+        disconnect:   'DISCONNECT',
+        support:      'Support: Phantom &middot; Solflare &middot; Backpack',
+        heroLabel:    'YOUR TOTAL CRYPTO VALUE (IDR)',
+        heroSub:      'Connect wallet to see realtime comparison',
+        heroSubConn:  'Your SOL wallet value',
+        network:      'NETWORK',
+        nilaiIdr:     'IDR VALUE',
+        secLabel:     'COMPARISON WITH HIGH-PAYING JOBS IN INDONESIA',
+        harusKerja:   'MUST WORK',
+        perDetik:     'PER SECOND',
+        perJam:       'PER HOUR',
+        perHari:      'PER DAY',
+        perMinggu:    'PER WEEK',
+        perBulan:     'PER MONTH',
+        perTahun:     'PER YEAR',
+        per35thn:     '35 YEARS',
+        connectWallet:'connect wallet',
+        blnGaji:      'mo salary',
+        insightTitle: 'INSIGHT',
+        insightText:  (sol, total, days) => 'You have <strong>' + sol.toFixed(4) + ' SOL</strong> worth <strong>' + fi(total) + '</strong> -- equivalent to <strong>' + fd(days) + ' of work</strong> as a Senior Software Engineer at GoTo, without opening a laptop. &#128640;',
+        footer:       'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
+        pilihWallet:  'Select Wallet',
+        walletSub:    'Wallets installed in your browser',
+        batal:        'Cancel',
+        terdeteksi:   'Detected',
+        belumInstall: 'Not installed',
+        modalLabel:   'CONNECT WALLET',
+      }
+    };
+
+    const JOBS_EN = [
+      { title:'President Director (CEO)',   company:'SOE / Large Private Company',  salary:150000000, pct:100 },
+      { title:'Medical Specialist',         company:'Private Hospital',             salary:80000000,  pct:53  },
+      { title:'Commercial Pilot',           company:'Garuda / Lion Air',            salary:75000000,  pct:50  },
+      { title:'Senior Software Engineer',   company:'GoTo / Tokopedia / Gojek',    salary:60000000,  pct:40  },
+      { title:'Investment Banker',          company:'Bank Mandiri / BCA',           salary:55000000,  pct:37  },
+      { title:'Notary',                     company:'Notary Office',                salary:50000000,  pct:33  },
+      { title:'Senior Judge / Prosecutor',  company:'Supreme Court',                salary:45000000,  pct:30  },
+      { title:'Data Scientist',             company:'Gojek / Grab / Shopee',        salary:40000000,  pct:27  },
+      { title:'Senior Architect',           company:'Property Consultant',          salary:35000000,  pct:23  },
+      { title:'Private Bank Manager',       company:'BCA / BRI / Mandiri',          salary:30000000,  pct:20  },
+    ];
+
+    function toggleLang() {
+      lang = lang === 'id' ? 'en' : 'id';
+      document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
+      applyLang();
+      renderJobs();
+      if (total > 0) renderFact(parseFloat(document.getElementById('wSol').textContent));
+    }
+
+    function applyLang() {
+      const t = T[lang];
+      document.querySelector('.logo-sub').textContent       = t.subtitle;
+      document.querySelector('.c-label').textContent        = t.connectLabel;
+      document.getElementById('btnConn').innerHTML          = '<div class="btn-cw-icon">&#9678;</div> ' + t.connectBtn;
+      document.querySelector('.modal-title').textContent    = t.pilihWallet;
+      document.querySelector('.modal-sub').textContent      = t.walletSub;
+      document.querySelector('.modal-cancel').textContent   = t.batal;
+      document.querySelector('.hero-l').textContent         = t.heroLabel;
+      document.querySelector('.sec-l').textContent          = t.secLabel;
+      document.querySelector('footer').innerHTML            = t.footer;
+      // Hero sub
+      if (total <= 0) document.getElementById('heroS').textContent = t.heroSub;
     }
 
     renderJobs();
