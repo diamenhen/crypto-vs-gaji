@@ -271,7 +271,7 @@
     <div class="ticker">
       <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">memuat...</div><div class="tick-chg" id="tChgI">--</div></div>
       <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd">memuat...</div><div class="tick-chg" id="tChgU">--</div></div>
-      <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg" id="tUsdIdrChg">loading...</div></div>
+      <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg up" id="tUsdIdrChg">+0.00%</div></div>
     </div>
 
     <div class="c-card" id="cCard">
@@ -479,38 +479,25 @@
 
     // ── Price ───────────────────────────────────────────────
     async function fetchUsdIdr() {
-      // Hitung USD/IDR dari SOL/USDT dan SOL/IDR (Tokocrypto/Indodax)
-      // Cara paling akurat: SOL_IDR / SOL_USD = USD_IDR
+      // Hitung dari cross rate: SOL/IDR ÷ SOL/USDT via Helius getPrice
+      // Atau pakai open.er-api.com yang support CORS
       try {
-        const [rSolUsdt, rSolIdr] = await Promise.all([
-          fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT').then(r=>r.json()),
-          fetch('https://api.tokocrypto.com/v1/market/ticker/24hr?symbol=SOLIDR').then(r=>r.json())
-        ]);
-        const solUsdt = parseFloat(rSolUsdt.price);
-        const solIdr  = parseFloat(rSolIdr?.data?.c || rSolIdr?.c || 0);
-        if (solUsdt > 0 && solIdr > 0) {
-          const rate = Math.round(solIdr / solUsdt);
-          if (rate > 14000 && rate < 22000) {
-            USD_IDR_RT = rate;
-            document.getElementById('tUsdIdr').textContent = 'Rp ' + rate.toLocaleString('id-ID');
-            document.getElementById('tUsdIdrChg').textContent = 'realtime';
-            document.getElementById('tUsdIdrChg').className = 'tick-chg up';
-            return;
-          }
-        }
-      } catch(e) {}
-      // Fallback: Indodax USDT/IDR
-      try {
-        const r = await fetch('https://indodax.com/api/ticker/usdtidr');
+        const r = await fetch('https://open.er-api.com/v6/latest/USD');
         const d = await r.json();
-        const rate = parseFloat(d.ticker?.last || 0);
-        if (rate > 14000 && rate < 22000) {
+        const rate = d.rates?.IDR;
+        if (rate && rate > 14000 && rate < 22000) {
           USD_IDR_RT = Math.round(rate);
           document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
           document.getElementById('tUsdIdrChg').textContent = 'realtime';
           document.getElementById('tUsdIdrChg').className = 'tick-chg up';
+          return;
         }
       } catch(e) {}
+      // Fallback: tetap pakai 17000, tidak tampil loading
+      USD_IDR_RT = 17000;
+      document.getElementById('tUsdIdr').textContent = 'Rp 17.000';
+      document.getElementById('tUsdIdrChg').textContent = 'est.';
+      document.getElementById('tUsdIdrChg').className = 'tick-chg';
     }
 
     async function fetchPrice() {
