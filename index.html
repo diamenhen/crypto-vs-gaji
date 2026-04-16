@@ -479,44 +479,36 @@
 
     // ── Price ───────────────────────────────────────────────
     async function fetchUsdIdr() {
+      // Hitung USD/IDR dari SOL/USDT dan SOL/IDR (Tokocrypto/Indodax)
+      // Cara paling akurat: SOL_IDR / SOL_USD = USD_IDR
       try {
-        // Binance: SOL/IDR tidak ada, pakai SOLUSDT/SOLIDR
-        // Cara: fetch SOL/USDT dan USDT/IDR terpisah
-        // USDT/IDR via Binance P2P proxy — pakai ExchangeRate API sebagai fallback
-        const apis = [
-          // Binance USDTBIDR (Indonesian Rupiah pair)
-          async () => {
-            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBIDR');
-            const d = await r.json();
-            const v = parseFloat(d.price);
-            return v > 10000 ? v : null;
-          },
-          // ExchangeRate-API (gratis, no key)
-          async () => {
-            const r = await fetch('https://open.er-api.com/v6/latest/USD');
-            const d = await r.json();
-            const v = d.rates?.IDR;
-            return v > 10000 ? v : null;
-          },
-          // Frankfurter API
-          async () => {
-            const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR');
-            const d = await r.json();
-            const v = d.rates?.IDR;
-            return v > 10000 ? v : null;
+        const [rSolUsdt, rSolIdr] = await Promise.all([
+          fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT').then(r=>r.json()),
+          fetch('https://api.tokocrypto.com/v1/market/ticker/24hr?symbol=SOLIDR').then(r=>r.json())
+        ]);
+        const solUsdt = parseFloat(rSolUsdt.price);
+        const solIdr  = parseFloat(rSolIdr?.data?.c || rSolIdr?.c || 0);
+        if (solUsdt > 0 && solIdr > 0) {
+          const rate = Math.round(solIdr / solUsdt);
+          if (rate > 14000 && rate < 22000) {
+            USD_IDR_RT = rate;
+            document.getElementById('tUsdIdr').textContent = 'Rp ' + rate.toLocaleString('id-ID');
+            document.getElementById('tUsdIdrChg').textContent = 'realtime';
+            document.getElementById('tUsdIdrChg').className = 'tick-chg up';
+            return;
           }
-        ];
-        for (const api of apis) {
-          try {
-            const rate = await api();
-            if (rate && rate > 10000) {
-              USD_IDR_RT = Math.round(rate);
-              document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
-              document.getElementById('tUsdIdrChg').textContent = 'realtime';
-              document.getElementById('tUsdIdrChg').className = 'tick-chg up';
-              return;
-            }
-          } catch(e) { continue; }
+        }
+      } catch(e) {}
+      // Fallback: Indodax USDT/IDR
+      try {
+        const r = await fetch('https://indodax.com/api/ticker/usdtidr');
+        const d = await r.json();
+        const rate = parseFloat(d.ticker?.last || 0);
+        if (rate > 14000 && rate < 22000) {
+          USD_IDR_RT = Math.round(rate);
+          document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
+          document.getElementById('tUsdIdrChg').textContent = 'realtime';
+          document.getElementById('tUsdIdrChg').className = 'tick-chg up';
         }
       } catch(e) {}
     }
