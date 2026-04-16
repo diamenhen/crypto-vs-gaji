@@ -677,7 +677,7 @@
     }
 
     // ── Target Top 1% ───────────────────────────────────────
-    const TARGETS=[{label:'Top 1% Indonesia',usd:60000,desc:'Min. kekayaan bersih 1% terkaya Indonesia',icon:'&#127470;&#127465;',color:'#3a9e6a'},{label:'Top 1% Global',usd:1000000,desc:'Min. kekayaan bersih 1% terkaya dunia (~$1 juta)',icon:'&#127758;',color:'#9945ff'}];
+    const TARGETS=[{label:'Top 1% Indonesia',usd:60000,desc:'Min. kekayaan bersih 1% terkaya Indonesia',icon:'🇮🇩',color:'#3a9e6a'},{label:'Top 1% Global',usd:1000000,desc:'Min. kekayaan bersih 1% terkaya dunia (~$1 juta)',icon:'&#127758;',color:'#9945ff'}];
     function renderTargets() {
       const box=document.getElementById('targetBox'); if(!box) return; box.innerHTML='';
       TARGETS.forEach(t=>{
@@ -686,7 +686,7 @@
         const C = t.usd === 60000 ? '#3a9e6a' : '#9b7fd4';
         const RED = '#d05a4a';
         div.innerHTML='<div style="width:100%;text-align:center">'
-          +(t.usd===60000 ? '<div style="margin-bottom:8px"><span style="font-size:26px">&#127470;&#127465;</span></div>' : '<div style="font-size:26px;margin-bottom:8px">'+t.icon+'</div>')
+          +(t.usd===60000 ? '<div style="margin-bottom:8px"><img src="https://flagcdn.com/w40/id.png" width="36" height="24" style="border-radius:3px" alt="Indonesia"></div>' : '<div style="font-size:26px;margin-bottom:8px">'+t.icon+'</div>')
           +'<div style="font-size:14px;font-weight:700;color:'+C+';margin-bottom:4px">'+t.label+'</div>'
           +(reached?'<div style="font-size:10px;background:'+C+'22;color:'+C+';border:1px solid '+C+'44;border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px">TERCAPAI ✓</div>':'')
           +'<div style="font-size:10px;color:'+C+';margin-bottom:12px;line-height:1.5">'+t.desc+'</div>'
