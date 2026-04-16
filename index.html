@@ -261,7 +261,6 @@
       </div>
       <div class="header-right">
         <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
       </div>
     </header>
 
@@ -272,7 +271,7 @@
     <div class="ticker">
       <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">memuat...</div><div class="tick-chg" id="tChgI">--</div></div>
       <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd">memuat...</div><div class="tick-chg" id="tChgU">--</div></div>
-      <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val">Rp 17.000</div><div class="tick-chg up">+0.04%</div></div>
+      <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg" id="tUsdIdrChg">loading...</div></div>
     </div>
 
     <div class="c-card" id="cCard">
@@ -355,7 +354,7 @@
   </div>
 
   <script>
-    const USD_IDR = 17000;
+    let USD_IDR = 17000; let USD_IDR_RT = 17000;
     let solIDR=0, solUSD=0, total=0, provider=null, wName='', portfolioChart=null;
 
     function fi(n) {
@@ -479,6 +478,34 @@
     }
 
     // ── Price ───────────────────────────────────────────────
+    async function fetchUsdIdr() {
+      try {
+        // USDT/IDR via Indodax API (no CORS issue)
+        const r = await fetch('https://indodax.com/api/ticker/usdtidr');
+        const d = await r.json();
+        const rate = parseFloat(d.ticker?.last || 0);
+        if (rate > 10000) {
+          USD_IDR_RT = Math.round(rate);
+          document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
+          document.getElementById('tUsdIdrChg').textContent = 'realtime';
+          document.getElementById('tUsdIdrChg').className = 'tick-chg up';
+        }
+      } catch(e) {
+        // fallback: try binance USDTIDR
+        try {
+          const r2 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBIDR');
+          const d2 = await r2.json();
+          const rate2 = parseFloat(d2.price || 0);
+          if (rate2 > 10000) {
+            USD_IDR_RT = Math.round(rate2 / 1000) * 1000;
+            document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
+            document.getElementById('tUsdIdrChg').textContent = 'realtime';
+            document.getElementById('tUsdIdrChg').className = 'tick-chg up';
+          }
+        } catch(e2) {}
+      }
+    }
+
     async function fetchPrice() {
       try {
         const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
@@ -538,7 +565,7 @@
           const pr = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
           const pd = await pr.json();
           solUSD = parseFloat(pd.price);
-          solIDR = Math.round(solUSD * USD_IDR);
+          solIDR = Math.round(solUSD * (USD_IDR_RT || USD_IDR));
           document.getElementById('tIdr').textContent = 'Rp ' + Math.round(solIDR).toLocaleString('id-ID');
           document.getElementById('tUsd').textContent = '$' + solUSD.toFixed(2);
           document.getElementById('tChgI').className = 'tick-chg up';
@@ -689,8 +716,6 @@
       id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Connect wallet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'connect wallet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
       en:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'YOUR TOTAL CRYPTO VALUE (IDR)',heroSub:'Connect wallet to see realtime comparison',secLabel:'COMPARISON WITH HIGH-PAYING JOBS IN INDONESIA',harusKerja:'MUST WORK',perDetik:'PER SEC',perJam:'PER HOUR',perHari:'PER DAY',perMinggu:'PER WEEK',perBulan:'PER MONTH',perTahun:'PER YEAR',per35thn:'35 YEARS',connectWallet:'connect wallet',blnGaji:'mo salary',insightText:(sol,total,days)=>'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+fd(days)+' of work</strong> as Senior SE at GoTo. 🚀',footer:'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',pilihWallet:'Select Wallet',walletSub:'Wallets installed in your browser',batal:'Cancel'}
     };
-    function toggleLang(){lang=lang==='id'?'en':'id';document.getElementById('langBtn').textContent=lang==='id'?'EN':'ID';applyLang();renderJobs();if(total>0)renderFact(parseFloat(document.getElementById('wSol').textContent));}
-    function applyLang(){const t=T[lang];document.querySelector('.logo-sub').textContent=t.subtitle;document.querySelector('.c-label').textContent=t.connectLabel;document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> '+t.connectBtn;document.querySelector('.modal-title').textContent=t.pilihWallet;document.querySelector('.modal-sub').textContent=t.walletSub;document.querySelector('.modal-cancel').textContent=t.batal;document.querySelector('.hero-l').textContent=t.heroLabel;document.getElementById('secLabelJobs').textContent=t.secLabel;document.getElementById('footerEl').innerHTML=t.footer;if(total<=0)document.getElementById('heroS').textContent=t.heroSub;}
 
     function copyDonate() {
       const addr = '4Nh6WBgGZTH5XrupJkX1fVbwZHcWvp2weWHi5sZT3cP4';
@@ -764,7 +789,7 @@
     function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('id-ID',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
     // ── Init ────────────────────────────────────────────────
-    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); setInterval(fetchPrice,30000);
+    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000);
   </script>
 </body>
 </html>
