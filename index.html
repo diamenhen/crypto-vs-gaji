@@ -356,6 +356,12 @@
     }
 
     // Fetch locked tokens from Jupiter Lock via Helius
+    // Anchor VestingEscrow layout:
+    // [0..8]   = discriminator
+    // [8..40]  = base (Pubkey)
+    // [40..72] = token_mint (Pubkey)
+    // [72..104]= creator (Pubkey)
+    // [104..136]= recipient (Pubkey)
     async function fetchLockedTokens(publicKey) {
       const elLocked    = document.getElementById('wLocked');
       const elLockedVal = document.getElementById('wLockedVal');
@@ -368,60 +374,60 @@
         const JUP_LOCK_PROGRAM = 'LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn';
         const HELIUS_RPC = 'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
 
-        // Gunakan Helius getProgramAccounts dengan filter recipient
-        // Jupiter Lock escrow account: recipient address ada di offset 8+32+32 = 72
-        const offsets = [72, 40, 8];
+        // Coba semua offset yang mungkin untuk field recipient
+        const offsets = [104, 72, 40, 8, 136, 168];
         let accounts = [];
 
         for (const offset of offsets) {
-          const r = await fetch(HELIUS_RPC, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0', id: 1,
-              method: 'getProgramAccounts',
-              params: [
-                JUP_LOCK_PROGRAM,
-                {
-                  commitment: 'confirmed',
-                  encoding: 'jsonParsed',
-                  filters: [{
-                    memcmp: { offset, bytes: publicKey }
-                  }]
-                }
-              ]
-            })
-          });
-          const d = await r.json();
-          if (d.result && d.result.length > 0) {
-            accounts = d.result;
-            break;
-          }
+          try {
+            const r = await fetch(HELIUS_RPC, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                jsonrpc: '2.0', id: 1,
+                method: 'getProgramAccounts',
+                params: [
+                  JUP_LOCK_PROGRAM,
+                  {
+                    commitment: 'confirmed',
+                    encoding: 'base64',
+                    filters: [{
+                      memcmp: { offset, bytes: publicKey }
+                    }]
+                  }
+                ]
+              })
+            });
+            const d = await r.json();
+            if (d.result && d.result.length > 0) {
+              accounts = d.result;
+              console.log('Jupiter Lock: found', d.result.length, 'accounts at offset', offset);
+              break;
+            }
+          } catch(e) { continue; }
         }
 
         if (!accounts || accounts.length === 0) {
-          elLocked.textContent    = 'Tidak ada';
-          elLockedVal.textContent = 'Tidak ada locked token di Jupiter Lock';
-          elLink.style.display    = 'none';
+          // Tidak ada di getProgramAccounts, coba link langsung
+          elLocked.textContent    = 'Cek manual';
+          elLockedVal.textContent = 'Klik link untuk cek di Jupiter Lock';
+          elLink.style.display    = 'inline';
+          elLink.href             = 'https://lock.jup.ag';
           return;
         }
 
         // Ada locked tokens!
         elLocked.textContent    = accounts.length + ' vesting';
-        elLockedVal.textContent = accounts.length + ' kontrak ditemukan di Jupiter Lock';
+        elLockedVal.textContent = accounts.length + ' kontrak lock ditemukan';
         elLink.style.display    = 'inline';
-        elLink.href             = 'https://lock.jup.ag/?recipient=' + publicKey;
-
-        // Update hero total dengan info locked
-        const heroS = document.getElementById('heroS');
-        heroS.textContent = heroS.textContent + ' + ' + accounts.length + ' locked vesting';
+        elLink.href             = 'https://lock.jup.ag';
 
       } catch(e) {
         console.error('Gagal fetch locked tokens:', e);
-        elLocked.textContent    = 'Error';
-        elLockedVal.textContent = 'Gagal fetch — cek lock.jup.ag';
+        elLocked.textContent    = 'Cek manual';
+        elLockedVal.textContent = 'Klik link untuk cek di Jupiter Lock';
         elLink.style.display    = 'inline';
-        elLink.href             = 'https://lock.jup.ag/?recipient=' + publicKey;
+        elLink.href             = 'https://lock.jup.ag';
       }
     }
 
