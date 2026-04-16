@@ -171,6 +171,10 @@
       <div><div class="fact-t">INSIGHT</div><div class="fact-b" id="factTxt"></div></div>
     </div>
 
+    <!-- Target Kekayaan -->
+    <div class="sec-l" style="margin-top:1.5rem">TARGET KEKAYAAN TOP 1%</div>
+    <div id="targetBox" class="jobs" style="gap:10px"></div>
+
     <footer>DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
   </div>
 
@@ -314,6 +318,7 @@
       document.getElementById('heroS').textContent = 'Connect wallet untuk melihat perbandingan realtime';
       document.getElementById('factBox').style.display = 'none';
       renderJobs();
+      renderTargets();
     }
 
     async function loadBalance(publicKey) {
@@ -351,6 +356,7 @@
         document.getElementById('heroS').textContent = 'Nilai SOL wallet kamu · ' + sol.toFixed(4) + ' SOL';
         renderJobs();
         renderFact(sol);
+        renderTargets();
         // Fetch locked tokens dari Jupiter Lock
         await fetchLockedTokens(publicKey);
       } catch(e) { console.error('Gagal fetch balance:', e); }
@@ -499,6 +505,7 @@
 
             // Update perbandingan jobs
             renderJobs();
+            renderTargets();
           }
         } else {
           elLocked.textContent    = accounts.length + ' vesting';
@@ -516,7 +523,71 @@
       }
     }
 
-        function renderJobs() {
+        // Target kekayaan top 1%
+    // Sumber: Knight Frank Wealth Report
+    const TARGETS = [
+      {
+        label: 'Top 1% Indonesia',
+        usd: 60000,
+        desc: 'Min. kekayaan bersih untuk masuk 1% terkaya di Indonesia',
+        icon: '🇮🇩',
+        color: '#14f195',
+      },
+      {
+        label: 'Top 1% Global',
+        usd: 1000000,
+        desc: 'Min. kekayaan bersih untuk masuk 1% terkaya di dunia (~$1 juta)',
+        icon: '🌍',
+        color: '#9945ff',
+      },
+
+    ];
+
+    function renderTargets() {
+      const box = document.getElementById('targetBox');
+      if (!box) return;
+      box.innerHTML = '';
+
+      TARGETS.forEach(t => {
+        const targetIDR  = t.usd * USD_IDR;
+        const myIDR      = total || 0;
+        const pct        = Math.min((myIDR / targetIDR) * 100, 100);
+        const remaining  = Math.max(targetIDR - myIDR, 0);
+        const reached    = myIDR >= targetIDR;
+
+        const div = document.createElement('div');
+        div.className = 'job';
+        div.style.borderColor = reached ? t.color + '66' : '';
+        div.innerHTML =
+          '<div class="jl">' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
+              '<span style="font-size:16px">' + t.icon + '</span>' +
+              '<div class="jt" style="color:' + t.color + '">' + t.label + '</div>' +
+              (reached ? '<span style="font-size:10px;background:' + t.color + '22;color:' + t.color + ';border:1px solid ' + t.color + '44;border-radius:99px;padding:2px 8px">TERCAPAI ✓</span>' : '') +
+            '</div>' +
+            '<div class="jc">' + t.desc + '</div>' +
+            '<div class="jns" style="margin-bottom:6px">' +
+              '<div><div class="jnl">TARGET</div><div class="jnv">' + fi(targetIDR) + '</div></div>' +
+              '<div><div class="jnl">KAMU PUNYA</div><div class="jnv" style="color:' + t.color + '">' + fi(myIDR) + '</div></div>' +
+              '<div><div class="jnl">KURANG</div><div class="jnv" style="color:' + (reached ? '#14f195' : '#f56565') + '">' + (reached ? 'Sudah lebih!' : fi(remaining)) + '</div></div>' +
+            '</div>' +
+            '<div class="bw"><div class="bf" id="tb' + t.usd + '" style="width:0%;background:linear-gradient(90deg,' + t.color + '88,' + t.color + ')"></div></div>' +
+            '<div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:right">' + pct.toFixed(1) + '% tercapai</div>' +
+          '</div>' +
+          '<div class="jr">' +
+            '<div class="jrl">PROGRESS</div>' +
+            '<div class="jrv" style="color:' + t.color + '">' + pct.toFixed(1) + '%</div>' +
+            '<div class="jrs">dari ' + fi(targetIDR) + '</div>' +
+          '</div>';
+        box.appendChild(div);
+        setTimeout(() => {
+          const b = document.getElementById('tb' + t.usd);
+          if (b) b.style.width = pct + '%';
+        }, 200);
+      });
+    }
+
+    function renderJobs() {
       const t   = T[lang];
       const src = lang === 'id' ? JOBS : JOBS_EN;
       const box = document.getElementById('jobsBox');
@@ -674,6 +745,7 @@
     }
 
     renderJobs();
+    renderTargets();
     fetchPrice();
     setInterval(fetchPrice, 30000);
   </script>
