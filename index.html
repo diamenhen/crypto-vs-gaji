@@ -148,6 +148,7 @@
           <div><div class="wi-l">SOL</div><div class="wi-v up" id="wSol">--</div><div class="wi-s" id="wSolV">--</div></div>
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
           <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
+          <div><div class="wi-l">LOCKED (JUP LOCK)</div><div class="wi-v" style="color:#f59e0b" id="wLocked">--</div><div class="wi-s" id="wLockedVal">--</div></div>
         </div>
       </div>
     </div>
@@ -354,7 +355,68 @@
         document.getElementById('heroS').textContent = 'Nilai SOL wallet kamu · ' + sol.toFixed(4) + ' SOL';
         renderJobs();
         renderFact(sol);
+        // Fetch locked tokens dari Jupiter Lock
+        await fetchLockedTokens(publicKey);
       } catch(e) { console.error('Gagal fetch balance:', e); }
+    }
+
+    // Fetch locked tokens from Jupiter Lock program
+    async function fetchLockedTokens(publicKey) {
+      try {
+        const JUP_LOCK_PROGRAM = 'LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn';
+        const RPCS = [
+          'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55',
+          'https://api.mainnet-beta.solana.com',
+        ];
+
+        let accounts = null;
+        for (const rpc of RPCS) {
+          try {
+            const r = await fetch(rpc, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                jsonrpc: '2.0', id: 1,
+                method: 'getProgramAccounts',
+                params: [
+                  JUP_LOCK_PROGRAM,
+                  {
+                    commitment: 'confirmed',
+                    encoding: 'base64',
+                    filters: [
+                      { dataSize: 300 },
+                      // Filter by recipient = wallet kamu
+                      {
+                        memcmp: {
+                          offset: 72,
+                          bytes: publicKey
+                        }
+                      }
+                    ]
+                  }
+                ]
+              })
+            });
+            const d = await r.json();
+            if (d.result) { accounts = d.result; break; }
+          } catch(e) { continue; }
+        }
+
+        if (!accounts || accounts.length === 0) {
+          document.getElementById('wLocked').textContent = '0 token';
+          document.getElementById('wLockedVal').textContent = 'Tidak ada locked token';
+          return;
+        }
+
+        // Tampilkan jumlah escrow yang ditemukan
+        document.getElementById('wLocked').textContent = accounts.length + ' escrow';
+        document.getElementById('wLockedVal').textContent = 'Cek lock.jup.ag untuk detail';
+
+      } catch(e) {
+        console.error('Gagal fetch locked tokens:', e);
+        document.getElementById('wLocked').textContent = '--';
+        document.getElementById('wLockedVal').textContent = 'Gagal fetch';
+      }
     }
 
     function renderJobs() {
