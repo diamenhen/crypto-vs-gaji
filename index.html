@@ -355,6 +355,17 @@
       } catch(e) { console.error('Gagal fetch balance:', e); }
     }
 
+    // Base58 encoder untuk decode Solana public keys
+    function encodeBase58(bytes) {
+      const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+      let num = BigInt(0);
+      for (const b of bytes) num = num * BigInt(256) + BigInt(b);
+      let str = '';
+      while (num > 0) { str = ALPHABET[Number(num % BigInt(58))] + str; num = num / BigInt(58); }
+      for (const b of bytes) { if (b !== 0) break; str = '1' + str; }
+      return str;
+    }
+
     // Fetch locked tokens from Jupiter Lock via Helius
     // Anchor VestingEscrow layout:
     // [0..8]   = discriminator
@@ -408,19 +419,89 @@
         }
 
         if (!accounts || accounts.length === 0) {
-          // Tidak ada di getProgramAccounts, coba link langsung
-          elLocked.textContent    = 'Cek manual';
-          elLockedVal.textContent = 'Klik link untuk cek di Jupiter Lock';
-          elLink.style.display    = 'inline';
-          elLink.href             = 'https://lock.jup.ag';
+          elLocked.textContent    = 'Tidak ada';
+          elLockedVal.textContent = 'Tidak ada locked token';
+          elLink.style.display    = 'none';
           return;
         }
 
-        // Ada locked tokens!
-        elLocked.textContent    = accounts.length + ' vesting';
-        elLockedVal.textContent = accounts.length + ' kontrak lock ditemukan';
+        // Ada locked tokens! Baca token account dari setiap escrow
+        elLocked.textContent    = 'memuat token...';
+        elLockedVal.textContent = accounts.length + ' vesting contract';
         elLink.style.display    = 'inline';
         elLink.href             = 'https://lock.jup.ag';
+
+        // Fetch token balance dari setiap escrow account
+        let totalLockedAmount = 0;
+        let tokenSymbol = '';
+        let tokenMint = '';
+
+        for (const acc of accounts) {
+          try {
+            // Decode base64 account data
+            const rawData = atob(acc.account.data[0]);
+            const bytes = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; i++) bytes[i] = rawData.charCodeAt(i);
+
+            // Baca token_mint dari offset 40 (32 bytes)
+            const mintBytes = bytes.slice(40, 72);
+            const mintAddr = encodeBase58(mintBytes);
+
+            // Baca amount dari offset sekitar 136 (u64 = 8 bytes)
+            // Jupiter Lock: amount_per_period + number_of_period ada di struct
+            // Coba baca total_deposited_amount di offset yang berbeda
+            const amountOffsets = [136, 144, 152, 160, 168, 176, 184];
+            let bestAmount = 0;
+            for (const ao of amountOffsets) {
+              if (ao + 8 <= bytes.length) {
+                const view = new DataView(bytes.buffer, ao, 8);
+                const lo = view.getUint32(0, true);
+                const hi = view.getUint32(4, true);
+                const val = hi * 4294967296 + lo;
+                if (val > bestAmount && val < 1e15) bestAmount = val;
+              }
+            }
+
+            tokenMint = mintAddr;
+
+            // Fetch token info dari Jupiter API
+            if (mintAddr && !tokenSymbol) {
+              try {
+                const tr = await fetch('https://api.jup.ag/tokens/v1/' + mintAddr);
+                if (tr.ok) {
+                  const td = await tr.json();
+                  tokenSymbol = td.symbol || mintAddr.slice(0,6);
+                  const decimals = td.decimals || 6;
+                  // Fetch harga token
+                  const pr = await fetch('https://api.jup.ag/price/v2?ids=' + mintAddr + '&vsToken=So11111111111111111111111111111111111111112');
+                  if (pr.ok) {
+                    const pd = await pr.json();
+                    const priceInSOL = parseFloat(pd.data?.[mintAddr]?.price || 0);
+                    const tokenAmount = bestAmount / Math.pow(10, decimals);
+                    const valueInSOL = tokenAmount * priceInSOL;
+                    const valueInIDR = valueInSOL * (solIDR || 2850000);
+                    totalLockedAmount = valueInIDR;
+                    elLocked.textContent    = tokenAmount.toLocaleString('id-ID', {maximumFractionDigits:2}) + ' ' + tokenSymbol;
+                    elLockedVal.textContent = '~ ' + fi(valueInIDR);
+                    // Tambah ke total IDR
+                    total += valueInIDR;
+                    document.getElementById('heroV').textContent = fi(total);
+                  }
+                }
+              } catch(e) {
+                elLocked.textContent    = accounts.length + ' vesting';
+                elLockedVal.textContent = 'Lihat detail di lock.jup.ag';
+              }
+            }
+          } catch(e) {
+            console.error('Error parsing escrow:', e);
+          }
+        }
+
+        if (!tokenSymbol) {
+          elLocked.textContent    = accounts.length + ' vesting';
+          elLockedVal.textContent = 'Lihat detail di lock.jup.ag';
+        }
 
       } catch(e) {
         console.error('Gagal fetch locked tokens:', e);
