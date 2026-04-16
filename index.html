@@ -367,7 +367,7 @@
     function showConnected(pk) {
       document.getElementById('notConn').style.display='none'; document.getElementById('isConn').style.display='block';
       document.getElementById('cCard').classList.add('on'); document.getElementById('addrTxt').textContent=pk.slice(0,5)+'...'+pk.slice(-4);
-      document.getElementById('wNameTxt').textContent='&middot; '+wName;
+      document.getElementById('wNameTxt').textContent='· '+wName;
     }
     function doDisconnect() {
       try{if(provider?.disconnect)provider.disconnect();}catch(e){}
@@ -386,9 +386,13 @@
         const RPCS=['https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55','https://api.mainnet-beta.solana.com'];
         let data=null;
         for (const rpc of RPCS) { try{ const r=await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[publicKey,{commitment:'confirmed'}]})}); data=await r.json(); if(data.result?.value!==undefined)break; }catch(e){continue;} }
-        const sol=(data?.result?.value||0)/1e9; total=sol*(solIDR||2850000); window._solBalance=sol;
-        document.getElementById('wSol').textContent=sol.toFixed(4)+' SOL'; document.getElementById('wSolV').textContent=fi(total);
-        document.getElementById('wIdr').textContent=fi(total); document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        const sol=(data?.result?.value||0)/1e9;
+        const priceNow = solIDR > 0 ? solIDR : 2850000;
+        total=sol*priceNow; window._solBalance=sol;
+        document.getElementById('wSol').textContent=sol.toFixed(4)+' SOL';
+        document.getElementById('wSolV').textContent=fi(total);
+        document.getElementById('wIdr').textContent=fi(total);
+        document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         document.getElementById('heroV').textContent=fi(total); document.getElementById('heroS').textContent='Nilai SOL wallet kamu \xB7 '+sol.toFixed(4)+' SOL';
         document.getElementById('btnShare').style.display='inline-flex';
         document.getElementById('retireCurrent').value=Math.round(total);
