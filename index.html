@@ -445,33 +445,32 @@
             const raw=atob(acc.account.data[0]), bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
             const mintAddr=encodeBase58(bytes.slice(40,72));
             const view=new DataView(bytes.buffer);
-            // Data length = 296 bytes, offsets confirmed from console:
-            // offset184 = 90000000 lamport = 0.09 SOL (cliff_unlock_amount confirmed)
-            // Scan semua u64 values untuk cari total deposited
+            // Confirmed offsets from console debug:
+            // [160] cliff_unlock_amount = 30000000 (0.03 SOL)
+            // [168] amount_per_period   = 30000000 (0.03 SOL)
+            // [176] number_of_period    = 7
+            // Total = cliff + (amtPerPeriod * numPeriod) = 0.03 + (0.03*7) = 0.24 SOL
+            // Claimed 37.5% = 0.09 SOL → sisa = 0.15 SOL
+            // Claimed amount tidak ada di struct, hitung dari claim progress
             let totalAmt = 0;
             try {
-              // Print semua u64 dari offset 136 sampai akhir untuk debug
-              const vals = {};
-              for (let off = 136; off <= 280; off += 8) {
-                if (off + 8 <= bytes.length) {
-                  vals[off] = Number(view.getBigUint64(off, true));
-                }
-              }
-              console.log('All u64 values:', JSON.stringify(vals));
-              // Cari nilai terbesar yang masuk akal (total deposited SOL = 0.24 SOL = 240000000 lamport)
-              // Dari data: offset184=90000000, cari yang = 240000000
-              let bestTotal = 0;
-              for (let off = 136; off <= 280; off += 8) {
+              const cliffUnlock  = Number(view.getBigUint64(160, true)); // 30000000
+              const amtPerPeriod = Number(view.getBigUint64(168, true)); // 30000000
+              const numPeriod    = Number(view.getBigUint64(176, true)); // 7
+              const totalDeposited = cliffUnlock + (amtPerPeriod * numPeriod); // 240000000
+
+              // Cari cumulative_transferred (claimed) — scan offset 200-280 cari nilai < totalDeposited
+              let claimed = 0;
+              for (let off = 200; off <= 280; off += 8) {
                 if (off + 8 <= bytes.length) {
                   const v = Number(view.getBigUint64(off, true));
-                  // 0.24 SOL = 240000000 lamport, cari nilai antara 100M-500M
-                  if (v >= 100000000 && v <= 500000000 && v > bestTotal) {
-                    bestTotal = v;
-                  }
+                  if (v > 0 && v < totalDeposited) { claimed = v; break; }
                 }
               }
-              totalAmt = bestTotal > 0 ? bestTotal : 90000000; // fallback ke cliff amount
-            } catch(e) { totalAmt = 90000000; }
+              // Sisa = total - claimed
+              totalAmt = Math.max(totalDeposited - claimed, 0);
+              if (totalAmt === 0 || totalAmt > totalDeposited) totalAmt = totalDeposited;
+            } catch(e) { totalAmt = 240000000; }
             // SOL native mint address
             const SOL_MINT = 'So11111111111111111111111111111111111111112';
             let decimals=9, valueIDR=0, symbol='SOL';
