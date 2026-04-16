@@ -229,8 +229,6 @@
     @keyframes sp { to{transform:rotate(360deg)} }
 
     /* ── FOOTER ── */
-    .lang-btn { background:transparent; border:1px solid var(--bdr2); padding:5px 13px; color:var(--text2); font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; letter-spacing:1px; }
-    .lang-btn:hover { border-color:var(--accent); color:var(--accent); }
     footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
 
     @media(max-width:600px){
@@ -263,7 +261,6 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
         <div class="live-badge"><div class="live-dot"></div>LANGSUNG</div>
       </div>
     </header>
@@ -707,7 +704,7 @@
 
     // ── Render Jobs ─────────────────────────────────────────
     function renderJobs() {
-      const L=LABELS[lang], src=L.jobs, box=document.getElementById('jobsBox'); box.innerHTML='';
+      const src=JOBS, box=document.getElementById('jobsBox'); box.innerHTML='';
       src.forEach(job=>{
         const perDetik=job.salary/30/24/3600, perJam=job.salary/30/24, perHari=job.salary/30, perMinggu=job.salary/4.33, perBulan=job.salary, perTahun=job.salary*12, per35thn=job.salary*420;
         const days=total>0?total/perHari:null, uid='b'+job.pct;
@@ -722,18 +719,20 @@
           +'<div><div class="jnl">35 TAHUN</div><div class="jnv">'+fi(per35thn)+'</div></div>'
           +'</div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div>'
           +'<div class="jr"><div class="jrl">HARUS KERJA</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
-          +'<div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' '+L.blnGaji:L.hubungkan)+'</div></div>';
+          +'<div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' bln gaji':'hubungkan dompet')+'</div></div>';
         box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
       });
     }
     function renderFact(sol) {
       if(total<=0){document.getElementById('factBox').style.display='none';return;}
       document.getElementById('factBox').style.display='flex';
-      const L = LABELS[lang];
       const days = Math.ceil(total/(JOBS_EN[3].salary/30));
+      // Baca langsung dari tampilan wSol yang sudah diupdate
       const wSolText = document.getElementById('wSol')?.textContent || '0 SOL';
       const totalSOL = parseFloat(wSolText) || window._totalSOL || sol || 0;
-      document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, days);
+      document.getElementById('factTxt').innerHTML=
+        'Kamu punya <strong>'+totalSOL.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong>'
+        +' — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀';
     }
 
     // ── Translations ────────────────────────────────────────
@@ -814,94 +813,8 @@
 
     function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('id-ID',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
-    // ── Language ─────────────────────────────────────────
-    let lang = 'id';
-
-    const LABELS = {
-      id: {
-        connectWallet: 'HUBUNGKAN DOMPET', connectBtn: 'Hubungkan Dompet',
-        disconnect: 'PUTUSKAN', network: 'JARINGAN',
-        heroLabel: 'TOTAL NILAI CRYPTO KAMU (IDR)',
-        heroSub: 'Hubungkan dompet untuk melihat perbandingan realtime',
-        share: 'Bagikan ke X/Twitter',
-        chartTitle: 'RIWAYAT NILAI PORTFOLIO (7 HARI)',
-        targetTitle: 'TARGET KEKAYAAN TOP 1%',
-        jobsTitle: 'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',
-        harusKerja: 'HARUS KERJA', perDetik: 'PER DETIK', perJam: 'PER JAM',
-        perHari: 'PER HARI', perMinggu: 'PER MINGGU', perBulan: 'PER BULAN',
-        perTahun: 'PER TAHUN', per35thn: '35 TAHUN',
-        blnGaji: 'bln gaji', hubungkan: 'hubungkan dompet',
-        pnlTitle: 'P&L HARI INI', profit: 'UNTUNG/RUGI',
-        sekarang: 'SEKARANG', buka: 'BUKA HARI INI', history: 'RIWAYAT 7 HARI',
-        donateTitle: 'DUKUNG CRYPTORETIRE', donateSub: 'Kirim SOL:',
-        copyBtn: 'SALIN ALAMAT',
-        footer: 'DATA GAJI ESTIMASI PASAR INDONESIA 2024 &middot; HARGA SOL VIA BINANCE API &middot; PERBARUI 30 DETIK',
-        insight: (sol,total,days) => 'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀',
-        modalTitle: 'Pilih Dompet', modalSub: 'Dompet yang terinstall di browser',
-        cancel: 'Batal', detected: 'Terdeteksi', notInstalled: 'Belum install',
-        jobs: JOBS,
-      },
-      en: {
-        connectWallet: 'CONNECT WALLET', connectBtn: 'Connect Wallet',
-        disconnect: 'DISCONNECT', network: 'NETWORK',
-        heroLabel: 'YOUR TOTAL CRYPTO VALUE (IDR)',
-        heroSub: 'Connect wallet to see realtime comparison',
-        share: 'Share to X/Twitter',
-        chartTitle: 'PORTFOLIO VALUE HISTORY (7 DAYS)',
-        targetTitle: 'TOP 1% WEALTH TARGET',
-        jobsTitle: 'HIGH-PAYING JOBS IN INDONESIA COMPARISON',
-        harusKerja: 'MUST WORK', perDetik: 'PER SEC', perJam: 'PER HOUR',
-        perHari: 'PER DAY', perMinggu: 'PER WEEK', perBulan: 'PER MONTH',
-        perTahun: 'PER YEAR', per35thn: '35 YEARS',
-        blnGaji: 'mo salary', hubungkan: 'connect wallet',
-        pnlTitle: 'P&L TODAY', profit: 'PROFIT/LOSS',
-        sekarang: 'CURRENT', buka: 'OPEN TODAY', history: '7-DAY HISTORY',
-        donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL to:',
-        copyBtn: 'COPY ADDRESS',
-        footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,days) => 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+fd(days)+' of work</strong> as a Senior SE at GoTo. 🚀',
-        modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
-        cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
-        jobs: JOBS_EN,
-      }
-    };
-
-    function toggleLang() {
-      lang = lang === 'id' ? 'en' : 'id';
-      document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
-      applyLang();
-      renderJobs();
-      if (total > 0) renderFact(window._totalSOL || window._solBalance || 0);
-    }
-
-    function applyLang() {
-      const L = LABELS[lang];
-      // Header
-      document.querySelector('.c-label').textContent = L.connectWallet;
-      document.getElementById('btnConn').innerHTML = '<div class="btn-cw-icon">&#9678;</div> ' + L.connectBtn;
-      document.querySelector('.modal-title').textContent = L.modalTitle;
-      document.querySelector('.modal-sub').textContent = L.modalSub;
-      document.querySelector('.modal-cancel').textContent = L.cancel;
-      // Hero
-      document.querySelector('.hero-l').textContent = L.heroLabel;
-      if (total <= 0) document.getElementById('heroS').textContent = L.heroSub;
-      document.getElementById('btnShare').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> ' + L.share;
-      // Sections
-      const secLabelJobs = document.getElementById('secLabelJobs');
-      if (secLabelJobs) secLabelJobs.textContent = L.jobsTitle;
-      // Chart
-      const chartTitle = document.querySelector('#chartCard .sec-l');
-      if (chartTitle) chartTitle.textContent = L.chartTitle;
-      // Target
-      const targetTitle = document.querySelector('#targetBox')?.previousElementSibling;
-      // Footer
-      document.getElementById('footerEl').innerHTML = L.footer;
-      // Donation
-      const donateTitle = document.querySelector('[style*="DUKUNG"]');
-    }
-
     // ── Init ────────────────────────────────────────────────
-    applyLang(); renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000);
+    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000);
   </script>
 </body>
 </html>
