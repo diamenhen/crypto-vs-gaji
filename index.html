@@ -236,6 +236,17 @@
 
     const WALLETS = [
       {
+        name: 'Jupiter Wallet', desc: 'Jupiter Extension Wallet',
+        icon: '&#129001;', bg: '#0d1a0d',
+        get: () => {
+          // Jupiter inject ke window.solana dengan property 'name' dan 'icon'
+          if (window.solana && !window.solana.isPhantom && !window.solana.isSolflare && window.solana.connect) {
+            return window.solana;
+          }
+          return null;
+        }
+      },
+      {
         name: 'Phantom', desc: 'Phantom Wallet',
         icon: '&#128123;', bg: '#1a1535',
         get: () => {
