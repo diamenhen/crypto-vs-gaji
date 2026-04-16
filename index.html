@@ -717,8 +717,10 @@
       if(total<=0){document.getElementById('factBox').style.display='none';return;}
       document.getElementById('factBox').style.display='flex';
       const days = Math.ceil(total/(JOBS_EN[3].salary/30));
+      // Gunakan total SOL = free + locked
+      const totalSOL = window._totalSOL || sol || 0;
       document.getElementById('factTxt').innerHTML=
-        'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong>'
+        'You have <strong>'+totalSOL.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong>'
         +' — equivalent to <strong>'+fd(days)+' of work</strong> as a Senior SE at GoTo. 🚀';
     }
 
