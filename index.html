@@ -165,7 +165,7 @@
       color: var(--text);
       margin-bottom: 10px;
     }
-    .hero-s { font-size: 12px; color: var(--text2); margin-bottom: 18px; font-weight: 400; }
+    .hero-s { font-size: 12px; color: var(--text2); margin-bottom: 18px; font-weight: 400; min-height: 0; }
 
     /* ── MODAL ── */
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
@@ -416,7 +416,7 @@
         if (pills.children.length>0) {
           pills.style.display='flex'; total+=tokenTotal;
           document.getElementById('heroV').textContent=fi(total);
-          document.getElementById('heroS').textContent='SOL + tokens &middot; wallet kamu';
+          document.getElementById('heroS').textContent='';
           document.getElementById('wIdr').textContent=fi(total);
           document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
           renderJobs(); renderTargets(); calcRetire();
@@ -542,7 +542,7 @@
           document.getElementById('wUsdV').textContent = '~$'+(t/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         };
         updateIDR();
-        document.getElementById('heroV').textContent=fi(total); document.getElementById('heroS').textContent='Nilai SOL wallet kamu \xB7 '+sol.toFixed(4)+' SOL';
+        document.getElementById('heroV').textContent=fi(total); document.getElementById('heroS').textContent='';
         document.getElementById('btnShare').style.display='inline-flex';
         document.getElementById('retireCurrent').value=Math.round(total);
         // Refresh IDR display setelah semua data loaded
@@ -633,7 +633,7 @@
           document.getElementById('wIdr').textContent  = fi(total);
           document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
           document.getElementById('heroV').textContent = fi(total);
-          document.getElementById('heroS').textContent = freeSol.toFixed(4)+' SOL + '+lockedSOL.toFixed(4)+' SOL locked';
+          document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
           renderJobs(); renderTargets(); calcRetire(); updateChart(total);
         }
