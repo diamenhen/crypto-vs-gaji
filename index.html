@@ -482,10 +482,18 @@
           } catch(e){}
         }
         if(totalLockedIDR>0) {
-          const lockedSOL=totalLockedIDR/(solIDR||2850000), totalSOL=(window._solBalance||0)+lockedSOL; total+=totalLockedIDR;
-          document.getElementById('wSol').textContent=totalSOL.toFixed(4)+' SOL'; document.getElementById('heroV').textContent=fi(total);
-          document.getElementById('heroS').textContent=(window._solBalance||0).toFixed(4)+' SOL + '+lockedSOL.toFixed(4)+' SOL locked';
-          document.getElementById('retireCurrent').value=Math.round(total);
+          const curSolIDR = solIDR > 0 ? solIDR : 1385337;
+          const lockedSOL = totalLockedIDR / curSolIDR;
+          const freeSol   = window._solBalance || 0;
+          const totalSOL  = freeSol + lockedSOL;
+          total = (freeSol * curSolIDR) + totalLockedIDR;
+          document.getElementById('wSol').textContent  = totalSOL.toFixed(4)+' SOL';
+          document.getElementById('wSolV').textContent = fi(total);
+          document.getElementById('wIdr').textContent  = fi(total);
+          document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+          document.getElementById('heroV').textContent = fi(total);
+          document.getElementById('heroS').textContent = freeSol.toFixed(4)+' SOL + '+lockedSOL.toFixed(4)+' SOL locked';
+          document.getElementById('retireCurrent').value = Math.round(total);
           renderJobs(); renderTargets(); calcRetire(); updateChart(total);
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
