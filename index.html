@@ -716,7 +716,10 @@
     function renderFact(sol) {
       if(total<=0){document.getElementById('factBox').style.display='none';return;}
       document.getElementById('factBox').style.display='flex';
-      document.getElementById('factTxt').innerHTML=T[lang].insightText(sol,total,Math.ceil(total/(JOBS[3].salary/30)));
+      const days = Math.ceil(total/(JOBS_EN[3].salary/30));
+      document.getElementById('factTxt').innerHTML=
+        'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong>'
+        +' — equivalent to <strong>'+fd(days)+' of work</strong> as a Senior SE at GoTo. 🚀';
     }
 
     // ── Translations ────────────────────────────────────────
