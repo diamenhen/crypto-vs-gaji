@@ -590,7 +590,7 @@
         refreshDisplay();
         renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updateChart(total); updatePnL(total);
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
-        refreshDisplay(); updatePnL(total);
+        refreshDisplay(); updatePnL(total); renderFact(window._solBalance||0);
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -671,7 +671,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); calcRetire(); updateChart(total); updatePnL(total);
+          renderJobs(); renderTargets(); calcRetire(); updateChart(total); updatePnL(total); renderFact(window._solBalance||0);
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
