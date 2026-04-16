@@ -441,7 +441,34 @@
             const raw=atob(acc.account.data[0]), bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
             const mintAddr=encodeBase58(bytes.slice(40,72));
             const view=new DataView(bytes.buffer);
-            const totalAmt=Number(view.getBigUint64(160,true))+(Number(view.getBigUint64(168,true))*Number(view.getBigUint64(176,true)));
+            // VestingEscrow struct offsets (Anchor):
+            // [136] vesting_start_time u64
+            // [144] cliff_time u64
+            // [152] frequency u64
+            // [160] cliff_unlock_amount u64
+            // [168] amount_per_period u64
+            // [176] number_of_period u64
+            // [184] total_deposited_amount u64  -- TOTAL AWAL
+            // [192] cumulative_transferred_amount u64 -- SUDAH DICLAIM
+            let totalAmt = 0;
+            try {
+              const totalDeposited = Number(view.getBigUint64(184, true));
+              const totalClaimed   = Number(view.getBigUint64(192, true));
+              // Sisa = total - sudah diclaim
+              totalAmt = Math.max(totalDeposited - totalClaimed, 0);
+              // Fallback jika offset 184 tidak valid
+              if (totalDeposited === 0) {
+                const cliffUnlock  = Number(view.getBigUint64(160, true));
+                const amtPerPeriod = Number(view.getBigUint64(168, true));
+                const numPeriod    = Number(view.getBigUint64(176, true));
+                totalAmt = cliffUnlock + (amtPerPeriod * numPeriod);
+              }
+            } catch(e) {
+              const cliffUnlock  = Number(view.getBigUint64(160, true));
+              const amtPerPeriod = Number(view.getBigUint64(168, true));
+              const numPeriod    = Number(view.getBigUint64(176, true));
+              totalAmt = cliffUnlock + (amtPerPeriod * numPeriod);
+            }
             const tr=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getAsset',params:{id:mintAddr}})});
             const td=await tr.json();
             const decimals=td.result?.token_info?.decimals??6, priceUSD=td.result?.token_info?.price_info?.price_per_token??0, symbol=td.result?.content?.metadata?.symbol||mintAddr.slice(0,6);
