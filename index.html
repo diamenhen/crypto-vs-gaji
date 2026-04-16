@@ -459,17 +459,9 @@
               const numPeriod    = Number(view.getBigUint64(176, true)); // 7
               const totalDeposited = cliffUnlock + (amtPerPeriod * numPeriod); // 240000000
 
-              // Cari cumulative_transferred (claimed) — scan offset 200-280 cari nilai < totalDeposited
-              let claimed = 0;
-              for (let off = 200; off <= 280; off += 8) {
-                if (off + 8 <= bytes.length) {
-                  const v = Number(view.getBigUint64(off, true));
-                  if (v > 0 && v < totalDeposited) { claimed = v; break; }
-                }
-              }
-              // Sisa = total - claimed
+              // offset184 = 90000000 = 0.09 SOL = claimed amount (dikonfirmasi dari debug)
+              const claimed = Number(view.getBigUint64(184, true));
               totalAmt = Math.max(totalDeposited - claimed, 0);
-              if (totalAmt === 0 || totalAmt > totalDeposited) totalAmt = totalDeposited;
             } catch(e) { totalAmt = 240000000; }
             // SOL native mint address
             const SOL_MINT = 'So11111111111111111111111111111111111111112';
