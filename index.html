@@ -473,10 +473,29 @@
               const numPeriod    = Number(view.getBigUint64(176, true));
               totalAmt = cliffUnlock + (amtPerPeriod * numPeriod);
             }
-            const tr=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getAsset',params:{id:mintAddr}})});
-            const td=await tr.json();
-            const decimals=td.result?.token_info?.decimals??6, priceUSD=td.result?.token_info?.price_info?.price_per_token??0, symbol=td.result?.content?.metadata?.symbol||mintAddr.slice(0,6);
-            const uiAmount=totalAmt/Math.pow(10,decimals), valueIDR=uiAmount*priceUSD*USD_IDR; totalLockedIDR+=valueIDR;
+            // SOL native mint address
+            const SOL_MINT = 'So11111111111111111111111111111111111111112';
+            let decimals=9, valueIDR=0, symbol='SOL';
+            if (mintAddr === SOL_MINT || mintAddr.startsWith('So1111')) {
+              // Ini SOL — pakai harga SOL langsung
+              const uiAmount = totalAmt / 1e9;
+              const curSolIDR = solIDR > 0 ? solIDR : 1385337;
+              valueIDR = uiAmount * curSolIDR;
+              symbol = 'SOL';
+            } else {
+              // Token lain — fetch dari Helius
+              try {
+                const tr=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getAsset',params:{id:mintAddr}})});
+                const td=await tr.json();
+                decimals = td.result?.token_info?.decimals ?? 6;
+                const priceUSD = td.result?.token_info?.price_info?.price_per_token ?? 0;
+                symbol = td.result?.content?.metadata?.symbol || mintAddr.slice(0,6);
+                const uiAmount = totalAmt / Math.pow(10, decimals);
+                valueIDR = uiAmount * priceUSD * USD_IDR;
+              } catch(e) {}
+            }
+            console.log('Locked:', symbol, 'amount:', totalAmt, 'valueIDR:', valueIDR, 'mint:', mintAddr.slice(0,10));
+            totalLockedIDR += valueIDR;
 
 
           } catch(e){}
