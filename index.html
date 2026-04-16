@@ -199,7 +199,7 @@
     .jnl { font-size:8px; color:var(--text3); letter-spacing:1.5px; margin-bottom:2px; font-weight:700; text-transform:uppercase; }
     .jnv { font-size:12px; font-weight:500; color:var(--text); }
     .bw { height:1px; background:var(--bg4); margin-top:10px; overflow:hidden; }
-    .bf { height:100%; background:linear-gradient(90deg,#7c5cbf,#9b78d4); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); opacity:0.7; }
+    .bf { height:100%; background:var(--accent); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); }
     .jr {
       text-align:right; flex-shrink:0;
       background:var(--bg3); border:1px solid var(--bdr);
@@ -315,6 +315,8 @@
       </button>
     </div>
 
+    <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
+
     <div class="chart-card" id="chartCard" style="display:none">
       <div class="sec-l" style="margin-bottom:12px">HISTORY NILAI PORTFOLIO (7 HARI)</div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
@@ -342,6 +344,13 @@
       <div><div class="fact-t">INSIGHT</div><div class="fact-b" id="factTxt"></div></div>
     </div>
 
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:12px 16px;margin-top:16px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:4px">DUKUNG CRYPTORETIRE</div>
+        <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">Kirim SOL: <span id="donateAddr" style="color:var(--text);cursor:pointer;letter-spacing:0.5px" onclick="copyDonate()" title="Klik untuk copy">4Nh6W...3cP4</span></div>
+      </div>
+      <button onclick="copyDonate()" style="background:transparent;border:1px solid var(--bdr2);padding:6px 14px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY ADDRESS</button>
+    </div>
     <footer id="footerEl">DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
   </div>
 
@@ -474,7 +483,7 @@
       try {
         const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
         const d=await r.json(); solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*USD_IDR);
-        document.getElementById('tIdr').textContent=fi(solIDR);
+        document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
         document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
         document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
         document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
@@ -530,12 +539,12 @@
           const pd = await pr.json();
           solUSD = parseFloat(pd.price);
           solIDR = Math.round(solUSD * USD_IDR);
-          document.getElementById('tIdr').textContent = fi(solIDR);
+          document.getElementById('tIdr').textContent = 'Rp ' + Math.round(solIDR).toLocaleString('id-ID');
           document.getElementById('tUsd').textContent = '$' + solUSD.toFixed(2);
           document.getElementById('tChgI').className = 'tick-chg up';
-          document.getElementById('tChgI').textContent = 'realtime';
+          document.getElementById('tChgI').textContent = 'LIVE';
           document.getElementById('tChgU').className = 'tick-chg up';
-          document.getElementById('tChgU').textContent = 'realtime';
+          document.getElementById('tChgU').textContent = 'LIVE';
         } catch(e) { if (!solIDR) { solIDR = 2850000; solUSD = 175; } }
         total = sol * solIDR; window._solBalance = sol; window._totalWithTokens = total;
         document.getElementById('wSol').textContent = sol.toFixed(4)+' SOL';
@@ -557,9 +566,9 @@
           document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         };
         refreshDisplay();
-        renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updateChart(total);
+        renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updateChart(total); updatePnL(total);
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
-        refreshDisplay();
+        refreshDisplay(); updatePnL(total);
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -640,7 +649,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); calcRetire(); updateChart(total);
+          renderJobs(); renderTargets(); calcRetire(); updateChart(total); updatePnL(total);
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -677,11 +686,86 @@
     // ── Translations ────────────────────────────────────────
     let lang='id';
     const T={
-      id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Connect wallet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'connect wallet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> -- setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. &#128640;',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
+      id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Connect wallet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'connect wallet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
       en:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'YOUR TOTAL CRYPTO VALUE (IDR)',heroSub:'Connect wallet to see realtime comparison',secLabel:'COMPARISON WITH HIGH-PAYING JOBS IN INDONESIA',harusKerja:'MUST WORK',perDetik:'PER SEC',perJam:'PER HOUR',perHari:'PER DAY',perMinggu:'PER WEEK',perBulan:'PER MONTH',perTahun:'PER YEAR',per35thn:'35 YEARS',connectWallet:'connect wallet',blnGaji:'mo salary',insightText:(sol,total,days)=>'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> -- equivalent to <strong>'+fd(days)+' of work</strong> as Senior SE at GoTo. &#128640;',footer:'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',pilihWallet:'Select Wallet',walletSub:'Wallets installed in your browser',batal:'Cancel'}
     };
     function toggleLang(){lang=lang==='id'?'en':'id';document.getElementById('langBtn').textContent=lang==='id'?'EN':'ID';applyLang();renderJobs();if(total>0)renderFact(parseFloat(document.getElementById('wSol').textContent));}
     function applyLang(){const t=T[lang];document.querySelector('.logo-sub').textContent=t.subtitle;document.querySelector('.c-label').textContent=t.connectLabel;document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> '+t.connectBtn;document.querySelector('.modal-title').textContent=t.pilihWallet;document.querySelector('.modal-sub').textContent=t.walletSub;document.querySelector('.modal-cancel').textContent=t.batal;document.querySelector('.hero-l').textContent=t.heroLabel;document.getElementById('secLabelJobs').textContent=t.secLabel;document.getElementById('footerEl').innerHTML=t.footer;if(total<=0)document.getElementById('heroS').textContent=t.heroSub;}
+
+    function copyDonate() {
+      const addr = '4Nh6WBgGZTH5XrupJkX1fVbwZHcWvp2weWHi5sZT3cP4';
+      navigator.clipboard.writeText(addr).then(() => {
+        const el = document.getElementById('donateAddr');
+        const orig = el.textContent;
+        el.textContent = 'COPIED!'; el.style.color = 'var(--green)';
+        setTimeout(() => { el.textContent = orig; el.style.color = 'var(--text)'; }, 1500);
+      });
+    }
+
+    let pnlData = [];
+    try { pnlData = JSON.parse(localStorage.getItem('cr_pnl') || '[]'); } catch(e) {}
+
+    function updatePnL(currentTotal) {
+      if (!currentTotal || currentTotal <= 0) return;
+      const now = new Date();
+      const todayKey = now.toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'});
+      const todayIdx = pnlData.findIndex(d => d.date === todayKey);
+      if (todayIdx === -1) {
+        pnlData.push({ date:todayKey, open:currentTotal, close:currentTotal, high:currentTotal, low:currentTotal });
+      } else {
+        const d = pnlData[todayIdx];
+        d.close = currentTotal;
+        d.high  = Math.max(d.high, currentTotal);
+        d.low   = Math.min(d.low, currentTotal);
+        pnlData[todayIdx] = d;
+      }
+      if (pnlData.length > 30) pnlData = pnlData.slice(-30);
+      try { localStorage.setItem('cr_pnl', JSON.stringify(pnlData)); } catch(e) {}
+      renderPnL(currentTotal);
+    }
+
+    function renderPnL(currentTotal) {
+      const box = document.getElementById('pnlBox');
+      if (!box || pnlData.length < 1) { if(box) box.style.display='none'; return; }
+      box.style.display = 'block';
+      const today = pnlData[pnlData.length - 1];
+      const prev  = pnlData.length > 1 ? pnlData[pnlData.length - 2] : null;
+      const dailyPnL = prev ? currentTotal - prev.close : currentTotal - today.open;
+      const dailyPct = prev && prev.close > 0 ? (dailyPnL / prev.close * 100) : 0;
+      const isUp = dailyPnL >= 0;
+      const pnlColor = isUp ? 'var(--green)' : '#d05a4a';
+      const pnlSign  = isUp ? '+' : '';
+      let histHTML = '';
+      const recent = [...pnlData].slice(-8).reverse();
+      recent.forEach((d, i) => {
+        if (i === 0) return;
+        const pl = d.close - d.open;
+        const plSign = pl >= 0 ? '+' : '';
+        const plColor = pl >= 0 ? 'var(--green)' : '#d05a4a';
+        histHTML += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:10px">'
+          + '<span style="color:var(--text2)">' + d.date + '</span>'
+          + '<span style="color:var(--text)">' + fi(d.close) + '</span>'
+          + '<span style="color:' + plColor + ';font-weight:700">' + plSign + fi(pl) + '</span>'
+          + '</div>';
+      });
+      box.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+          + '<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L HARI INI</div>'
+          + '<div style="font-size:9px;color:var(--text3);letter-spacing:1px">' + today.date + '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px">'
+          + '<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">PROFIT/LOSS</div>'
+            + '<div style="font-size:18px;font-weight:700;color:' + pnlColor + '">' + pnlSign + fi(dailyPnL) + '</div>'
+            + '<div style="font-size:10px;color:' + pnlColor + '">' + pnlSign + dailyPct.toFixed(2) + '%</div></div>'
+          + '<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">SEKARANG</div>'
+            + '<div style="font-size:18px;font-weight:700;color:var(--text)">' + fi(currentTotal) + '</div></div>'
+          + '<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">OPEN HARI INI</div>'
+            + '<div style="font-size:18px;font-weight:700;color:var(--text2)">' + fi(today.open) + '</div></div>'
+        + '</div>'
+        + (histHTML
+          ? '<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px">HISTORY</div>' + histHTML
+          : '');
+    }
 
     function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('id-ID',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
