@@ -480,30 +480,45 @@
     // ── Price ───────────────────────────────────────────────
     async function fetchUsdIdr() {
       try {
-        // USDT/IDR via Indodax API (no CORS issue)
-        const r = await fetch('https://indodax.com/api/ticker/usdtidr');
-        const d = await r.json();
-        const rate = parseFloat(d.ticker?.last || 0);
-        if (rate > 10000) {
-          USD_IDR_RT = Math.round(rate);
-          document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
-          document.getElementById('tUsdIdrChg').textContent = 'realtime';
-          document.getElementById('tUsdIdrChg').className = 'tick-chg up';
-        }
-      } catch(e) {
-        // fallback: try binance USDTIDR
-        try {
-          const r2 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBIDR');
-          const d2 = await r2.json();
-          const rate2 = parseFloat(d2.price || 0);
-          if (rate2 > 10000) {
-            USD_IDR_RT = Math.round(rate2 / 1000) * 1000;
-            document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
-            document.getElementById('tUsdIdrChg').textContent = 'realtime';
-            document.getElementById('tUsdIdrChg').className = 'tick-chg up';
+        // Binance: SOL/IDR tidak ada, pakai SOLUSDT/SOLIDR
+        // Cara: fetch SOL/USDT dan USDT/IDR terpisah
+        // USDT/IDR via Binance P2P proxy — pakai ExchangeRate API sebagai fallback
+        const apis = [
+          // Binance USDTBIDR (Indonesian Rupiah pair)
+          async () => {
+            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBIDR');
+            const d = await r.json();
+            const v = parseFloat(d.price);
+            return v > 10000 ? v : null;
+          },
+          // ExchangeRate-API (gratis, no key)
+          async () => {
+            const r = await fetch('https://open.er-api.com/v6/latest/USD');
+            const d = await r.json();
+            const v = d.rates?.IDR;
+            return v > 10000 ? v : null;
+          },
+          // Frankfurter API
+          async () => {
+            const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR');
+            const d = await r.json();
+            const v = d.rates?.IDR;
+            return v > 10000 ? v : null;
           }
-        } catch(e2) {}
-      }
+        ];
+        for (const api of apis) {
+          try {
+            const rate = await api();
+            if (rate && rate > 10000) {
+              USD_IDR_RT = Math.round(rate);
+              document.getElementById('tUsdIdr').textContent = 'Rp ' + USD_IDR_RT.toLocaleString('id-ID');
+              document.getElementById('tUsdIdrChg').textContent = 'realtime';
+              document.getElementById('tUsdIdrChg').className = 'tick-chg up';
+              return;
+            }
+          } catch(e) { continue; }
+        }
+      } catch(e) {}
     }
 
     async function fetchPrice() {
