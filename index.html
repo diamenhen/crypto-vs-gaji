@@ -10,20 +10,20 @@
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     :root {
-      --accent:  #e8800a;   /* orange — medium brightness */
-      --accent2: #f09040;
-      --green:   #3a9e6a;   /* medium green */
-      --green-bg:rgba(58,158,106,0.08);
-      --red:     #d05a4a;
-      --bg:      #13161b;
-      --bg2:     #1b1f26;
-      --bg3:     #22272f;
-      --bg4:     #292e38;
-      --bdr:     rgba(255,255,255,0.08);
-      --bdr2:    rgba(232,128,10,0.25);
-      --text:    #dde2ec;
-      --text2:   #8892a8;
-      --text3:   #50586a;
+      --accent:  #c8a850;   /* muted gold — not too bright */
+      --accent2: #d4b870;
+      --green:   #5a9e6f;   /* muted green */
+      --green-bg:rgba(90,158,111,0.08);
+      --red:     #c0574a;
+      --bg:      #161a1f;   /* dark slate, not pure black */
+      --bg2:     #1e2229;
+      --bg3:     #252b33;
+      --bg4:     #2c333d;
+      --bdr:     rgba(255,255,255,0.07);
+      --bdr2:    rgba(200,168,80,0.25);
+      --text:    #d8dce5;   /* not pure white — easier on eyes */
+      --text2:   #8a909e;
+      --text3:   #545c6b;
     }
     html { font-size:13px; }
     body {
@@ -199,7 +199,7 @@
     .jnl { font-size:8px; color:var(--text3); letter-spacing:1.5px; margin-bottom:2px; font-weight:700; text-transform:uppercase; }
     .jnv { font-size:12px; font-weight:500; color:var(--text2); }
     .bw { height:1px; background:var(--bg4); margin-top:10px; overflow:hidden; }
-    .bf { height:100%; background:linear-gradient(90deg,#7c5cbf,#9b78d4); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); opacity:0.7; }
+    .bf { height:100%; background:var(--accent); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); opacity:0.6; }
     .jr {
       text-align:right; flex-shrink:0;
       background:var(--bg3); border:1px solid var(--bdr);
