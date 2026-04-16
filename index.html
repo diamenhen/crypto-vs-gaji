@@ -278,7 +278,7 @@
           else { try{const pr=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+info.sym+'USDT');if(pr.ok){const pd=await pr.json();priceUSD=parseFloat(pd.price);}}catch(e){} }
           const valueIDR=token.amount*priceUSD*USD_IDR; tokenTotal+=valueIDR;
           const pill=document.createElement('div'); pill.className='token-pill';
-          pill.innerHTML='<span class="token-pill-sym">'+info.sym+'</span><span class="token-pill-val">'+token.amount.toLocaleString('id-ID',{maximumFractionDigits:2})+' &middot; '+fi(valueIDR)+'</span>';
+          pill.innerHTML='<span class="token-pill-sym">'+info.sym+'</span><span class="token-pill-val">'+token.amount.toLocaleString('id-ID',{maximumFractionDigits:2})+' · '+fi(valueIDR)+'</span>';
           pills.appendChild(pill);
         }
         if (pills.children.length>0) {
@@ -396,16 +396,29 @@
             solIDR = Math.round(solUSD * USD_IDR);
           } catch(e) { solIDR = 2850000; solUSD = 175; }
         }
-        total = sol * solIDR; window._solBalance = sol;
+        total = sol * solIDR; window._solBalance = sol; window._totalWithTokens = total;
         document.getElementById('wSol').textContent = sol.toFixed(4)+' SOL';
-        document.getElementById('wSolV').textContent = fi(total);
-        document.getElementById('wIdr').textContent = fi(total);
-        document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        // Update IDR values
+        const updateIDR = () => {
+          const t = window._totalWithTokens || total;
+          document.getElementById('wSolV').textContent = fi(t);
+          document.getElementById('wIdr').textContent  = fi(t);
+          document.getElementById('wUsdV').textContent = '~$'+(t/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        };
+        updateIDR();
         document.getElementById('heroV').textContent=fi(total); document.getElementById('heroS').textContent='Nilai SOL wallet kamu \xB7 '+sol.toFixed(4)+' SOL';
         document.getElementById('btnShare').style.display='inline-flex';
         document.getElementById('retireCurrent').value=Math.round(total);
+        // Refresh IDR display setelah semua data loaded
+        const refreshDisplay = () => {
+          document.getElementById('wSolV').textContent=fi(total);
+          document.getElementById('wIdr').textContent=fi(total);
+          document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        };
+        refreshDisplay();
         renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updateChart(total);
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
+        refreshDisplay();
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -433,9 +446,8 @@
             const td=await tr.json();
             const decimals=td.result?.token_info?.decimals??6, priceUSD=td.result?.token_info?.price_info?.price_per_token??0, symbol=td.result?.content?.metadata?.symbol||mintAddr.slice(0,6);
             const uiAmount=totalAmt/Math.pow(10,decimals), valueIDR=uiAmount*priceUSD*USD_IDR; totalLockedIDR+=valueIDR;
-            const pills=document.getElementById('tokenPills'), pill=document.createElement('div'); pill.className='token-pill'; pill.style.borderColor='rgba(249,158,11,0.3)';
-            pill.innerHTML='<span class="token-pill-sym" style="color:#f59e0b">&#128274; '+symbol+'</span><span class="token-pill-val">'+uiAmount.toLocaleString('id-ID',{maximumFractionDigits:2})+' &middot; '+fi(valueIDR)+'</span>';
-            pills.appendChild(pill); pills.style.display='flex';
+
+
           } catch(e){}
         }
         if(totalLockedIDR>0) {
