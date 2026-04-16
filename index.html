@@ -179,39 +179,22 @@
     </div>
 
     <div class="chart-card" id="chartCard" style="display:none">
-      <div class="sec-l" style="margin-bottom:12px">HISTORY NILAI PORTFOLIO</div>
+      <div class="sec-l" style="margin-bottom:12px">HISTORY NILAI PORTFOLIO (7 HARI)</div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
     </div>
 
     <div class="sec-l" style="text-align:center">TARGET KEKAYAAN TOP 1%</div>
     <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px"></div>
 
-    <div class="retire-card">
-      <div class="sec-l">&#127776; KALKULATOR KAPAN BISA RETIRE?</div>
-      <div class="retire-grid">
-        <div class="retire-input">
-          <div class="retire-label">TARGET PASSIVE INCOME/BULAN (IDR)</div>
-          <input class="retire-inp" id="retireTarget" type="number" value="10000000" oninput="calcRetire()">
-        </div>
-        <div class="retire-input">
-          <div class="retire-label">ESTIMASI RETURN TAHUNAN (%)</div>
-          <input class="retire-inp" id="retireReturn" type="number" value="10" oninput="calcRetire()">
-        </div>
-        <div class="retire-input">
-          <div class="retire-label">TABUNGAN BULANAN (IDR)</div>
-          <input class="retire-inp" id="retireSaving" type="number" value="1000000" oninput="calcRetire()">
-        </div>
-        <div class="retire-input">
-          <div class="retire-label">PORTFOLIO SEKARANG (IDR)</div>
-          <input class="retire-inp" id="retireCurrent" type="number" placeholder="auto dari wallet" oninput="calcRetire()">
-        </div>
-      </div>
-      <div class="retire-result">
-        <div class="retire-label" style="margin-bottom:8px">ESTIMASI WAKTU RETIRE</div>
-        <div class="retire-result-val" id="retireResult">-- tahun</div>
-        <div class="retire-result-sub" id="retireSub">Isi data di atas untuk kalkulasi</div>
-        <div style="margin-top:8px;font-size:10px;color:var(--text3)" id="retireDetail"></div>
-      </div>
+    <!-- Retire Calculator Hidden -->
+    <div style="display:none">
+      <input id="retireTarget" value="10000000">
+      <input id="retireReturn" value="10">
+      <input id="retireSaving" value="1000000">
+      <input id="retireCurrent">
+      <div id="retireResult"></div>
+      <div id="retireSub"></div>
+      <div id="retireDetail"></div>
     </div>
 
     <div class="sec-l" id="secLabelJobs">PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA</div>
@@ -319,9 +302,11 @@
       try { localStorage.setItem(key,JSON.stringify(history)); } catch(e){}
       if (history.length<2) return;
       document.getElementById('chartCard').style.display='block';
+      // Show last 7 data points (1 week)
+      const display = history.slice(-7);
       if (portfolioChart) portfolioChart.destroy();
       const ctx=document.getElementById('portfolioChart').getContext('2d');
-      portfolioChart=new Chart(ctx,{type:'line',data:{labels:history.map(h=>h.t),datasets:[{data:history.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>h.t),datasets:[{data:display.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
     }
 
     // ── 4. Retire Calculator ────────────────────────────────
@@ -425,6 +410,9 @@
         for (const offset of [72,8]) { const r=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getProgramAccounts',params:[JUP_LOCK,{commitment:'confirmed',encoding:'base64',filters:[{memcmp:{offset,bytes:publicKey}}]}]})}); const d=await r.json(); if(d.result?.length>0){accounts=d.result;break;} }
         if(!accounts.length) return;
         let totalLockedIDR=0;
+        // Clear any existing locked pills first
+        const existingLocked = document.querySelectorAll('.pill-locked');
+        existingLocked.forEach(p => p.remove());
         for (const acc of accounts) {
           try {
             const raw=atob(acc.account.data[0]), bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
