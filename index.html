@@ -43,10 +43,10 @@
     .wi-l { font-size:10px; color:var(--text3); letter-spacing:1.5px; margin-bottom:3px; }
     .wi-v { font-size:15px; font-weight:500; }
     .wi-s { font-size:11px; color:var(--text2); margin-top:1px; }
-    .hero { background:linear-gradient(135deg,rgba(153,69,255,0.07),rgba(20,241,149,0.04)); border:1px solid rgba(153,69,255,0.18); border-radius:18px; padding:26px 28px; margin-bottom:24px; text-align:center; }
-    .hero-l { font-size:11px; color:var(--text3); letter-spacing:2px; margin-bottom:10px; }
-    .hero-v { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(28px,5vw,52px); font-weight:800; letter-spacing:-1px; background:linear-gradient(135deg,#fff 40%,var(--sol) 70%,var(--sol2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px; }
-    .hero-s { font-size:12px; color:var(--text3); }
+    .hero { background:linear-gradient(135deg,rgba(153,69,255,0.07),rgba(20,241,149,0.04)); border:1px solid rgba(153,69,255,0.18); border-radius:18px; padding:32px 28px; margin-bottom:24px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .hero-l { font-size:11px; color:var(--text3); letter-spacing:2px; margin-bottom:12px; }
+    .hero-v { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(36px,6vw,64px); font-weight:800; letter-spacing:-2px; background:linear-gradient(135deg,#fff 40%,var(--sol) 70%,var(--sol2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; line-height:1; }
+    .hero-s { font-size:12px; color:var(--text3); text-align:center; }
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
     .modal { background:var(--bg2); border:1px solid var(--bdr2); border-radius:20px; padding:24px; width:100%; max-width:360px; margin:20px; }
     .modal-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
@@ -89,7 +89,7 @@
     footer { text-align:center; margin-top:40px; font-size:10px; color:var(--text3); letter-spacing:1.5px; border-top:1px solid var(--bdr); padding-top:20px; }
     .lang-btn { background:rgba(255,255,255,0.05); border:1px solid var(--bdr2); border-radius:8px; padding:5px 12px; color:var(--text); font-family:'DM Mono',monospace; font-size:12px; cursor:pointer; transition:all 0.2s; letter-spacing:1px; }
     .lang-btn:hover { background:rgba(153,69,255,0.15); border-color:var(--sol); color:var(--sol); }
-    @media(max-width:600px){ .ticker{grid-template-columns:1fr 1fr} .hero-v{font-size:34px} .job{flex-direction:column} .jr{width:100%;min-width:unset;text-align:left} }
+    @media(max-width:600px){ .ticker{grid-template-columns:1fr 1fr} .hero-v{font-size:34px} .job{flex-direction:column} .jr{width:100%;min-width:unset;text-align:left} #targetBox{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
@@ -172,8 +172,8 @@
     </div>
 
     <!-- Target Kekayaan -->
-    <div class="sec-l" style="margin-top:1.5rem">TARGET KEKAYAAN TOP 1%</div>
-    <div id="targetBox" class="jobs" style="gap:10px"></div>
+    <div class="sec-l" style="margin-top:1.5rem;text-align:center">TARGET KEKAYAAN TOP 1%</div>
+    <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px"></div>
 
     <footer>DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
   </div>
@@ -556,28 +556,22 @@
         const reached    = myIDR >= targetIDR;
 
         const div = document.createElement('div');
-        div.className = 'job';
-        div.style.borderColor = reached ? t.color + '66' : '';
+        div.style.cssText = 'background:var(--bg2);border:1px solid ' + (reached ? t.color+'66' : 'var(--bdr)') + ';border-radius:14px;padding:20px 16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;';
         div.innerHTML =
-          '<div class="jl">' +
-            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
-              '<span style="font-size:16px">' + t.icon + '</span>' +
-              '<div class="jt" style="color:' + t.color + '">' + t.label + '</div>' +
-              (reached ? '<span style="font-size:10px;background:' + t.color + '22;color:' + t.color + ';border:1px solid ' + t.color + '44;border-radius:99px;padding:2px 8px">TERCAPAI ✓</span>' : '') +
+          '<div style="width:100%;text-align:center">' +
+            '<div style="font-size:28px;margin-bottom:8px">' + t.icon + '</div>' +
+            '<div style="font-size:14px;font-weight:700;color:' + t.color + ';margin-bottom:4px">' + t.label + '</div>' +
+            (reached ? '<div style="font-size:10px;background:' + t.color + '22;color:' + t.color + ';border:1px solid ' + t.color + '44;border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px">TERCAPAI ✓</div>' : '') +
+            '<div style="font-size:10px;color:var(--text3);margin-bottom:12px;line-height:1.5">' + t.desc + '</div>' +
+            '<div style="font-size:22px;font-weight:700;color:' + t.color + ';margin-bottom:4px">' + pct.toFixed(1) + '%</div>' +
+            '<div class="bw" style="margin-bottom:8px"><div class="bf" id="tb' + t.usd + '" style="width:0%;background:linear-gradient(90deg,' + t.color + '88,' + t.color + ')"></div></div>' +
+            '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">' +
+              '<span>Kamu: <span style="color:' + t.color + '">' + fi(myIDR) + '</span></span>' +
+              '<span>Target: ' + fi(targetIDR) + '</span>' +
             '</div>' +
-            '<div class="jc">' + t.desc + '</div>' +
-            '<div class="jns" style="margin-bottom:6px">' +
-              '<div><div class="jnl">TARGET</div><div class="jnv">' + fi(targetIDR) + '</div></div>' +
-              '<div><div class="jnl">KAMU PUNYA</div><div class="jnv" style="color:' + t.color + '">' + fi(myIDR) + '</div></div>' +
-              '<div><div class="jnl">KURANG</div><div class="jnv" style="color:' + (reached ? '#14f195' : '#f56565') + '">' + (reached ? 'Sudah lebih!' : fi(remaining)) + '</div></div>' +
+            '<div style="font-size:11px;color:' + (reached ? '#14f195' : '#f56565') + '">' +
+              (reached ? '🎉 Sudah tercapai!' : 'Kurang: ' + fi(remaining)) +
             '</div>' +
-            '<div class="bw"><div class="bf" id="tb' + t.usd + '" style="width:0%;background:linear-gradient(90deg,' + t.color + '88,' + t.color + ')"></div></div>' +
-            '<div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:right">' + pct.toFixed(1) + '% tercapai</div>' +
-          '</div>' +
-          '<div class="jr">' +
-            '<div class="jrl">PROGRESS</div>' +
-            '<div class="jrv" style="color:' + t.color + '">' + pct.toFixed(1) + '%</div>' +
-            '<div class="jrs">dari ' + fi(targetIDR) + '</div>' +
           '</div>';
         box.appendChild(div);
         setTimeout(() => {
