@@ -261,12 +261,12 @@
         </div>
       </div>
       <div class="header-right">
-        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+        <div class="live-badge"><div class="live-dot"></div>LANGSUNG</div>
       </div>
     </header>
 
     <div class="status-bar">
-      SYS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; REFRESH:<span>30S</span>
+      SIS:<span>AKTIF</span> &nbsp; JAR:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; PERBARUI:<span>30S</span>
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
@@ -276,14 +276,14 @@
     </div>
 
     <div class="c-card" id="cCard">
-      <div class="c-label">CONNECT WALLET</div>
+      <div class="c-label">HUBUNGKAN DOMPET</div>
       <div class="c-body">
       <div id="notConn">
         <button class="btn-cw" id="btnConn" onclick="openModal()">
           <div class="btn-cw-icon">&#9678;</div>
           Connect Wallet
         </button>
-        <div style="margin-top:10px;font-size:11px;color:#4a5568">Support: Phantom Wallet</div>
+        <div style="margin-top:10px;font-size:11px;color:#4a5568">Dukungan: Phantom Wallet</div>
       </div>
       <div id="isConn" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -292,12 +292,12 @@
             <span style="font-size:12px;color:#9945ff" id="addrTxt">--</span>
             <span style="font-size:11px;color:#4a5568" id="wNameTxt"></span>
           </div>
-          <button class="btn-dc" onclick="doDisconnect()">DISCONNECT</button>
+          <button class="btn-dc" onclick="doDisconnect()">PUTUSKAN</button>
         </div>
         <div class="wi">
           <div><div class="wi-l">SOL</div><div class="wi-v up" id="wSol">--</div><div class="wi-s" id="wSolV">--</div></div>
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
-          <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
+          <div><div class="wi-l">JARINGAN</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
         </div>
         <div id="tokenPills" style="display:none"></div>
         <div style="display:none"><div id="wLocked"></div><div id="wLockedVal"></div><a id="wLockedLink" href="https://lock.jup.ag" target="_blank"></a></div>
@@ -318,7 +318,7 @@
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
 
     <div class="chart-card" id="chartCard" style="display:none">
-      <div class="sec-l" style="margin-bottom:12px">HISTORY NILAI PORTFOLIO (7 HARI)</div>
+      <div class="sec-l" style="margin-bottom:12px">RIWAYAT NILAI PORTFOLIO (7 HARI)</div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
     </div>
 
@@ -349,9 +349,9 @@
         <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:4px">DUKUNG CRYPTORETIRE</div>
         <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">Kirim SOL: <span id="donateAddr" style="color:var(--text);cursor:pointer;letter-spacing:0.5px" onclick="copyDonate()" title="Klik untuk copy">4Nh6W...3cP4</span></div>
       </div>
-      <button onclick="copyDonate()" style="background:transparent;border:1px solid var(--bdr2);padding:6px 14px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY ADDRESS</button>
+      <button onclick="copyDonate()" style="background:transparent;border:1px solid var(--bdr2);padding:6px 14px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN ALAMAT</button>
     </div>
-    <footer id="footerEl">DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
+    <footer id="footerEl">DATA GAJI ESTIMASI PASAR INDONESIA 2024 &middot; HARGA SOL VIA BINANCE API &middot; PERBARUI 30 DETIK</footer>
   </div>
 
   <script>
@@ -543,7 +543,7 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 0'; document.getElementById('heroS').textContent='Connect wallet untuk melihat perbandingan realtime';
+      document.getElementById('heroV').textContent='Rp 0'; document.getElementById('heroS').textContent='Hubungkan dompet untuk melihat perbandingan realtime';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
       document.getElementById('retireCurrent').value='';
@@ -704,12 +704,12 @@
 
     // ── Render Jobs ─────────────────────────────────────────
     function renderJobs() {
-      const t=T[lang], src=lang==='id'?JOBS:JOBS_EN, box=document.getElementById('jobsBox'); box.innerHTML='';
+      const src=JOBS, box=document.getElementById('jobsBox'); box.innerHTML='';
       src.forEach(job=>{
         const perDetik=job.salary/30/24/3600, perJam=job.salary/30/24, perHari=job.salary/30, perMinggu=job.salary/4.33, perBulan=job.salary, perTahun=job.salary*12, per35thn=job.salary*420;
         const days=total>0?total/perHari:null, uid='b'+job.pct;
         const div=document.createElement('div'); div.className='job';
-        div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid"><div><div class="jnl">'+t.perDetik+'</div><div class="jnv">'+fi(perDetik)+'</div></div><div><div class="jnl">'+t.perJam+'</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div><div><div class="jnl">'+t.perHari+'</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div><div><div class="jnl">'+t.perMinggu+'</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div><div><div class="jnl">'+t.perBulan+'</div><div class="jnv">'+fi(perBulan)+'</div></div><div><div class="jnl">'+t.perTahun+'</div><div class="jnv">'+fi(perTahun)+'</div></div><div><div class="jnl">'+t.per35thn+'</div><div class="jnv">'+fi(per35thn)+'</div></div></div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div><div class="jr"><div class="jrl">'+t.harusKerja+'</div><div class="jrv">'+(days?fd(days):'--')+'</div><div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' '+t.blnGaji:t.connectWallet)+'</div></div>';
+        div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid"><div><div class="jnl">'+t.perDetik+'</div><div class="jnv">'+fi(perDetik)+'</div></div><div><div class="jnl">'+t.perJam+'</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div><div><div class="jnl">'+t.perHari+'</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div><div><div class="jnl">'+t.perMinggu+'</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div><div><div class="jnl">'+t.perBulan+'</div><div class="jnv">'+fi(perBulan)+'</div></div><div><div class="jnl">'+t.perTahun+'</div><div class="jnv">'+fi(perTahun)+'</div></div><div><div class="jnl">'+t.per35thn+'</div><div class="jnv">'+fi(per35thn)+'</div></div></div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div><div class="jr"><div class="jrl">'+t.harusKerja+'</div><div class="jrv">'+(days?fd(days):'--')+'</div><div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' bln gaji':'hubungkan dompet')+'</div></div>';
         box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
       });
     }
@@ -721,15 +721,15 @@
       const wSolText = document.getElementById('wSol')?.textContent || '0 SOL';
       const totalSOL = parseFloat(wSolText) || window._totalSOL || sol || 0;
       document.getElementById('factTxt').innerHTML=
-        'You have <strong>'+totalSOL.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong>'
-        +' — equivalent to <strong>'+fd(days)+' of work</strong> as a Senior SE at GoTo. 🚀';
+        'Kamu punya <strong>'+totalSOL.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong>'
+        +' — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀';
     }
 
     // ── Translations ────────────────────────────────────────
     let lang='id';
     const T={
-      id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Connect wallet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'connect wallet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
-      en:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'YOUR TOTAL CRYPTO VALUE (IDR)',heroSub:'Connect wallet to see realtime comparison',secLabel:'COMPARISON WITH HIGH-PAYING JOBS IN INDONESIA',harusKerja:'MUST WORK',perDetik:'PER SEC',perJam:'PER HOUR',perHari:'PER DAY',perMinggu:'PER WEEK',perBulan:'PER MONTH',perTahun:'PER YEAR',per35thn:'35 YEARS',connectWallet:'connect wallet',blnGaji:'mo salary',insightText:(sol,total,days)=>'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+fd(days)+' of work</strong> as Senior SE at GoTo. 🚀',footer:'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',pilihWallet:'Select Wallet',walletSub:'Wallets installed in your browser',batal:'Cancel'}
+      id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'HUBUNGKAN DOMPET',connectBtn:'Hubungkan Dompet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Hubungkan dompet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'hubungkan dompet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
+      en:{subtitle:'IDR REALTIME TRACKER',connectLabel:'HUBUNGKAN DOMPET',connectBtn:'Hubungkan Dompet',heroLabel:'YOUR TOTAL CRYPTO VALUE (IDR)',heroSub:'Connect wallet to see realtime comparison',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'hubungkan dompet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+fd(days)+' kerja</strong> as Senior SE at GoTo. 🚀',footer:'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',pilihWallet:'Pilih Dompet',walletSub:'Dompet yang terinstall di browser',batal:'Batal'}
     };
 
     function copyDonate() {
