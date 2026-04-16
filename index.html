@@ -387,15 +387,19 @@
         let data=null;
         for (const rpc of RPCS) { try{ const r=await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[publicKey,{commitment:'confirmed'}]})}); data=await r.json(); if(data.result?.value!==undefined)break; }catch(e){continue;} }
         const sol=(data?.result?.value||0)/1e9;
-        // Pastikan solIDR selalu terisi
-        if (!solIDR || solIDR === 0) {
-          try {
-            const pr = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
-            const pd = await pr.json();
-            solUSD = parseFloat(pd.price);
-            solIDR = Math.round(solUSD * USD_IDR);
-          } catch(e) { solIDR = 2850000; solUSD = 175; }
-        }
+        // Selalu fetch harga terbaru saat loadBalance
+        try {
+          const pr = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
+          const pd = await pr.json();
+          solUSD = parseFloat(pd.price);
+          solIDR = Math.round(solUSD * USD_IDR);
+          document.getElementById('tIdr').textContent = fi(solIDR);
+          document.getElementById('tUsd').textContent = '$' + solUSD.toFixed(2);
+          document.getElementById('tChgI').className = 'tick-chg up';
+          document.getElementById('tChgI').textContent = 'realtime';
+          document.getElementById('tChgU').className = 'tick-chg up';
+          document.getElementById('tChgU').textContent = 'realtime';
+        } catch(e) { if (!solIDR) { solIDR = 2850000; solUSD = 175; } }
         total = sol * solIDR; window._solBalance = sol; window._totalWithTokens = total;
         document.getElementById('wSol').textContent = sol.toFixed(4)+' SOL';
         // Update IDR values
