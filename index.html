@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CryptoRetire</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -19,7 +20,7 @@
     .container { max-width:900px; margin:0 auto; padding:0 20px 80px; position:relative; z-index:1; }
     header { display:flex; align-items:center; justify-content:space-between; padding:28px 0 24px; border-bottom:1px solid var(--bdr); margin-bottom:28px; }
     .logo { display:flex; align-items:center; gap:12px; }
-    .logo-icon { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--sol),var(--sol2)); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#080b12; font-family:'Syne',sans-serif; }
+    .logo-icon { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--sol),var(--sol2)); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#080b12; font-family:'Plus Jakarta Sans',sans-serif; }
     .logo-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:17px; font-weight:800; }
     .logo-title span { color:var(--sol); }
     .logo-sub { font-size:10px; color:var(--text3); letter-spacing:2px; }
@@ -39,16 +40,22 @@
     .btn-cw:hover { border-color:rgba(153,69,255,0.4); }
     .btn-cw-icon { width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--sol),var(--sol2)); display:flex; align-items:center; justify-content:center; font-size:14px; }
     .btn-dc { background:rgba(245,101,101,0.08); border:1px solid rgba(245,101,101,0.2); border-radius:10px; padding:8px 16px; color:var(--red); font-family:'DM Mono',monospace; font-size:11px; cursor:pointer; letter-spacing:1px; }
+    .btn-share { display:inline-flex; align-items:center; gap:8px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:9px 18px; color:var(--text); font-family:'DM Mono',monospace; font-size:11px; cursor:pointer; transition:all 0.2s; letter-spacing:1px; margin-top:4px; }
+    .btn-share:hover { background:rgba(255,255,255,0.08); }
     .wi { display:flex; gap:20px; padding-top:16px; border-top:1px solid var(--bdr); flex-wrap:wrap; }
     .wi-l { font-size:10px; color:var(--text3); letter-spacing:1.5px; margin-bottom:3px; }
     .wi-v { font-size:15px; font-weight:500; }
     .wi-s { font-size:11px; color:var(--text2); margin-top:1px; }
+    .token-pills { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid var(--bdr); }
+    .token-pill { display:flex; align-items:center; gap:6px; background:var(--bg3); border:1px solid var(--bdr); border-radius:99px; padding:4px 10px; font-size:11px; }
+    .token-pill-sym { color:var(--green); font-weight:500; }
+    .token-pill-val { color:var(--text3); }
     .hero { background:linear-gradient(135deg,rgba(153,69,255,0.07),rgba(20,241,149,0.04)); border:1px solid rgba(153,69,255,0.18); border-radius:18px; padding:32px 28px; margin-bottom:24px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
     .hero-l { font-size:11px; color:var(--text3); letter-spacing:2px; margin-bottom:12px; }
     .hero-v { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(36px,6vw,64px); font-weight:800; letter-spacing:-2px; background:linear-gradient(135deg,#fff 40%,var(--sol) 70%,var(--sol2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; line-height:1; }
-    .hero-s { font-size:12px; color:var(--text3); text-align:center; }
+    .hero-s { font-size:12px; color:var(--text3); text-align:center; margin-bottom:14px; }
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
-    .modal { background:var(--bg2); border:1px solid var(--bdr2); border-radius:20px; padding:24px; width:100%; max-width:360px; margin:20px; }
+    .modal { background:var(--bg2); border:1px solid var(--bdr2); border-radius:20px; padding:24px; width:100%; max-width:380px; margin:20px; }
     .modal-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
     .modal-sub { font-size:12px; color:var(--text3); margin-bottom:18px; }
     .w-btn { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--bdr); border-radius:12px; padding:13px 15px; cursor:pointer; width:100%; text-align:left; color:var(--text); font-family:'DM Mono',monospace; margin-bottom:8px; transition:all 0.2s; }
@@ -69,7 +76,6 @@
     .jl { flex:1; min-width:0; }
     .jt { font-size:13px; font-weight:500; margin-bottom:2px; }
     .jc { font-size:11px; color:var(--text3); margin-bottom:10px; }
-    .jns { display:flex; gap:18px; }
     .jgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px 16px; margin-bottom:4px; }
     @media(max-width:600px){ .jgrid { grid-template-columns:repeat(2,1fr); } }
     .jnl { font-size:9px; color:var(--text3); letter-spacing:1.5px; margin-bottom:2px; }
@@ -80,16 +86,26 @@
     .jrl { font-size:9px; color:var(--text3); letter-spacing:1.5px; margin-bottom:5px; }
     .jrv { font-size:15px; font-weight:500; }
     .jrs { font-size:10px; color:var(--text3); margin-top:3px; }
-    .fact { background:var(--green-bg); border:1px solid rgba(20,241,149,0.15); border-radius:14px; padding:16px 20px; display:flex; gap:12px; align-items:flex-start; }
+    .fact { background:var(--green-bg); border:1px solid rgba(20,241,149,0.15); border-radius:14px; padding:16px 20px; display:flex; gap:12px; align-items:flex-start; margin-bottom:20px; }
     .fact-t { font-size:10px; color:var(--green); letter-spacing:2px; margin-bottom:5px; font-weight:500; }
     .fact-b { font-size:13px; color:var(--text2); line-height:1.7; }
     .fact-b strong { color:var(--text); font-weight:500; }
+    .chart-card { background:var(--bg2); border:1px solid var(--bdr); border-radius:16px; padding:20px; margin-bottom:24px; }
+    .retire-card { background:var(--bg2); border:1px solid var(--bdr); border-radius:16px; padding:20px 24px; margin-bottom:24px; }
+    .retire-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+    .retire-input { display:flex; flex-direction:column; gap:6px; }
+    .retire-label { font-size:10px; color:var(--text3); letter-spacing:1.5px; }
+    .retire-inp { background:var(--bg3); border:1px solid var(--bdr); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'DM Mono',monospace; font-size:13px; outline:none; width:100%; }
+    .retire-inp:focus { border-color:var(--sol); }
+    .retire-result { background:linear-gradient(135deg,rgba(153,69,255,0.07),rgba(20,241,149,0.04)); border:1px solid rgba(153,69,255,0.18); border-radius:12px; padding:16px; text-align:center; margin-top:4px; }
+    .retire-result-val { font-family:'Plus Jakarta Sans',sans-serif; font-size:32px; font-weight:800; background:linear-gradient(135deg,#fff,var(--sol)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .retire-result-sub { font-size:11px; color:var(--text3); margin-top:4px; }
     .spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,0.15); border-top-color:#fff; border-radius:50%; animation:sp 0.6s linear infinite; vertical-align:middle; margin-right:6px; }
     @keyframes sp { to{transform:rotate(360deg)} }
-    footer { text-align:center; margin-top:40px; font-size:10px; color:var(--text3); letter-spacing:1.5px; border-top:1px solid var(--bdr); padding-top:20px; }
     .lang-btn { background:rgba(255,255,255,0.05); border:1px solid var(--bdr2); border-radius:8px; padding:5px 12px; color:var(--text); font-family:'DM Mono',monospace; font-size:12px; cursor:pointer; transition:all 0.2s; letter-spacing:1px; }
     .lang-btn:hover { background:rgba(153,69,255,0.15); border-color:var(--sol); color:var(--sol); }
-    @media(max-width:600px){ .ticker{grid-template-columns:1fr 1fr} .hero-v{font-size:34px} .job{flex-direction:column} .jr{width:100%;min-width:unset;text-align:left} #targetBox{grid-template-columns:1fr} }
+    footer { text-align:center; margin-top:40px; font-size:10px; color:var(--text3); letter-spacing:1.5px; border-top:1px solid var(--bdr); padding-top:20px; }
+    @media(max-width:600px){ .ticker{grid-template-columns:1fr 1fr} .hero-v{font-size:34px} .job{flex-direction:column} .jr{width:100%;min-width:unset;text-align:left} #targetBox{grid-template-columns:1fr} .retire-grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
@@ -131,9 +147,7 @@
           <div class="btn-cw-icon">&#9678;</div>
           Connect Wallet
         </button>
-        <div style="margin-top:10px;font-size:11px;color:#4a5568">
-          Support: Phantom Wallet
-        </div>
+        <div style="margin-top:10px;font-size:11px;color:#4a5568">Support: Phantom Wallet</div>
       </div>
       <div id="isConn" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -148,12 +162,9 @@
           <div><div class="wi-l">SOL</div><div class="wi-v up" id="wSol">--</div><div class="wi-s" id="wSolV">--</div></div>
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
           <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
-          <div style="display:none">
-            <div id="wLocked"></div>
-            <div id="wLockedVal"></div>
-            <a id="wLockedLink" href="https://lock.jup.ag" target="_blank"></a>
-          </div>
         </div>
+        <div class="token-pills" id="tokenPills" style="display:none"></div>
+        <div style="display:none"><div id="wLocked"></div><div id="wLockedVal"></div><a id="wLockedLink" href="https://lock.jup.ag" target="_blank"></a></div>
       </div>
     </div>
 
@@ -161,13 +172,49 @@
       <div class="hero-l">TOTAL NILAI CRYPTO KAMU (IDR)</div>
       <div class="hero-v" id="heroV">Rp 0</div>
       <div class="hero-s" id="heroS">Connect wallet untuk melihat perbandingan realtime</div>
+      <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share ke X/Twitter
+      </button>
     </div>
 
-    <!-- Target Kekayaan -->
+    <div class="chart-card" id="chartCard" style="display:none">
+      <div class="sec-l" style="margin-bottom:12px">HISTORY NILAI PORTFOLIO</div>
+      <canvas id="portfolioChart" style="max-height:180px"></canvas>
+    </div>
+
     <div class="sec-l" style="text-align:center">TARGET KEKAYAAN TOP 1%</div>
     <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px"></div>
 
-    <div class="sec-l">PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA</div>
+    <div class="retire-card">
+      <div class="sec-l">&#127776; KALKULATOR KAPAN BISA RETIRE?</div>
+      <div class="retire-grid">
+        <div class="retire-input">
+          <div class="retire-label">TARGET PASSIVE INCOME/BULAN (IDR)</div>
+          <input class="retire-inp" id="retireTarget" type="number" value="10000000" oninput="calcRetire()">
+        </div>
+        <div class="retire-input">
+          <div class="retire-label">ESTIMASI RETURN TAHUNAN (%)</div>
+          <input class="retire-inp" id="retireReturn" type="number" value="10" oninput="calcRetire()">
+        </div>
+        <div class="retire-input">
+          <div class="retire-label">TABUNGAN BULANAN (IDR)</div>
+          <input class="retire-inp" id="retireSaving" type="number" value="1000000" oninput="calcRetire()">
+        </div>
+        <div class="retire-input">
+          <div class="retire-label">PORTFOLIO SEKARANG (IDR)</div>
+          <input class="retire-inp" id="retireCurrent" type="number" placeholder="auto dari wallet" oninput="calcRetire()">
+        </div>
+      </div>
+      <div class="retire-result">
+        <div class="retire-label" style="margin-bottom:8px">ESTIMASI WAKTU RETIRE</div>
+        <div class="retire-result-val" id="retireResult">-- tahun</div>
+        <div class="retire-result-sub" id="retireSub">Isi data di atas untuk kalkulasi</div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text3)" id="retireDetail"></div>
+      </div>
+    </div>
+
+    <div class="sec-l" id="secLabelJobs">PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA</div>
     <div class="jobs" id="jobsBox"></div>
 
     <div class="fact" id="factBox" style="display:none">
@@ -175,575 +222,274 @@
       <div><div class="fact-t">INSIGHT</div><div class="fact-b" id="factTxt"></div></div>
     </div>
 
-
-
-    <footer>DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
+    <footer id="footerEl">DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK</footer>
   </div>
 
   <script>
     const USD_IDR = 16300;
-    let solIDR = 0, solUSD = 0, total = 0;
-    let provider = null, wName = '';
+    let solIDR=0, solUSD=0, total=0, provider=null, wName='', portfolioChart=null;
 
     function fi(n) {
       n = Math.round(n);
-      if (n >= 1e12) return 'Rp ' + (n/1e12).toFixed(2) + ' T';
-      if (n >= 1e9)  return 'Rp ' + (n/1e9).toFixed(2)  + ' M';
-      if (n >= 1e6)  return 'Rp ' + (n/1e6).toFixed(1)  + ' Jt';
-      return 'Rp ' + n.toLocaleString('id-ID');
+      if (n>=1e12) return 'Rp '+(n/1e12).toFixed(2)+' T';
+      if (n>=1e9)  return 'Rp '+(n/1e9).toFixed(2)+' M';
+      if (n>=1e6)  return 'Rp '+(n/1e6).toFixed(1)+' Jt';
+      return 'Rp '+n.toLocaleString('id-ID');
     }
-
     function fd(d) {
-      if (d < 1) {
-        const jam = Math.ceil(d * 24);
-        if (jam < 1) return '<1 jam';
-        return jam+' jam';
-      }
-      d = Math.ceil(d);
-      if (d >= 365) { const y=Math.floor(d/365), m=Math.floor((d%365)/30); return y+'thn'+(m?' '+m+'bln':''); }
-      if (d >= 30)  { const m=Math.floor(d/30), r=d%30; return m+'bln'+(r?' '+r+'hr':''); }
+      if (d<1) { const j=Math.ceil(d*24); return j<1?'<1 jam':j+' jam'; }
+      d=Math.ceil(d);
+      if (d>=365){ const y=Math.floor(d/365),m=Math.floor((d%365)/30); return y+'thn'+(m?' '+m+'bln':''); }
+      if (d>=30) { const m=Math.floor(d/30),r=d%30; return m+'bln'+(r?' '+r+'hr':''); }
       return d+' hari';
     }
 
-    const JOBS = [
-      { title:'Direktur Utama (CEO)',     company:'BUMN / Swasta Besar',      salary:150000000, pct:100 },
-      { title:'Dokter Spesialis',         company:'RS Swasta',                salary:80000000,  pct:53  },
-      { title:'Pilot Komersial',          company:'Garuda / Lion Air',        salary:75000000,  pct:50  },
-      { title:'Software Engineer Senior', company:'GoTo / Tokopedia / Gojek', salary:60000000,  pct:40  },
-      { title:'Investment Banker',        company:'Bank Mandiri / BCA',       salary:55000000,  pct:37  },
-      { title:'Notaris',                  company:'Kantor Notaris',           salary:50000000,  pct:33  },
-      { title:'Hakim / Jaksa Senior',     company:'Mahkamah Agung',           salary:45000000,  pct:30  },
-      { title:'Data Scientist',           company:'Gojek / Grab / Shopee',    salary:40000000,  pct:27  },
-      { title:'Arsitek Senior',           company:'Konsultan Properti',       salary:35000000,  pct:23  },
-      { title:'Manajer Bank Swasta',      company:'BCA / BRI / Mandiri',      salary:30000000,  pct:20  },
+    const JOBS=[
+      {title:'Direktur Utama (CEO)',     company:'BUMN / Swasta Besar',      salary:150000000,pct:100},
+      {title:'Dokter Spesialis',         company:'RS Swasta',                salary:80000000, pct:53},
+      {title:'Pilot Komersial',          company:'Garuda / Lion Air',        salary:75000000, pct:50},
+      {title:'Software Engineer Senior', company:'GoTo / Tokopedia / Gojek', salary:60000000, pct:40},
+      {title:'Investment Banker',        company:'Bank Mandiri / BCA',       salary:55000000, pct:37},
+      {title:'Notaris',                  company:'Kantor Notaris',           salary:50000000, pct:33},
+      {title:'Hakim / Jaksa Senior',     company:'Mahkamah Agung',           salary:45000000, pct:30},
+      {title:'Data Scientist',           company:'Gojek / Grab / Shopee',    salary:40000000, pct:27},
+      {title:'Arsitek Senior',           company:'Konsultan Properti',       salary:35000000, pct:23},
+      {title:'Manajer Bank Swasta',      company:'BCA / BRI / Mandiri',      salary:30000000, pct:20},
+    ];
+    const JOBS_EN=[
+      {title:'President Director (CEO)', company:'SOE / Large Private',      salary:150000000,pct:100},
+      {title:'Medical Specialist',       company:'Private Hospital',         salary:80000000, pct:53},
+      {title:'Commercial Pilot',         company:'Garuda / Lion Air',        salary:75000000, pct:50},
+      {title:'Senior Software Engineer', company:'GoTo / Tokopedia / Gojek', salary:60000000, pct:40},
+      {title:'Investment Banker',        company:'Bank Mandiri / BCA',       salary:55000000, pct:37},
+      {title:'Notary',                   company:'Notary Office',            salary:50000000, pct:33},
+      {title:'Senior Judge',             company:'Supreme Court',            salary:45000000, pct:30},
+      {title:'Data Scientist',           company:'Gojek / Grab / Shopee',    salary:40000000, pct:27},
+      {title:'Senior Architect',         company:'Property Consultant',      salary:35000000, pct:23},
+      {title:'Private Bank Manager',     company:'BCA / BRI / Mandiri',      salary:30000000, pct:20},
     ];
 
-    // Pakai Binance API — support CORS, tidak perlu key
+    // ── 1. Share Twitter ────────────────────────────────────
+    function shareTwitter() {
+      if (total<=0) return;
+      const days = Math.ceil(total/(JOBS[0].salary/30));
+      const text = 'Crypto saya senilai '+fi(total)+' = '+fd(days)+' kerja CEO BUMN \uD83D\uDE80\n\nCek portfolio SOL kamu:\nhttps://crypto-vs-gaji.vercel.app\n\n#CryptoRetire #Solana';
+      window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text),'_blank');
+    }
+
+    // ── 2. Multi-token ──────────────────────────────────────
+    async function fetchTokens(publicKey) {
+      try {
+        const HELIUS='https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
+        const r=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getTokenAccountsByOwner',params:[publicKey,{programId:'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'},{encoding:'jsonParsed'}]})});
+        const data=await r.json();
+        const accounts=(data.result?.value||[]).map(a=>({mint:a.account.data.parsed.info.mint,amount:a.account.data.parsed.info.tokenAmount.uiAmount||0})).filter(t=>t.amount>0);
+        if (!accounts.length) return;
+        const POPULAR={'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':{sym:'USDC'},'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':{sym:'USDT'},'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN':{sym:'JUP'},'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263':{sym:'BONK'},'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm':{sym:'WIF'}};
+        const pills=document.getElementById('tokenPills');
+        pills.innerHTML=''; let tokenTotal=0;
+        for (const token of accounts.slice(0,8)) {
+          const info=POPULAR[token.mint]; if (!info) continue;
+          let priceUSD=0;
+          if (info.sym==='USDC'||info.sym==='USDT') { priceUSD=1; }
+          else { try{const pr=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+info.sym+'USDT');if(pr.ok){const pd=await pr.json();priceUSD=parseFloat(pd.price);}}catch(e){} }
+          const valueIDR=token.amount*priceUSD*USD_IDR; tokenTotal+=valueIDR;
+          const pill=document.createElement('div'); pill.className='token-pill';
+          pill.innerHTML='<span class="token-pill-sym">'+info.sym+'</span><span class="token-pill-val">'+token.amount.toLocaleString('id-ID',{maximumFractionDigits:2})+' &middot; '+fi(valueIDR)+'</span>';
+          pills.appendChild(pill);
+        }
+        if (pills.children.length>0) {
+          pills.style.display='flex'; total+=tokenTotal;
+          document.getElementById('heroV').textContent=fi(total);
+          document.getElementById('heroS').textContent='SOL + tokens &middot; wallet kamu';
+          document.getElementById('wIdr').textContent=fi(total);
+          document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+          renderJobs(); renderTargets(); calcRetire();
+        }
+      } catch(e){ console.error('fetchTokens:',e); }
+    }
+
+    // ── 3. Portfolio History Chart ──────────────────────────
+    function updateChart(val) {
+      const now=new Date();
+      const key='cr_history'; let history=[];
+      try { history=JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){}
+      history.push({t:now.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}),v:val});
+      if (history.length>30) history=history.slice(-30);
+      try { localStorage.setItem(key,JSON.stringify(history)); } catch(e){}
+      if (history.length<2) return;
+      document.getElementById('chartCard').style.display='block';
+      if (portfolioChart) portfolioChart.destroy();
+      const ctx=document.getElementById('portfolioChart').getContext('2d');
+      portfolioChart=new Chart(ctx,{type:'line',data:{labels:history.map(h=>h.t),datasets:[{data:history.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+    }
+
+    // ── 4. Retire Calculator ────────────────────────────────
+    function calcRetire() {
+      const targetMonthly=parseFloat(document.getElementById('retireTarget').value)||0;
+      const returnRate=parseFloat(document.getElementById('retireReturn').value)/100||0.1;
+      const monthlySaving=parseFloat(document.getElementById('retireSaving').value)||0;
+      const currentVal=parseFloat(document.getElementById('retireCurrent').value)||total||0;
+      if (!targetMonthly) { document.getElementById('retireResult').textContent='-- tahun'; document.getElementById('retireSub').textContent='Isi target passive income per bulan'; return; }
+      const targetPortfolio=targetMonthly/(returnRate/12);
+      const monthlyReturn=returnRate/12;
+      let months=0, portfolio=currentVal;
+      if (portfolio>=targetPortfolio) {
+        document.getElementById('retireResult').textContent='SEKARANG! \uD83C\uDF89';
+        document.getElementById('retireSub').textContent='Portfolio sudah cukup untuk retire!';
+        document.getElementById('retireDetail').textContent='Target: '+fi(targetPortfolio)+' \xB7 Kamu: '+fi(portfolio);
+        return;
+      }
+      while (portfolio<targetPortfolio && months<1200) { portfolio=portfolio*(1+monthlyReturn)+monthlySaving; months++; }
+      const years=Math.floor(months/12), remMo=months%12;
+      document.getElementById('retireResult').textContent=years>0?years+' tahun'+(remMo>0?' '+remMo+' bulan':''):remMo+' bulan';
+      document.getElementById('retireSub').textContent='Estimasi waktu retire dari crypto';
+      document.getElementById('retireDetail').textContent='Target portfolio: '+fi(targetPortfolio)+' \xB7 Passive income: '+fi(targetMonthly)+'/bln';
+    }
+
+    // ── Price ───────────────────────────────────────────────
     async function fetchPrice() {
       try {
-        const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
-        const d = await r.json();
-        solUSD = parseFloat(d.price);
-        solIDR = Math.round(solUSD * USD_IDR);
-
-        document.getElementById('tIdr').textContent = fi(solIDR);
-        document.getElementById('tUsd').textContent = '$' + solUSD.toFixed(2);
-        document.getElementById('tChgI').textContent = 'realtime';
-        document.getElementById('tChgI').className = 'tick-chg up';
-        document.getElementById('tChgU').textContent = 'realtime';
-        document.getElementById('tChgU').className = 'tick-chg up';
-
+        const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
+        const d=await r.json(); solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*USD_IDR);
+        document.getElementById('tIdr').textContent=fi(solIDR);
+        document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
+        document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
+        document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
-
-      } catch(e) {
-        solIDR = 2850000; solUSD = 174.85;
-        document.getElementById('tIdr').textContent = 'Rp 2.850.000*';
-        document.getElementById('tUsd').textContent = '$174.85*';
-        document.getElementById('tChgI').textContent = '*estimasi';
-        console.error('Gagal fetch harga:', e);
-      }
+      } catch(e) { solIDR=2850000; solUSD=174.85; document.getElementById('tIdr').textContent='Rp 2.850.000*'; document.getElementById('tUsd').textContent='$174.85*'; }
     }
 
-    const WALLETS = [
-      {
-        name: 'Phantom', desc: 'Phantom Wallet',
-        icon: '&#128123;', bg: '#1a1535',
-        get: () => {
-          if (window.phantom?.solana?.isPhantom) return window.phantom.solana;
-          if (window.solana?.isPhantom) return window.solana;
-          return null;
-        }
-      },
-    ];
-
+    // ── Wallet ──────────────────────────────────────────────
+    const WALLETS=[{name:'Phantom',desc:'Phantom Wallet',icon:'&#128123;',bg:'#1a1535',get:()=>{if(window.phantom?.solana?.isPhantom)return window.phantom.solana;if(window.solana?.isPhantom)return window.solana;return null;}}];
     function openModal() {
-      const list = document.getElementById('wList');
-      list.innerHTML = '';
-      WALLETS.forEach(w => {
-        const p  = w.get();
-        const ok = !!p;
-        const btn = document.createElement('button');
-        btn.className = 'w-btn';
-        btn.disabled  = !ok;
-        btn.innerHTML =
-          '<div class="w-icon" style="background:' + w.bg + '">' + w.icon + '</div>' +
-          '<div><div class="w-name">' + w.name + '</div><div class="w-desc">' + w.desc + '</div></div>' +
-          '<span class="w-badge ' + (ok?'detected':'install') + '">' + (ok?'Terdeteksi':'Belum install') + '</span>';
-        if (ok) btn.onclick = () => doConnect(w);
-        list.appendChild(btn);
-      });
-      document.getElementById('overlay').style.display = 'flex';
+      const list=document.getElementById('wList'); list.innerHTML='';
+      WALLETS.forEach(w=>{ const p=w.get(),ok=!!p; const btn=document.createElement('button'); btn.className='w-btn'; btn.disabled=!ok;
+        btn.innerHTML='<div class="w-icon" style="background:'+w.bg+'">'+w.icon+'</div><div><div class="w-name">'+w.name+'</div><div class="w-desc">'+w.desc+'</div></div><span class="w-badge '+(ok?'detected':'install')+'">'+(ok?'Terdeteksi':'Belum install')+'</span>';
+        if(ok) btn.onclick=()=>doConnect(w); list.appendChild(btn); });
+      document.getElementById('overlay').style.display='flex';
     }
-
-    function closeModal() {
-      document.getElementById('overlay').style.display = 'none';
-    }
-
+    function closeModal(){ document.getElementById('overlay').style.display='none'; }
     async function doConnect(walletDef) {
-      closeModal();
-      const p = walletDef.get();
-      if (!p) return;
-      const btn = document.getElementById('btnConn');
-      btn.innerHTML = '<span class="spin"></span> Connecting...';
-      btn.disabled = true;
+      closeModal(); const p=walletDef.get(); if(!p) return;
+      const btn=document.getElementById('btnConn'); btn.innerHTML='<span class="spin"></span> Connecting...'; btn.disabled=true;
       try {
-        const resp = await p.connect();
-        const pk = (resp?.publicKey || p.publicKey)?.toString();
-        if (!pk) throw new Error('Tidak dapat baca public key');
-        provider = p; wName = walletDef.name;
-        await loadBalance(pk);
-        showConnected(pk);
-      } catch(e) {
-        btn.innerHTML = '<div class="btn-cw-icon">&#9678;</div> Connect Wallet';
-        btn.disabled = false;
-        if (e.code !== 4001) alert('Gagal connect: ' + e.message);
-      }
+        const resp=await p.connect(); const pk=(resp?.publicKey||p.publicKey)?.toString();
+        if(!pk) throw new Error('Tidak dapat baca public key');
+        provider=p; wName=walletDef.name; await loadBalance(pk); showConnected(pk);
+      } catch(e) { btn.innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; btn.disabled=false; if(e.code!==4001) alert('Gagal connect: '+e.message); }
     }
-
     function showConnected(pk) {
-      document.getElementById('notConn').style.display = 'none';
-      document.getElementById('isConn').style.display  = 'block';
-      document.getElementById('cCard').classList.add('on');
-      document.getElementById('addrTxt').textContent  = pk.slice(0,5)+'...'+pk.slice(-4);
-      document.getElementById('wNameTxt').textContent = '· ' + wName;
+      document.getElementById('notConn').style.display='none'; document.getElementById('isConn').style.display='block';
+      document.getElementById('cCard').classList.add('on'); document.getElementById('addrTxt').textContent=pk.slice(0,5)+'...'+pk.slice(-4);
+      document.getElementById('wNameTxt').textContent='&middot; '+wName;
     }
-
     function doDisconnect() {
-      try { if (provider?.disconnect) provider.disconnect(); } catch(e) {}
-      provider = null; wName = ''; total = 0;
-      document.getElementById('notConn').style.display = 'block';
-      document.getElementById('isConn').style.display  = 'none';
+      try{if(provider?.disconnect)provider.disconnect();}catch(e){}
+      provider=null; wName=''; total=0;
+      document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
-      document.getElementById('btnConn').innerHTML = '<div class="btn-cw-icon">&#9678;</div> Connect Wallet';
-      document.getElementById('btnConn').disabled = false;
-      document.getElementById('heroV').textContent = 'Rp 0';
-      document.getElementById('heroS').textContent = 'Connect wallet untuk melihat perbandingan realtime';
-      document.getElementById('factBox').style.display = 'none';
-      renderJobs();
-      renderTargets();
+      document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
+      document.getElementById('heroV').textContent='Rp 0'; document.getElementById('heroS').textContent='Connect wallet untuk melihat perbandingan realtime';
+      document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
+      document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
+      document.getElementById('retireCurrent').value='';
+      renderJobs(); renderTargets(); calcRetire();
     }
-
     async function loadBalance(publicKey) {
       try {
-        // Coba beberapa RPC fallback
-        const RPCS = [
-          'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55',
-          'https://api.mainnet-beta.solana.com',
-        ];
-        let data = null;
-        for (const rpc of RPCS) {
-          try {
-            const r = await fetch(rpc, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                jsonrpc: '2.0', id: 1,
-                method: 'getBalance',
-                params: [publicKey, { commitment: 'confirmed' }]
-              })
-            });
-            data = await r.json();
-            if (data.result?.value !== undefined) break;
-          } catch(e) { continue; }
-        }
-        const sol = (data?.result?.value || 0) / 1e9;
-        total = sol * (solIDR || 2850000);
-        // Simpan sol balance untuk digabung dengan locked nanti
-        window._solBalance = sol;
-        document.getElementById('wSol').textContent  = sol.toFixed(4) + ' SOL';
-        document.getElementById('wSolV').textContent = fi(total);
-        document.getElementById('wIdr').textContent  = fi(total);
-        document.getElementById('wUsdV').textContent = '~$' + (total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
-        document.getElementById('heroV').textContent = fi(total);
-        document.getElementById('heroS').textContent = 'Nilai SOL wallet kamu · ' + sol.toFixed(4) + ' SOL';
-        renderJobs();
-        renderFact(sol);
-        renderTargets();
-        // Fetch locked tokens dari Jupiter Lock
-        await fetchLockedTokens(publicKey);
-      } catch(e) { console.error('Gagal fetch balance:', e); }
+        const RPCS=['https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55','https://api.mainnet-beta.solana.com'];
+        let data=null;
+        for (const rpc of RPCS) { try{ const r=await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[publicKey,{commitment:'confirmed'}]})}); data=await r.json(); if(data.result?.value!==undefined)break; }catch(e){continue;} }
+        const sol=(data?.result?.value||0)/1e9; total=sol*(solIDR||2850000); window._solBalance=sol;
+        document.getElementById('wSol').textContent=sol.toFixed(4)+' SOL'; document.getElementById('wSolV').textContent=fi(total);
+        document.getElementById('wIdr').textContent=fi(total); document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        document.getElementById('heroV').textContent=fi(total); document.getElementById('heroS').textContent='Nilai SOL wallet kamu \xB7 '+sol.toFixed(4)+' SOL';
+        document.getElementById('btnShare').style.display='inline-flex';
+        document.getElementById('retireCurrent').value=Math.round(total);
+        renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updateChart(total);
+        await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
+      } catch(e){ console.error('loadBalance:',e); }
     }
 
-    // Base58 encoder
+    // ── Jupiter Lock ────────────────────────────────────────
     function encodeBase58(bytes) {
-      const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-      let num = BigInt(0);
-      for (const b of bytes) num = num * BigInt(256) + BigInt(b);
-      let str = '';
-      while (num > 0n) { str = ALPHABET[Number(num % 58n)] + str; num = num / 58n; }
-      for (const b of bytes) { if (b !== 0) break; str = '1' + str; }
-      return str;
+      const A='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; let n=BigInt(0);
+      for(const b of bytes) n=n*256n+BigInt(b); let s='';
+      while(n>0n){s=A[Number(n%58n)]+s;n=n/58n;} for(const b of bytes){if(b!==0)break;s='1'+s;} return s;
     }
-
     async function fetchLockedTokens(publicKey) {
-      const elLocked    = document.getElementById('wLocked');
-      const elLockedVal = document.getElementById('wLockedVal');
-      const elLink      = document.getElementById('wLockedLink');
-      elLocked.textContent    = 'memuat...';
-      elLockedVal.textContent = '';
-      elLink.style.display    = 'none';
-
       try {
-        const JUP_LOCK = 'LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn';
-        const HELIUS   = 'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
-
-        // Coba semua offset untuk field recipient di VestingEscrow
-        // Anchor struct: discriminator(8) + base(32) + token_mint(32) + creator(32) + recipient(32)
-        // recipient offset = 8+32+32+32 = 104
-        let accounts = [];
-        for (const offset of [72, 8]) {  // offset 72 = recipient confirmed dari test
-          const r = await fetch(HELIUS, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0', id: 1,
-              method: 'getProgramAccounts',
-              params: [ JUP_LOCK, {
-                commitment: 'confirmed',
-                encoding: 'base64',
-                filters: [{ memcmp: { offset, bytes: publicKey } }]
-              }]
-            })
-          });
-          const d = await r.json();
-          if (d.result?.length > 0) { accounts = d.result; break; }
-        }
-
-        if (!accounts.length) {
-          elLocked.textContent    = 'Tidak ada';
-          elLockedVal.textContent = 'Tidak ada locked token';
-          return;
-        }
-
-        // Parse escrow accounts
-        let results = [];
+        const JUP_LOCK='LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn', HELIUS='https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
+        let accounts=[];
+        for (const offset of [72,8]) { const r=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getProgramAccounts',params:[JUP_LOCK,{commitment:'confirmed',encoding:'base64',filters:[{memcmp:{offset,bytes:publicKey}}]}]})}); const d=await r.json(); if(d.result?.length>0){accounts=d.result;break;} }
+        if(!accounts.length) return;
+        let totalLockedIDR=0;
         for (const acc of accounts) {
           try {
-            const raw   = atob(acc.account.data[0]);
-            const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-
-            // token_mint = offset 40, 32 bytes
-            const mintBytes = bytes.slice(40, 72);
-            const mintAddr  = encodeBase58(mintBytes);
-
-            // Cari amount — scan semua u64 fields mulai offset 136
-            // VestingEscrow fields setelah recipient(104+32=136):
-            // cliff_time(8), frequency(8), cliff_unlock_amount(8),
-            // amount_per_period(8), number_of_period(8), total_claimed_amount(8)
-            // total = amount_per_period * number_of_period + cliff_unlock_amount
-            let totalAmount = 0;
-            try {
-              const view = new DataView(bytes.buffer);
-              const cliffUnlock    = Number(view.getBigUint64(160, true)); // offset 160
-              const amtPerPeriod   = Number(view.getBigUint64(168, true)); // offset 168
-              const numPeriod      = Number(view.getBigUint64(176, true)); // offset 176
-              totalAmount = cliffUnlock + (amtPerPeriod * numPeriod);
-            } catch(e) {}
-
-            results.push({ mint: mintAddr, amount: totalAmount });
-          } catch(e) { console.error('Parse error:', e); }
+            const raw=atob(acc.account.data[0]), bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
+            const mintAddr=encodeBase58(bytes.slice(40,72));
+            const view=new DataView(bytes.buffer);
+            const totalAmt=Number(view.getBigUint64(160,true))+(Number(view.getBigUint64(168,true))*Number(view.getBigUint64(176,true)));
+            const tr=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getAsset',params:{id:mintAddr}})});
+            const td=await tr.json();
+            const decimals=td.result?.token_info?.decimals??6, priceUSD=td.result?.token_info?.price_info?.price_per_token??0, symbol=td.result?.content?.metadata?.symbol||mintAddr.slice(0,6);
+            const uiAmount=totalAmt/Math.pow(10,decimals), valueIDR=uiAmount*priceUSD*USD_IDR; totalLockedIDR+=valueIDR;
+            const pills=document.getElementById('tokenPills'), pill=document.createElement('div'); pill.className='token-pill'; pill.style.borderColor='rgba(249,158,11,0.3)';
+            pill.innerHTML='<span class="token-pill-sym" style="color:#f59e0b">&#128274; '+symbol+'</span><span class="token-pill-val">'+uiAmount.toLocaleString('id-ID',{maximumFractionDigits:2})+' &middot; '+fi(valueIDR)+'</span>';
+            pills.appendChild(pill); pills.style.display='flex';
+          } catch(e){}
         }
-
-        if (!results.length) {
-          elLocked.textContent    = accounts.length + ' vesting';
-          elLockedVal.textContent = 'Lihat detail di link';
-          elLink.style.display    = 'inline';
-          elLink.href             = 'https://lock.jup.ag';
-          return;
+        if(totalLockedIDR>0) {
+          const lockedSOL=totalLockedIDR/(solIDR||2850000), totalSOL=(window._solBalance||0)+lockedSOL; total+=totalLockedIDR;
+          document.getElementById('wSol').textContent=totalSOL.toFixed(4)+' SOL'; document.getElementById('heroV').textContent=fi(total);
+          document.getElementById('heroS').textContent=(window._solBalance||0).toFixed(4)+' SOL + '+lockedSOL.toFixed(4)+' SOL locked';
+          document.getElementById('retireCurrent').value=Math.round(total);
+          renderJobs(); renderTargets(); calcRetire(); updateChart(total);
         }
-
-        // Fetch token info & harga untuk semua mint
-        let displayParts = [];
-        let totalLockedIDR = 0;
-
-        for (const item of results) {
-          try {
-            // Token info via Helius getAsset
-            const HELIUS = 'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
-            const tr = await fetch(HELIUS, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                jsonrpc: '2.0', id: 1,
-                method: 'getAsset',
-                params: { id: item.mint }
-              })
-            });
-            const td = await tr.json();
-            const symbol   = td.result?.content?.metadata?.symbol || item.mint.slice(0,6);
-            const decimals = td.result?.token_info?.decimals ?? 6;
-            const priceUSD = td.result?.token_info?.price_info?.price_per_token ?? 0;
-            const uiAmount = item.amount / Math.pow(10, decimals);
-            const valueIDR = uiAmount * priceUSD * USD_IDR;
-            totalLockedIDR += valueIDR;
-            displayParts.push(uiAmount.toLocaleString('id-ID', {maximumFractionDigits:2}) + ' ' + symbol);
-          } catch(e) { console.error('Token fetch error:', e); }
-        }
-
-        if (displayParts.length) {
-          elLocked.textContent    = displayParts.join(', ');
-          elLockedVal.textContent = totalLockedIDR > 0 ? '~ ' + fi(totalLockedIDR) : '--';
-          elLink.style.display    = 'inline';
-          elLink.href             = 'https://lock.jup.ag';
-
-          if (totalLockedIDR > 0) {
-            // Hitung locked SOL equivalent
-            const lockedSOL = totalLockedIDR / (solIDR || 2850000);
-            const totalSOL  = (window._solBalance || 0) + lockedSOL;
-
-            // Update total IDR
-            total += totalLockedIDR;
-
-            // Update tampilan SOL jadi gabungan
-            document.getElementById('wSol').textContent  = totalSOL.toFixed(4) + ' SOL';
-            document.getElementById('wSolV').textContent = fi(total);
-            document.getElementById('wIdr').textContent  = fi(total);
-            document.getElementById('wUsdV').textContent = '~$' + (total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
-
-            // Update hero
-            document.getElementById('heroV').textContent = fi(total);
-            document.getElementById('heroS').textContent =
-              (window._solBalance||0).toFixed(4) + ' SOL + ' + lockedSOL.toFixed(4) + ' SOL locked · wallet kamu';
-
-            // Update perbandingan jobs
-            renderJobs();
-            renderTargets();
-          }
-        } else {
-          elLocked.textContent    = accounts.length + ' vesting';
-          elLockedVal.textContent = 'Lihat detail di link';
-          elLink.style.display    = 'inline';
-          elLink.href             = 'https://lock.jup.ag';
-        }
-
-      } catch(e) {
-        console.error('fetchLockedTokens error:', e);
-        elLocked.textContent    = 'Error';
-        elLockedVal.textContent = 'Cek lock.jup.ag';
-        elLink.style.display    = 'inline';
-        elLink.href             = 'https://lock.jup.ag';
-      }
+      } catch(e){ console.error('fetchLockedTokens:',e); }
     }
 
-        // Target kekayaan top 1%
-    // Sumber: Knight Frank Wealth Report
-    const TARGETS = [
-      {
-        label: 'Top 1% Indonesia',
-        usd: 60000,
-        desc: 'Min. kekayaan bersih untuk masuk 1% terkaya di Indonesia',
-        icon: '🇮🇩',
-        color: '#14f195',
-      },
-      {
-        label: 'Top 1% Global',
-        usd: 1000000,
-        desc: 'Min. kekayaan bersih untuk masuk 1% terkaya di dunia (~$1 juta)',
-        icon: '🌍',
-        color: '#9945ff',
-      },
-
-    ];
-
+    // ── Target Top 1% ───────────────────────────────────────
+    const TARGETS=[{label:'Top 1% Indonesia',usd:60000,desc:'Min. kekayaan bersih 1% terkaya Indonesia',icon:'&#127470;&#127465;',color:'#14f195'},{label:'Top 1% Global',usd:1000000,desc:'Min. kekayaan bersih 1% terkaya dunia (~$1 juta)',icon:'&#127758;',color:'#9945ff'}];
     function renderTargets() {
-      const box = document.getElementById('targetBox');
-      if (!box) return;
-      box.innerHTML = '';
-
-      TARGETS.forEach(t => {
-        const targetIDR  = t.usd * USD_IDR;
-        const myIDR      = total || 0;
-        const pct        = Math.min((myIDR / targetIDR) * 100, 100);
-        const remaining  = Math.max(targetIDR - myIDR, 0);
-        const reached    = myIDR >= targetIDR;
-
-        const div = document.createElement('div');
-        div.style.cssText = 'background:var(--bg2);border:1px solid ' + (reached ? t.color+'66' : 'var(--bdr)') + ';border-radius:14px;padding:20px 16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;';
-        div.innerHTML =
-          '<div style="width:100%;text-align:center">' +
-            '<div style="font-size:28px;margin-bottom:8px">' + t.icon + '</div>' +
-            '<div style="font-size:14px;font-weight:700;color:' + t.color + ';margin-bottom:4px">' + t.label + '</div>' +
-            (reached ? '<div style="font-size:10px;background:' + t.color + '22;color:' + t.color + ';border:1px solid ' + t.color + '44;border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px">TERCAPAI ✓</div>' : '') +
-            '<div style="font-size:10px;color:var(--text3);margin-bottom:12px;line-height:1.5">' + t.desc + '</div>' +
-            '<div style="font-size:22px;font-weight:700;color:' + t.color + ';margin-bottom:4px">' + pct.toFixed(1) + '%</div>' +
-            '<div class="bw" style="margin-bottom:8px"><div class="bf" id="tb' + t.usd + '" style="width:0%;background:linear-gradient(90deg,' + t.color + '88,' + t.color + ')"></div></div>' +
-            '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">' +
-              '<span>Kamu: <span style="color:' + t.color + '">' + fi(myIDR) + '</span></span>' +
-              '<span>Target: ' + fi(targetIDR) + '</span>' +
-            '</div>' +
-            '<div style="font-size:11px;color:' + (reached ? '#14f195' : '#f56565') + '">' +
-              (reached ? '🎉 Sudah tercapai!' : 'Kurang: ' + fi(remaining)) +
-            '</div>' +
-          '</div>';
-        box.appendChild(div);
-        setTimeout(() => {
-          const b = document.getElementById('tb' + t.usd);
-          if (b) b.style.width = pct + '%';
-        }, 200);
+      const box=document.getElementById('targetBox'); if(!box) return; box.innerHTML='';
+      TARGETS.forEach(t=>{
+        const targetIDR=t.usd*USD_IDR, myIDR=total||0, pct=Math.min((myIDR/targetIDR)*100,100), remaining=Math.max(targetIDR-myIDR,0), reached=myIDR>=targetIDR;
+        const div=document.createElement('div'); div.style.cssText='background:var(--bg2);border:1px solid '+(reached?t.color+'66':'var(--bdr)')+';border-radius:14px;padding:20px 16px;display:flex;align-items:center;justify-content:center;';
+        div.innerHTML='<div style="width:100%;text-align:center"><div style="font-size:28px;margin-bottom:8px">'+t.icon+'</div><div style="font-size:14px;font-weight:700;color:'+t.color+';margin-bottom:4px">'+t.label+'</div>'+(reached?'<div style="font-size:10px;background:'+t.color+'22;color:'+t.color+';border:1px solid '+t.color+'44;border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px">TERCAPAI \u2713</div>':'')+'<div style="font-size:10px;color:var(--text3);margin-bottom:12px;line-height:1.5">'+t.desc+'</div><div style="font-size:22px;font-weight:700;color:'+t.color+';margin-bottom:4px">'+pct.toFixed(1)+'%</div><div class="bw" style="margin-bottom:8px"><div class="bf" id="tb'+t.usd+'" style="width:0%;background:linear-gradient(90deg,'+t.color+'88,'+t.color+')"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px"><span>Kamu: <span style="color:'+t.color+'">'+fi(myIDR)+'</span></span><span>Target: '+fi(targetIDR)+'</span></div><div style="font-size:11px;color:'+(reached?'#14f195':'#f56565')+'">'+( reached?'\uD83C\uDF89 Sudah tercapai!':'Kurang: '+fi(remaining))+'</div></div>';
+        box.appendChild(div); setTimeout(()=>{const b=document.getElementById('tb'+t.usd);if(b)b.style.width=pct+'%';},200);
       });
     }
 
+    // ── Render Jobs ─────────────────────────────────────────
     function renderJobs() {
-      const t   = T[lang];
-      const src = lang === 'id' ? JOBS : JOBS_EN;
-      const box = document.getElementById('jobsBox');
-      box.innerHTML = '';
-      src.forEach(job => {
-        const perDetik = job.salary / 30 / 24 / 3600;
-        const perJam   = job.salary / 30 / 24;
-        const perHari  = job.salary / 30;
-        const perMinggu= job.salary / 4.33;
-        const perBulan = job.salary;
-        const perTahun = job.salary * 12;
-        const per35thn = job.salary * 420;
-        const days     = total > 0 ? total / perHari : null;
-        const uid      = 'b' + job.pct;
-        const div      = document.createElement('div');
-        div.className  = 'job';
-        div.innerHTML =
-          '<div class="jl">' +
-            '<div class="jt">' + job.title + '</div>' +
-            '<div class="jc">' + job.company + '</div>' +
-            '<div class="jgrid">' +
-              '<div><div class="jnl">' + t.perDetik  + '</div><div class="jnv">' + fi(perDetik) + '</div></div>' +
-              '<div><div class="jnl">' + t.perJam    + '</div><div class="jnv">' + fi(Math.round(perJam)) + '</div></div>' +
-              '<div><div class="jnl">' + t.perHari   + '</div><div class="jnv">' + fi(Math.round(perHari)) + '</div></div>' +
-              '<div><div class="jnl">' + t.perMinggu + '</div><div class="jnv">' + fi(Math.round(perMinggu)) + '</div></div>' +
-              '<div><div class="jnl">' + t.perBulan  + '</div><div class="jnv">' + fi(perBulan) + '</div></div>' +
-              '<div><div class="jnl">' + t.perTahun  + '</div><div class="jnv">' + fi(perTahun) + '</div></div>' +
-              '<div><div class="jnl">' + t.per35thn  + '</div><div class="jnv">' + fi(per35thn) + '</div></div>' +
-            '</div>' +
-            '<div class="bw"><div class="bf" id="' + uid + '" style="width:0%"></div></div>' +
-          '</div>' +
-          '<div class="jr">' +
-            '<div class="jrl">' + t.harusKerja + '</div>' +
-            '<div class="jrv">' + (days ? fd(days) : '--') + '</div>' +
-            '<div class="jrs">' + (total > 0 ? '~' + (total/perBulan).toFixed(1) + ' ' + t.blnGaji : t.connectWallet) + '</div>' +
-          '</div>';
-        box.appendChild(div);
-        setTimeout(() => { const b=document.getElementById(uid); if(b) b.style.width=job.pct+'%'; }, 150);
+      const t=T[lang], src=lang==='id'?JOBS:JOBS_EN, box=document.getElementById('jobsBox'); box.innerHTML='';
+      src.forEach(job=>{
+        const perDetik=job.salary/30/24/3600, perJam=job.salary/30/24, perHari=job.salary/30, perMinggu=job.salary/4.33, perBulan=job.salary, perTahun=job.salary*12, per35thn=job.salary*420;
+        const days=total>0?total/perHari:null, uid='b'+job.pct;
+        const div=document.createElement('div'); div.className='job';
+        div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid"><div><div class="jnl">'+t.perDetik+'</div><div class="jnv">'+fi(perDetik)+'</div></div><div><div class="jnl">'+t.perJam+'</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div><div><div class="jnl">'+t.perHari+'</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div><div><div class="jnl">'+t.perMinggu+'</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div><div><div class="jnl">'+t.perBulan+'</div><div class="jnv">'+fi(perBulan)+'</div></div><div><div class="jnl">'+t.perTahun+'</div><div class="jnv">'+fi(perTahun)+'</div></div><div><div class="jnl">'+t.per35thn+'</div><div class="jnv">'+fi(per35thn)+'</div></div></div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div><div class="jr"><div class="jrl">'+t.harusKerja+'</div><div class="jrv">'+(days?fd(days):'--')+'</div><div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' '+t.blnGaji:t.connectWallet)+'</div></div>';
+        box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
       });
     }
-
     function renderFact(sol) {
-      if (total <= 0) { document.getElementById('factBox').style.display='none'; return; }
-      document.getElementById('factBox').style.display = 'flex';
-      const days = Math.ceil(total / (JOBS[3].salary / 30));
-      document.getElementById('factTxt').innerHTML = T[lang].insightText(sol, total, days);
+      if(total<=0){document.getElementById('factBox').style.display='none';return;}
+      document.getElementById('factBox').style.display='flex';
+      document.getElementById('factTxt').innerHTML=T[lang].insightText(sol,total,Math.ceil(total/(JOBS[3].salary/30)));
     }
 
-    // ── Translations ─────────────────────────────────────────
-    let lang = 'id';
-
-    const T = {
-      id: {
-        title:        'CryptoRetire',
-        subtitle:     'IDR REALTIME TRACKER',
-        connectLabel: 'CONNECT WALLET',
-        connectBtn:   'Connect Wallet',
-        disconnect:   'DISCONNECT',
-        support:      'Support: Phantom Wallet',
-        heroLabel:    'TOTAL NILAI CRYPTO KAMU (IDR)',
-        heroSub:      'Connect wallet untuk melihat perbandingan realtime',
-        heroSubConn:  'Nilai SOL wallet kamu',
-        network:      'NETWORK',
-        nilaiIdr:     'NILAI IDR',
-        secLabel:     'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',
-        harusKerja:   'HARUS KERJA',
-        perDetik:     'PER DETIK',
-        perJam:       'PER JAM',
-        perHari:      'PER HARI',
-        perMinggu:    'PER MINGGU',
-        perBulan:     'PER BULAN',
-        perTahun:     'PER TAHUN',
-        per35thn:     '35 TAHUN',
-        connectWallet:'connect wallet',
-        blnGaji:      'bln gaji',
-        insightTitle: 'INSIGHT',
-        insightText:  (sol, total, days) => 'Kamu punya <strong>' + sol.toFixed(4) + ' SOL</strong> senilai <strong>' + fi(total) + '</strong> -- setara <strong>' + fd(days) + ' kerja</strong> seorang Software Engineer Senior di GoTo, tanpa harus buka laptop sekalipun. &#128640;',
-        footer:       'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',
-        pilihWallet:  'Pilih Wallet',
-        walletSub:    'Wallet yang terinstall di browser kamu',
-        batal:        'Batal',
-        terdeteksi:   'Terdeteksi',
-        belumInstall: 'Belum install',
-        modalLabel:   'CONNECT WALLET',
-      },
-      en: {
-        title:        'CryptoRetire',
-        subtitle:     'IDR REALTIME TRACKER',
-        connectLabel: 'CONNECT WALLET',
-        connectBtn:   'Connect Wallet',
-        disconnect:   'DISCONNECT',
-        support:      'Support: Phantom Wallet',
-        heroLabel:    'YOUR TOTAL CRYPTO VALUE (IDR)',
-        heroSub:      'Connect wallet to see realtime comparison',
-        heroSubConn:  'Your SOL wallet value',
-        network:      'NETWORK',
-        nilaiIdr:     'IDR VALUE',
-        secLabel:     'COMPARISON WITH HIGH-PAYING JOBS IN INDONESIA',
-        harusKerja:   'MUST WORK',
-        perDetik:     'PER SECOND',
-        perJam:       'PER HOUR',
-        perHari:      'PER DAY',
-        perMinggu:    'PER WEEK',
-        perBulan:     'PER MONTH',
-        perTahun:     'PER YEAR',
-        per35thn:     '35 YEARS',
-        connectWallet:'connect wallet',
-        blnGaji:      'mo salary',
-        insightTitle: 'INSIGHT',
-        insightText:  (sol, total, days) => 'You have <strong>' + sol.toFixed(4) + ' SOL</strong> worth <strong>' + fi(total) + '</strong> -- equivalent to <strong>' + fd(days) + ' of work</strong> as a Senior Software Engineer at GoTo, without opening a laptop. &#128640;',
-        footer:       'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        pilihWallet:  'Select Wallet',
-        walletSub:    'Wallets installed in your browser',
-        batal:        'Cancel',
-        terdeteksi:   'Detected',
-        belumInstall: 'Not installed',
-        modalLabel:   'CONNECT WALLET',
-      }
+    // ── Translations ────────────────────────────────────────
+    let lang='id';
+    const T={
+      id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Connect wallet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'connect wallet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> -- setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. &#128640;',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
+      en:{subtitle:'IDR REALTIME TRACKER',connectLabel:'CONNECT WALLET',connectBtn:'Connect Wallet',heroLabel:'YOUR TOTAL CRYPTO VALUE (IDR)',heroSub:'Connect wallet to see realtime comparison',secLabel:'COMPARISON WITH HIGH-PAYING JOBS IN INDONESIA',harusKerja:'MUST WORK',perDetik:'PER SEC',perJam:'PER HOUR',perHari:'PER DAY',perMinggu:'PER WEEK',perBulan:'PER MONTH',perTahun:'PER YEAR',per35thn:'35 YEARS',connectWallet:'connect wallet',blnGaji:'mo salary',insightText:(sol,total,days)=>'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> -- equivalent to <strong>'+fd(days)+' of work</strong> as Senior SE at GoTo. &#128640;',footer:'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',pilihWallet:'Select Wallet',walletSub:'Wallets installed in your browser',batal:'Cancel'}
     };
+    function toggleLang(){lang=lang==='id'?'en':'id';document.getElementById('langBtn').textContent=lang==='id'?'EN':'ID';applyLang();renderJobs();if(total>0)renderFact(parseFloat(document.getElementById('wSol').textContent));}
+    function applyLang(){const t=T[lang];document.querySelector('.logo-sub').textContent=t.subtitle;document.querySelector('.c-label').textContent=t.connectLabel;document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> '+t.connectBtn;document.querySelector('.modal-title').textContent=t.pilihWallet;document.querySelector('.modal-sub').textContent=t.walletSub;document.querySelector('.modal-cancel').textContent=t.batal;document.querySelector('.hero-l').textContent=t.heroLabel;document.getElementById('secLabelJobs').textContent=t.secLabel;document.getElementById('footerEl').innerHTML=t.footer;if(total<=0)document.getElementById('heroS').textContent=t.heroSub;}
 
-    const JOBS_EN = [
-      { title:'President Director (CEO)',   company:'SOE / Large Private Company',  salary:150000000, pct:100 },
-      { title:'Medical Specialist',         company:'Private Hospital',             salary:80000000,  pct:53  },
-      { title:'Commercial Pilot',           company:'Garuda / Lion Air',            salary:75000000,  pct:50  },
-      { title:'Senior Software Engineer',   company:'GoTo / Tokopedia / Gojek',    salary:60000000,  pct:40  },
-      { title:'Investment Banker',          company:'Bank Mandiri / BCA',           salary:55000000,  pct:37  },
-      { title:'Notary',                     company:'Notary Office',                salary:50000000,  pct:33  },
-      { title:'Senior Judge / Prosecutor',  company:'Supreme Court',                salary:45000000,  pct:30  },
-      { title:'Data Scientist',             company:'Gojek / Grab / Shopee',        salary:40000000,  pct:27  },
-      { title:'Senior Architect',           company:'Property Consultant',          salary:35000000,  pct:23  },
-      { title:'Private Bank Manager',       company:'BCA / BRI / Mandiri',          salary:30000000,  pct:20  },
-    ];
-
-    function toggleLang() {
-      lang = lang === 'id' ? 'en' : 'id';
-      document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
-      applyLang();
-      renderJobs();
-      if (total > 0) renderFact(parseFloat(document.getElementById('wSol').textContent));
-    }
-
-    function applyLang() {
-      const t = T[lang];
-      document.querySelector('.logo-sub').textContent       = t.subtitle;
-      document.querySelector('.c-label').textContent        = t.connectLabel;
-      document.getElementById('btnConn').innerHTML          = '<div class="btn-cw-icon">&#9678;</div> ' + t.connectBtn;
-      document.querySelector('.modal-title').textContent    = t.pilihWallet;
-      document.querySelector('.modal-sub').textContent      = t.walletSub;
-      document.querySelector('.modal-cancel').textContent   = t.batal;
-      document.querySelector('.hero-l').textContent         = t.heroLabel;
-      document.querySelector('.sec-l').textContent          = t.secLabel;
-      document.querySelector('footer').innerHTML            = t.footer;
-      // Hero sub
-      if (total <= 0) document.getElementById('heroS').textContent = t.heroSub;
-    }
-
-    renderJobs();
-    renderTargets();
-    fetchPrice();
-    setInterval(fetchPrice, 30000);
+    // ── Init ────────────────────────────────────────────────
+    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); setInterval(fetchPrice,30000);
   </script>
 </body>
 </html>
