@@ -149,10 +149,10 @@
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
           <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
           <div>
-            <div class="wi-l">LOCKED (JUP LOCK)</div>
-            <div class="wi-v" style="color:#f59e0b" id="wLocked">--</div>
-            <div class="wi-s" id="wLockedVal">memuat...</div>
-            <a id="wLockedLink" href="https://lock.jup.ag" target="_blank" style="font-size:10px;color:#9945ff;text-decoration:none;display:none">Lihat di lock.jup.ag &#8599;</a>
+            <div class="wi-l">LOCKED (JUP)</div>
+            <div class="wi-v up" id="wLocked">--</div>
+            <div class="wi-s" id="wLockedVal">--</div>
+            <a id="wLockedLink" href="https://lock.jup.ag" target="_blank" style="font-size:10px;color:#9945ff;text-decoration:none;display:none">lock.jup.ag &#8599;</a>
           </div>
         </div>
       </div>
@@ -342,6 +342,8 @@
         }
         const sol = (data?.result?.value || 0) / 1e9;
         total = sol * (solIDR || 2850000);
+        // Simpan sol balance untuk digabung dengan locked nanti
+        window._solBalance = sol;
         document.getElementById('wSol').textContent  = sol.toFixed(4) + ' SOL';
         document.getElementById('wSolV').textContent = fi(total);
         document.getElementById('wIdr').textContent  = fi(total);
@@ -473,20 +475,38 @@
 
         if (displayParts.length) {
           elLocked.textContent    = displayParts.join(', ');
-          elLockedVal.textContent = totalLockedIDR > 0 ? '~ ' + fi(totalLockedIDR) : 'harga tidak tersedia';
-          // Tambah ke total
+          elLockedVal.textContent = totalLockedIDR > 0 ? '~ ' + fi(totalLockedIDR) : '--';
+          elLink.style.display    = 'inline';
+          elLink.href             = 'https://lock.jup.ag';
+
           if (totalLockedIDR > 0) {
+            // Hitung locked SOL equivalent
+            const lockedSOL = totalLockedIDR / (solIDR || 2850000);
+            const totalSOL  = (window._solBalance || 0) + lockedSOL;
+
+            // Update total IDR
             total += totalLockedIDR;
+
+            // Update tampilan SOL jadi gabungan
+            document.getElementById('wSol').textContent  = totalSOL.toFixed(4) + ' SOL';
+            document.getElementById('wSolV').textContent = fi(total);
+            document.getElementById('wIdr').textContent  = fi(total);
+            document.getElementById('wUsdV').textContent = '~$' + (total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+
+            // Update hero
             document.getElementById('heroV').textContent = fi(total);
             document.getElementById('heroS').textContent =
-              'SOL + locked token · wallet kamu';
+              (window._solBalance||0).toFixed(4) + ' SOL + ' + lockedSOL.toFixed(4) + ' SOL locked · wallet kamu';
+
+            // Update perbandingan jobs
+            renderJobs();
           }
         } else {
           elLocked.textContent    = accounts.length + ' vesting';
           elLockedVal.textContent = 'Lihat detail di link';
+          elLink.style.display    = 'inline';
+          elLink.href             = 'https://lock.jup.ag';
         }
-        elLink.style.display = 'inline';
-        elLink.href          = 'https://lock.jup.ag';
 
       } catch(e) {
         console.error('fetchLockedTokens error:', e);
