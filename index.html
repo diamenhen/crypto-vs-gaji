@@ -15,9 +15,9 @@
       --green:    #22c55e;
       --green-bg: rgba(34,197,94,0.08);
       --red:      #ef4444;
-      --bg:       #111317;   /* dark charcoal, not pure black */
-      --bg2:      #1a1d23;
-      --bg3:      #22262e;
+      --bg:       #0d0f13;   /* dark charcoal, not pure black */
+      --bg2:      #1c1f27;
+      --bg3:      #252930;
       --bg4:      #2a2f38;
       --bdr:      rgba(255,255,255,0.06);
       --bdr2:     rgba(255,255,255,0.11);
@@ -95,7 +95,7 @@
     }
     .tick:hover { border-color: var(--bdr2); transform: translateY(-1px); }
     .tick-label { font-size: 10px; color: var(--text3); letter-spacing: 1px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
-    .tick-val { font-family: 'Geist Mono', 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 500; letter-spacing: -0.5px; }
+    .tick-val { font-family: 'Geist Mono', 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; letter-spacing: -0.5px; color: #ffffff; }
     .tick-chg { font-size: 11px; margin-top: 4px; font-weight: 500; }
     .up { color: var(--green); }
     .dn { color: var(--red); }
@@ -134,8 +134,8 @@
     .btn-share:hover { border-color: var(--accent); color: var(--accent2); transform: translateY(-1px); }
     .wi { display: flex; gap: 24px; padding-top: 16px; border-top: 1px solid var(--bdr); flex-wrap: wrap; }
     .wi-l { font-size: 10px; color: var(--text3); letter-spacing: 1px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; }
-    .wi-v { font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 500; }
-    .wi-s { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .wi-v { font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 600; color: #ffffff; }
+    .wi-s { font-size: 11px; color: #9ca3af; margin-top: 2px; }
     .token-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bdr); }
     .token-pill {
       display: flex; align-items: center; gap: 6px;
@@ -198,17 +198,17 @@
     }
     .job:hover { border-color: var(--bdr2); background: var(--bg3); transform: translateX(3px); }
     .jl { flex: 1; min-width: 0; }
-    .jt { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .jt { font-size: 13px; font-weight: 600; margin-bottom: 2px; color: #ffffff; }
     .jc { font-size: 11px; color: var(--text3); margin-bottom: 10px; }
     .jgrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px 16px; margin-bottom: 4px; }
     @media(max-width:600px){ .jgrid { grid-template-columns: repeat(2,1fr); } }
     .jnl { font-size: 9px; color: var(--text3); letter-spacing: 1px; margin-bottom: 2px; font-weight: 600; text-transform: uppercase; }
-    .jnv { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text2); }
+    .jnv { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; color: #d1d5db; }
     .bw { height: 2px; background: var(--bg4); border-radius: 99px; margin-top: 10px; overflow: hidden; }
     .bf { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1.4s cubic-bezier(0.4,0,0.2,1); }
     .jr { text-align: right; flex-shrink: 0; background: var(--bg3); border: 1px solid var(--bdr); border-radius: 12px; padding: 10px 14px; min-width: 124px; }
     .jrl { font-size: 9px; color: var(--text3); letter-spacing: 1.5px; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
-    .jrv { font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text); }
+    .jrv { font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 700; color: #ffffff; }
     .jrs { font-size: 10px; color: var(--text3); margin-top: 3px; }
 
     /* ── INSIGHT ── */
