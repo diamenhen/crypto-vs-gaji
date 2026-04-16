@@ -132,7 +132,7 @@
           Connect Wallet
         </button>
         <div style="margin-top:10px;font-size:11px;color:#4a5568">
-          Support: Phantom &middot; Solflare &middot; Backpack
+          Support: Phantom Wallet
         </div>
       </div>
       <div id="isConn" style="display:none">
@@ -148,7 +148,12 @@
           <div><div class="wi-l">SOL</div><div class="wi-v up" id="wSol">--</div><div class="wi-s" id="wSolV">--</div></div>
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
           <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
-          <div><div class="wi-l">LOCKED (JUP LOCK)</div><div class="wi-v" style="color:#f59e0b" id="wLocked">--</div><div class="wi-s" id="wLockedVal">--</div></div>
+          <div>
+            <div class="wi-l">LOCKED (JUP LOCK)</div>
+            <div class="wi-v" style="color:#f59e0b" id="wLocked">--</div>
+            <div class="wi-s" id="wLockedVal">memuat...</div>
+            <a id="wLockedLink" href="https://lock.jup.ag" target="_blank" style="font-size:10px;color:#9945ff;text-decoration:none;display:none">Lihat di lock.jup.ag &#8599;</a>
+          </div>
         </div>
       </div>
     </div>
@@ -236,17 +241,6 @@
 
     const WALLETS = [
       {
-        name: 'Jupiter Wallet', desc: 'Jupiter Extension Wallet',
-        icon: '&#129001;', bg: '#0d1a0d',
-        get: () => {
-          // Jupiter inject ke window.solana dengan property 'name' dan 'icon'
-          if (window.solana && !window.solana.isPhantom && !window.solana.isSolflare && window.solana.connect) {
-            return window.solana;
-          }
-          return null;
-        }
-      },
-      {
         name: 'Phantom', desc: 'Phantom Wallet',
         icon: '&#128123;', bg: '#1a1535',
         get: () => {
@@ -254,16 +248,6 @@
           if (window.solana?.isPhantom) return window.solana;
           return null;
         }
-      },
-      {
-        name: 'Solflare', desc: 'Solflare Wallet',
-        icon: '&#127774;', bg: '#2a1a00',
-        get: () => window.solflare?.isSolflare ? window.solflare : null
-      },
-      {
-        name: 'Backpack', desc: 'Backpack Wallet',
-        icon: '&#127890;', bg: '#1a1a1a',
-        get: () => window.backpack?.solana || null
       },
     ];
 
@@ -371,62 +355,73 @@
       } catch(e) { console.error('Gagal fetch balance:', e); }
     }
 
-    // Fetch locked tokens from Jupiter Lock program
+    // Fetch locked tokens from Jupiter Lock via Helius
     async function fetchLockedTokens(publicKey) {
+      const elLocked    = document.getElementById('wLocked');
+      const elLockedVal = document.getElementById('wLockedVal');
+      const elLink      = document.getElementById('wLockedLink');
+
+      elLocked.textContent    = 'memuat...';
+      elLockedVal.textContent = '';
+
       try {
         const JUP_LOCK_PROGRAM = 'LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn';
-        const RPCS = [
-          'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55',
-          'https://api.mainnet-beta.solana.com',
-        ];
+        const HELIUS_RPC = 'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
 
-        let accounts = null;
-        for (const rpc of RPCS) {
-          try {
-            const r = await fetch(rpc, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                jsonrpc: '2.0', id: 1,
-                method: 'getProgramAccounts',
-                params: [
-                  JUP_LOCK_PROGRAM,
-                  {
-                    commitment: 'confirmed',
-                    encoding: 'base64',
-                    filters: [
-                      { dataSize: 300 },
-                      // Filter by recipient = wallet kamu
-                      {
-                        memcmp: {
-                          offset: 72,
-                          bytes: publicKey
-                        }
-                      }
-                    ]
-                  }
-                ]
-              })
-            });
-            const d = await r.json();
-            if (d.result) { accounts = d.result; break; }
-          } catch(e) { continue; }
+        // Gunakan Helius getProgramAccounts dengan filter recipient
+        // Jupiter Lock escrow account: recipient address ada di offset 8+32+32 = 72
+        const offsets = [72, 40, 8];
+        let accounts = [];
+
+        for (const offset of offsets) {
+          const r = await fetch(HELIUS_RPC, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0', id: 1,
+              method: 'getProgramAccounts',
+              params: [
+                JUP_LOCK_PROGRAM,
+                {
+                  commitment: 'confirmed',
+                  encoding: 'jsonParsed',
+                  filters: [{
+                    memcmp: { offset, bytes: publicKey }
+                  }]
+                }
+              ]
+            })
+          });
+          const d = await r.json();
+          if (d.result && d.result.length > 0) {
+            accounts = d.result;
+            break;
+          }
         }
 
         if (!accounts || accounts.length === 0) {
-          document.getElementById('wLocked').textContent = '0 token';
-          document.getElementById('wLockedVal').textContent = 'Tidak ada locked token';
+          elLocked.textContent    = 'Tidak ada';
+          elLockedVal.textContent = 'Tidak ada locked token di Jupiter Lock';
+          elLink.style.display    = 'none';
           return;
         }
 
-        // Tampilkan jumlah escrow yang ditemukan
-        document.getElementById('wLocked').textContent = accounts.length + ' escrow';
-        document.getElementById('wLockedVal').textContent = 'Cek lock.jup.ag untuk detail';
+        // Ada locked tokens!
+        elLocked.textContent    = accounts.length + ' vesting';
+        elLockedVal.textContent = accounts.length + ' kontrak ditemukan di Jupiter Lock';
+        elLink.style.display    = 'inline';
+        elLink.href             = 'https://lock.jup.ag/?recipient=' + publicKey;
+
+        // Update hero total dengan info locked
+        const heroS = document.getElementById('heroS');
+        heroS.textContent = heroS.textContent + ' + ' + accounts.length + ' locked vesting';
 
       } catch(e) {
         console.error('Gagal fetch locked tokens:', e);
-        document.getElementById('wLocked').textContent = '--';
-        document.getElementById('wLockedVal').textContent = 'Gagal fetch';
+        elLocked.textContent    = 'Error';
+        elLockedVal.textContent = 'Gagal fetch — cek lock.jup.ag';
+        elLink.style.display    = 'inline';
+        elLink.href             = 'https://lock.jup.ag/?recipient=' + publicKey;
       }
     }
 
@@ -489,7 +484,7 @@
         connectLabel: 'CONNECT WALLET',
         connectBtn:   'Connect Wallet',
         disconnect:   'DISCONNECT',
-        support:      'Support: Phantom &middot; Solflare &middot; Backpack',
+        support:      'Support: Phantom Wallet',
         heroLabel:    'TOTAL NILAI CRYPTO KAMU (IDR)',
         heroSub:      'Connect wallet untuk melihat perbandingan realtime',
         heroSubConn:  'Nilai SOL wallet kamu',
@@ -522,7 +517,7 @@
         connectLabel: 'CONNECT WALLET',
         connectBtn:   'Connect Wallet',
         disconnect:   'DISCONNECT',
-        support:      'Support: Phantom &middot; Solflare &middot; Backpack',
+        support:      'Support: Phantom Wallet',
         heroLabel:    'YOUR TOTAL CRYPTO VALUE (IDR)',
         heroSub:      'Connect wallet to see realtime comparison',
         heroSubConn:  'Your SOL wallet value',
