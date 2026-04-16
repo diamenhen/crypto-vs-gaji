@@ -163,7 +163,7 @@
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
           <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
         </div>
-        <div class="token-pills" id="tokenPills" style="display:none"></div>
+        <div id="tokenPills" style="display:none"></div>
         <div style="display:none"><div id="wLocked"></div><div id="wLockedVal"></div><a id="wLockedLink" href="https://lock.jup.ag" target="_blank"></a></div>
       </div>
     </div>
@@ -367,7 +367,7 @@
     function showConnected(pk) {
       document.getElementById('notConn').style.display='none'; document.getElementById('isConn').style.display='block';
       document.getElementById('cCard').classList.add('on'); document.getElementById('addrTxt').textContent=pk.slice(0,5)+'...'+pk.slice(-4);
-      document.getElementById('wNameTxt').textContent='· '+wName;
+      document.getElementById('wNameTxt').textContent='';
     }
     function doDisconnect() {
       try{if(provider?.disconnect)provider.disconnect();}catch(e){}
@@ -387,12 +387,20 @@
         let data=null;
         for (const rpc of RPCS) { try{ const r=await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[publicKey,{commitment:'confirmed'}]})}); data=await r.json(); if(data.result?.value!==undefined)break; }catch(e){continue;} }
         const sol=(data?.result?.value||0)/1e9;
-        const priceNow = solIDR > 0 ? solIDR : 2850000;
-        total=sol*priceNow; window._solBalance=sol;
-        document.getElementById('wSol').textContent=sol.toFixed(4)+' SOL';
-        document.getElementById('wSolV').textContent=fi(total);
-        document.getElementById('wIdr').textContent=fi(total);
-        document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        // Pastikan solIDR selalu terisi
+        if (!solIDR || solIDR === 0) {
+          try {
+            const pr = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
+            const pd = await pr.json();
+            solUSD = parseFloat(pd.price);
+            solIDR = Math.round(solUSD * USD_IDR);
+          } catch(e) { solIDR = 2850000; solUSD = 175; }
+        }
+        total = sol * solIDR; window._solBalance = sol;
+        document.getElementById('wSol').textContent = sol.toFixed(4)+' SOL';
+        document.getElementById('wSolV').textContent = fi(total);
+        document.getElementById('wIdr').textContent = fi(total);
+        document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         document.getElementById('heroV').textContent=fi(total); document.getElementById('heroS').textContent='Nilai SOL wallet kamu \xB7 '+sol.toFixed(4)+' SOL';
         document.getElementById('btnShare').style.display='inline-flex';
         document.getElementById('retireCurrent').value=Math.round(total);
@@ -414,9 +422,7 @@
         for (const offset of [72,8]) { const r=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getProgramAccounts',params:[JUP_LOCK,{commitment:'confirmed',encoding:'base64',filters:[{memcmp:{offset,bytes:publicKey}}]}]})}); const d=await r.json(); if(d.result?.length>0){accounts=d.result;break;} }
         if(!accounts.length) return;
         let totalLockedIDR=0;
-        // Clear any existing locked pills first
-        const existingLocked = document.querySelectorAll('.pill-locked');
-        existingLocked.forEach(p => p.remove());
+
         for (const acc of accounts) {
           try {
             const raw=atob(acc.account.data[0]), bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
