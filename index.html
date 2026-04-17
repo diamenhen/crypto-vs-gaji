@@ -5,6 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CryptoRetire</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMTMxNjFiIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIxNiwyIDMwLDE2IDE2LDMwIDIsMTYiIGZpbGw9IiNlODgwMGEiLz4KPC9zdmc+">
   <!-- Bloomberg Dark: IBM Plex Mono, muted tones -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -262,11 +263,11 @@
     @media(max-width:600px){
       .container { padding:0 12px 40px; }
 
-      /* Status bar */
-      .status-bar { gap:8px; flex-wrap:wrap; font-size:9px; padding:4px 8px; }
+      /* Status bar - hide refresh on mobile, allow wrap */
+      .status-bar { gap:10px; flex-wrap:wrap; font-size:9px; padding:4px 8px; }
       .status-bar #clockEl { font-size:9px; }
 
-      /* Ticker - 1 column */
+      /* Ticker - 1 column stacked */
       .ticker { grid-template-columns:1fr; }
       .tick { padding:8px 12px; }
       .tick-val { font-size:15px; }
@@ -274,48 +275,26 @@
       /* Hero */
       .hero-v { font-size:28px; }
 
-      /* P&L grid - stack 2 col */
+      /* P&L grid - stack on mobile */
       #pnlBox > div > div[style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr 1fr !important; gap:10px !important; }
 
       /* Target cards - single column */
       #targetBox { grid-template-columns:1fr !important; }
 
-      /* Job cards — keep MUST WORK on the right, just shrink */
-      .job { flex-direction:row; padding:10px 10px; flex-wrap:wrap; }
-      .jl { flex:1; min-width:0; }
-      .jr {
-        width:90px; min-width:90px; text-align:right;
-        border-left:2px solid var(--accent); border-top:none;
-        padding:6px 8px; align-self:flex-start;
-      }
-      .jrl { font-size:7px; letter-spacing:1px; }
-      .jrv { font-size:14px; }
-      .jgrid { grid-template-columns:repeat(2,1fr); gap:5px 8px; }
+      /* Job cards */
+      .job { flex-direction:column; padding:10px 12px; }
+      .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:8px 12px; }
+      .jgrid { grid-template-columns:repeat(2,1fr); gap:6px 10px; }
       .jt { font-size:11px; }
       .jnv { font-size:11px; }
-      .jnl { font-size:7.5px; }
-      .jc { font-size:9.5px; margin-bottom:8px; }
 
       /* Wallet info */
       .wi { gap:0; }
       .wi > div { padding-right:12px; margin-right:12px; }
       .wi-v { font-size:13px; }
 
-      /* ALL TIME P&L grid */
-      #atplContent > div[style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr 1fr !important; gap:10px !important; }
-
-      /* Rank cards */
-      .rank-card { padding:10px 12px; gap:10px; }
-      .rank-icon { font-size:22px; width:32px; }
-      .rank-name { font-size:11px; }
-      .rank-desc { font-size:9px; margin-bottom:4px; }
-      .rank-target { font-size:9px; }
-      .rank-badge { font-size:8px; padding:2px 7px; }
-      .rank-current-icon { font-size:36px; }
-      .rank-current-name { font-size:15px; }
-
       /* Chart timeframe buttons */
-      .tf-btn { padding:2px 6px; font-size:8px; }
+      .tf-btn { padding:3px 7px; font-size:8px; }
 
       /* Modal */
       .modal { margin:12px; }
