@@ -850,8 +850,7 @@
         pnlData.push({ date:todayKey, open:currentTotal, close:currentTotal, high:currentTotal, low:currentTotal });
       } else {
         const d = pnlData[idx];
-        // If new value is >20% larger than stored open, it means open was a partial load — update it
-        if (currentTotal > d.open * 1.2) d.open = currentTotal;
+        // Never change open — only update close/high/low
         d.close = currentTotal; d.high = Math.max(d.high,currentTotal); d.low = Math.min(d.low,currentTotal);
         pnlData[idx] = d;
       }
