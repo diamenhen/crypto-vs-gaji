@@ -348,16 +348,9 @@
     <div id="atplBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">ALL TIME P&amp;L</div>
-        <button onclick="editInitial()" style="background:transparent;border:1px solid var(--bdr2);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px">EDIT</button>
+        <button onclick="fetchInitialValue()" id="atplRefresh" style="background:transparent;border:1px solid var(--bdr2);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px">↻ SYNC</button>
       </div>
-      <div id="atplContent"></div>
-      <div id="atplInput" style="display:none;margin-top:10px">
-        <div style="font-size:9px;color:var(--text3);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase">Initial wallet value (IDR)</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="initialInput" type="number" placeholder="e.g. 400000" style="background:var(--bg3);border:1px solid var(--bdr);padding:6px 10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;flex:1">
-          <button onclick="saveInitial()" style="background:var(--accent);border:none;padding:6px 14px;color:#1a1a0a;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase">SAVE</button>
-        </div>
-      </div>
+      <div id="atplContent"><div style="font-size:10px;color:var(--text3)">Connect wallet to load on-chain data...</div></div>
     </div>
 
     <div class="chart-card" id="chartCard" style="display:none">
@@ -912,49 +905,135 @@
         +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px">7-DAY HISTORY</div>'+hist:'');
     }
 
-    // ── All Time P&L ────────────────────────────────────────
+    // ── All Time P&L (Birdeye + Helius) ─────────────────────
+    const BIRDEYE_KEY = '0c38a69c78f5472d99946fdee39a3d5d';
+    const SOL_MINT    = 'So11111111111111111111111111111111111111112';
+    const HELIUS_RPC  = 'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
+
     function renderAllTimePnL(currentTotal) {
       if (!currentTotal || currentTotal <= 0) return;
-      const initialVal = parseFloat(localStorage.getItem('cr_initial') || '0');
       const box = document.getElementById('atplBox');
-      const content = document.getElementById('atplContent');
-      if (!box || !content) return;
+      if (!box) return;
       box.style.display = 'block';
-      if (!initialVal) {
-        content.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:4px 0">Set your initial wallet value to see all-time P&L</div>';
+      const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
+      if (!cached) {
+        document.getElementById('atplContent').innerHTML =
+          '<div style="font-size:10px;color:var(--text3);padding:4px 0">Click <strong style="color:var(--accent)">↻ SYNC</strong> to load on-chain initial value</div>';
         return;
       }
-      const pl = currentTotal - initialVal;
-      const pct = (pl / initialVal * 100);
+      const { initialIDR, initialDate, initialSOL, initialPriceUSD } = cached;
+      const pl = currentTotal - initialIDR;
+      const pct = (pl / initialIDR * 100);
       const up = pl >= 0;
       const col = up ? 'var(--green)' : '#d05a4a';
       const sgn = up ? '+' : '';
-      const multiplier = (currentTotal / initialVal).toFixed(2);
-      content.innerHTML =
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">'
+      const multiplier = (currentTotal / initialIDR).toFixed(2);
+      document.getElementById('atplContent').innerHTML =
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:8px">'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">INITIAL</div>'
-            +'<div style="font-size:16px;font-weight:700;color:var(--text2)">'+fi(initialVal)+'</div></div>'
+            +'<div style="font-size:16px;font-weight:700;color:var(--text2)">'+fi(initialIDR)+'</div>'
+            +'<div style="font-size:9px;color:var(--text3);margin-top:2px">'+initialDate+'</div></div>'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">CURRENT</div>'
             +'<div style="font-size:16px;font-weight:700;color:var(--text)">'+fi(currentTotal)+'</div></div>'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">ALL TIME P&amp;L</div>'
             +'<div style="font-size:16px;font-weight:700;color:'+col+'">'+sgn+fi(pl)+'</div>'
-            +'<div style="font-size:10px;color:'+col+'">'+sgn+pct.toFixed(1)+'% &nbsp;·&nbsp; '+multiplier+'x</div></div>'
-        +'</div>';
+            +'<div style="font-size:10px;color:'+col+'">'+sgn+pct.toFixed(1)+'% &middot; '+multiplier+'x</div></div>'
+        +'</div>'
+        +'<div style="font-size:9px;color:var(--text3);margin-top:4px">Entry: '+initialSOL.toFixed(4)+' SOL @ $'+initialPriceUSD.toFixed(2)+'</div>';
     }
 
-    function editInitial() {
-      const inp = document.getElementById('atplInput');
-      const cur = localStorage.getItem('cr_initial') || '';
-      document.getElementById('initialInput').value = cur;
-      inp.style.display = inp.style.display === 'none' ? 'block' : 'none';
-    }
+    async function fetchInitialValue() {
+      const btn = document.getElementById('atplRefresh');
+      const content = document.getElementById('atplContent');
+      const box = document.getElementById('atplBox');
+      if (!box) return;
+      box.style.display = 'block';
 
-    function saveInitial() {
-      const val = parseFloat(document.getElementById('initialInput').value);
-      if (!val || val <= 0) return;
-      localStorage.setItem('cr_initial', val.toString());
-      document.getElementById('atplInput').style.display = 'none';
-      if (total > 0) renderAllTimePnL(total);
+      // Get wallet public key
+      const pk = provider?.publicKey?.toString();
+      if (!pk) { content.innerHTML = '<div style="font-size:10px;color:var(--red)">Connect wallet first</div>'; return; }
+
+      if (btn) { btn.textContent = '⏳ Loading...'; btn.disabled = true; }
+      content.innerHTML = '<div style="font-size:10px;color:var(--text3)">Fetching on-chain history...</div>';
+
+      try {
+        // Step 1: Get oldest transaction signature via Helius
+        let oldest = null;
+        let before = null;
+        content.innerHTML = '<div style="font-size:10px;color:var(--text3)">Finding first transaction...</div>';
+
+        // Paginate to find the oldest tx (max 5 pages = ~500 txs)
+        for (let i = 0; i < 5; i++) {
+          const body = { jsonrpc:'2.0', id:1, method:'getSignaturesForAddress',
+            params:[pk, { limit:100, ...(before ? {before} : {}) }] };
+          const r = await fetch(HELIUS_RPC, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+          const d = await r.json();
+          const sigs = d.result || [];
+          if (!sigs.length) break;
+          oldest = sigs[sigs.length - 1];
+          if (sigs.length < 100) break; // no more pages
+          before = sigs[sigs.length - 1].signature;
+        }
+
+        if (!oldest) throw new Error('No transactions found');
+
+        const firstTs = oldest.blockTime; // unix timestamp
+        const firstDate = new Date(firstTs * 1000);
+        const dateStr = firstDate.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+
+        content.innerHTML = '<div style="font-size:10px;color:var(--text3)">First tx: '+dateStr+' — fetching SOL price...</div>';
+
+        // Step 2: Get SOL price at that timestamp via Birdeye
+        const priceRes = await fetch(
+          'https://public-api.birdeye.so/defi/historical_price_unix?address='+SOL_MINT+'&unixtime='+firstTs,
+          { headers: { 'X-API-KEY': BIRDEYE_KEY, 'x-chain': 'solana' } }
+        );
+        const priceData = await priceRes.json();
+        const solPriceUSD = priceData?.data?.value || 0;
+        if (!solPriceUSD) throw new Error('Could not fetch historical price');
+
+        // Step 3: Get SOL balance at that time (approximate — use current balance as base)
+        // For more accuracy we use the actual SOL involved in first tx
+        const txRes = await fetch(HELIUS_RPC, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({jsonrpc:'2.0',id:1,method:'getTransaction',
+            params:[oldest.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0}]})
+        });
+        const txData = await txRes.json();
+
+        // Find initial SOL balance from pre/post balances
+        const accountKeys = txData.result?.transaction?.message?.accountKeys || [];
+        const preBalances = txData.result?.meta?.preBalances || [];
+        const postBalances = txData.result?.meta?.postBalances || [];
+        let initialSOL = 0;
+
+        // Find this wallet's index in account keys
+        const walletIdx = accountKeys.findIndex(k => {
+          const addr = typeof k === 'string' ? k : k?.pubkey;
+          return addr === pk;
+        });
+
+        if (walletIdx >= 0) {
+          // Use post balance of first tx as initial SOL amount
+          initialSOL = (postBalances[walletIdx] || 0) / 1e9;
+        }
+        if (!initialSOL) initialSOL = window._solBalance || 0;
+
+        // Step 4: Calculate initial IDR value
+        const usdIdr = USD_IDR_RT || USD_IDR || 17000;
+        const initialIDR = Math.round(initialSOL * solPriceUSD * usdIdr);
+
+        // Cache result
+        const cacheData = { initialIDR, initialDate: dateStr, initialSOL, initialPriceUSD: solPriceUSD, ts: Date.now() };
+        localStorage.setItem('cr_initial_data', JSON.stringify(cacheData));
+
+        renderAllTimePnL(total);
+      } catch(e) {
+        console.error('fetchInitialValue:', e);
+        content.innerHTML = '<div style="font-size:10px;color:var(--red)">Error: '+e.message+'<br><span style="color:var(--text3)">Try again or check console</span></div>';
+      } finally {
+        if (btn) { btn.textContent = '↻ SYNC'; btn.disabled = false; }
+      }
     }
 
     function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
