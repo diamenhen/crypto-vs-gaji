@@ -84,7 +84,9 @@
     #clockEl { margin-left:auto; color:var(--text2); }
 
     /* ── TICKER ── */
-    .ticker { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-bottom:10px; }
+    .ticker { display:grid; grid-template-columns:repeat(6,1fr); gap:2px; margin-bottom:10px; }
+    @media(max-width:700px){ .ticker { grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:400px){ .ticker { grid-template-columns:repeat(2,1fr); } }
     .tick {
       background:var(--bg2); border:1px solid var(--bdr);
       border-top:2px solid var(--accent); padding:10px 14px;
@@ -273,6 +275,14 @@
     .cal-cell.profit .cal-val, .cal-cell.profit .cal-pct { color:#3a9e6a; }
     .cal-cell.loss   .cal-val, .cal-cell.loss   .cal-pct { color:#d05a4a; }
 
+    /* ── BADGES ── */
+    .badge-item { text-align:center; width:60px; }
+    .badge-circle { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 4px; border:2px solid; }
+    .badge-circle.unlocked { border-color:var(--accent); }
+    .badge-circle.locked   { background:var(--bg3); border-color:var(--bdr); filter:grayscale(1); opacity:0.3; }
+    .badge-lbl { font-size:7px; letter-spacing:1px; font-weight:700; text-transform:uppercase; }
+    .badge-lbl.locked { color:var(--text3); }
+
     /* ── FOOTER ── */
     footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
 
@@ -341,6 +351,9 @@
         </div>
       </div>
       <div class="header-right">
+        <div style="display:flex;align-items:center;border-left:1px solid var(--bdr);height:100%;">
+          <button id="currBtn" onclick="toggleCurrency()" style="background:transparent;border:none;border-right:1px solid var(--bdr);padding:0 14px;height:100%;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">IDR</button>
+        </div>
         <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       </div>
     </header>
@@ -350,8 +363,12 @@
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
-      <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">loading...</div><div class="tick-chg" id="tChgI">--</div></div>
+    <div class="ticker">
+      <div class="tick"><div class="tick-label">BTC/USD</div><div class="tick-val" id="tBtc">loading...</div><div class="tick-chg" id="tBtcChg">--</div></div>
+      <div class="tick"><div class="tick-label">ETH/USD</div><div class="tick-val" id="tEth">loading...</div><div class="tick-chg" id="tEthChg">--</div></div>
+      <div class="tick"><div class="tick-label">BNB/USD</div><div class="tick-val" id="tBnb">loading...</div><div class="tick-chg" id="tBnbChg">--</div></div>
       <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd">loading...</div><div class="tick-chg" id="tChgU">--</div></div>
+      <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">loading...</div><div class="tick-chg" id="tChgI">--</div></div>
       <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg up" id="tUsdIdrChg">+0.00%</div></div>
     </div>
 
@@ -396,6 +413,16 @@
     </div>
 
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
+
+    <div id="fearGreedBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:8px">
+      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px">MARKET SENTIMENT</div>
+      <div id="fearGreedContent"></div>
+    </div>
+
+    <div id="badgesBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:8px">
+      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px">YOUR BADGES</div>
+      <div id="badgesContent" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+    </div>
 
     <div id="pnlCalendarBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -754,20 +781,26 @@
     }
 
     async function fetchPrice() {
-      // Try Binance first
       try {
-        const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
-        const d=await r.json();
-        if (!d.price) throw new Error('no price');
-        solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+        const [rSol,rBtc,rEth,rBnb] = await Promise.all([
+          fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT'),
+          fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
+          fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT'),
+          fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT'),
+        ]);
+        const [dSol,dBtc,dEth,dBnb] = await Promise.all([rSol.json(),rBtc.json(),rEth.json(),rBnb.json()]);
+        if (!dSol.price) throw new Error('no price');
+        solUSD=parseFloat(dSol.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
         document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
         document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
         document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
         document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
+        if (dBtc.price) { const p=parseFloat(dBtc.price); document.getElementById('tBtc').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
+        if (dEth.price) { const p=parseFloat(dEth.price); document.getElementById('tEth').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
+        if (dBnb.price) { const p=parseFloat(dBnb.price); document.getElementById('tBnb').textContent='$'+p.toFixed(2); document.getElementById('tBnbChg').textContent='realtime'; document.getElementById('tBnbChg').className='tick-chg up'; }
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
         return;
       } catch(e) {}
-      // Fallback: CoinGecko (more mobile-friendly CORS)
       try {
         const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
         const d=await r.json();
@@ -780,7 +813,6 @@
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
         return;
       } catch(e) {}
-      // Last fallback: keep last known price or use estimate
       if (!solIDR) { solIDR=2850000; solUSD=174.85; document.getElementById('tIdr').textContent='Rp 2.850.000*'; document.getElementById('tUsd').textContent='$174.85*'; }
     }
 
@@ -875,7 +907,7 @@
         document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         document.getElementById('retireCurrent').value = Math.round(total);
         updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank();
-        renderJobs(); renderTargets(); calcRetire();
+        renderJobs(); renderTargets(); calcRetire(); renderBadges(); updateCurrencyDisplay();
         renderFact(parseFloat(document.getElementById('wSol').textContent) || sol);
         // Auto-fetch initial value from on-chain — use cache if already synced
         const cached = localStorage.getItem('cr_initial_data');
@@ -960,7 +992,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL);
+          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL); renderBadges(); updateCurrencyDisplay();
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -1509,8 +1541,86 @@
 
 
 
+    // ── Currency Toggle ──────────────────────────────────────
+    let currencyMode = 'IDR';
+    function toggleCurrency() {
+      currencyMode = currencyMode === 'IDR' ? 'USD' : 'IDR';
+      const btn = document.getElementById('currBtn');
+      btn.textContent = currencyMode;
+      btn.style.color = currencyMode === 'USD' ? '#9945ff' : 'var(--accent)';
+      updateCurrencyDisplay();
+    }
+    function updateCurrencyDisplay() {
+      if (total <= 0) return;
+      const rate = USD_IDR_RT || USD_IDR || 17000;
+      const heroLabel = document.querySelector('.hero-l');
+      if (currencyMode === 'USD') {
+        document.getElementById('heroV').textContent = '$' + (total/rate).toLocaleString('en',{maximumFractionDigits:2});
+        if (heroLabel) heroLabel.textContent = 'YOUR TOTAL CRYPTO VALUE (USD)';
+      } else {
+        document.getElementById('heroV').textContent = fi(total);
+        if (heroLabel) heroLabel.textContent = 'YOUR TOTAL CRYPTO VALUE (IDR)';
+      }
+    }
+
+    // ── Fear & Greed ─────────────────────────────────────────
+    async function fetchFearGreed() {
+      try {
+        const r = await fetch('https://api.alternative.me/fng/?limit=1');
+        const d = await r.json();
+        const val = parseInt(d.data[0].value);
+        const cls = d.data[0].value_classification;
+        const box = document.getElementById('fearGreedBox');
+        const content = document.getElementById('fearGreedContent');
+        if (!box || !content) return;
+        box.style.display = 'block';
+        let col = val<=25?'#d05a4a':val<=45?'#c87941':val<=55?'#e8800a':val<=75?'#6a9e4a':'#3a9e6a';
+        content.innerHTML =
+          '<div style="display:flex;align-items:center;gap:16px">'
+          +'<div style="width:56px;height:56px;border-radius:50%;border:3px solid '+col+';display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">'
+            +'<div style="font-size:16px;font-weight:700;color:'+col+'">'+val+'</div>'
+            +'<div style="font-size:7px;color:'+col+';letter-spacing:0.5px;">/100</div>'
+          +'</div>'
+          +'<div style="flex:1">'
+            +'<div style="font-size:13px;font-weight:700;color:'+col+';letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">'+cls+'</div>'
+            +'<div style="height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:4px">'
+              +'<div style="height:100%;width:'+val+'%;background:'+col+';border-radius:3px;transition:width 1s ease"></div>'
+            +'</div>'
+            +'<div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text3);letter-spacing:1px">'
+              +'<span>EXTREME FEAR</span><span>NEUTRAL</span><span>EXTREME GREED</span>'
+            +'</div>'
+          +'</div>'
+        +'</div>';
+      } catch(e) { console.error('fetchFearGreed:', e); }
+    }
+
+    // ── Badges ────────────────────────────────────────────────
+    const BADGES = [
+      { icon:'🌱', label:'FIRST SOL',  threshold:0,          color:'#8892a8' },
+      { icon:'💰', label:'Rp 1 JT',    threshold:1000000,    color:'#cd7f32' },
+      { icon:'🚀', label:'Rp 10 JT',   threshold:10000000,   color:'#a0a0a0' },
+      { icon:'💎', label:'Rp 50 JT',   threshold:50000000,   color:'#ffd700' },
+      { icon:'👑', label:'Rp 100 JT',  threshold:100000000,  color:'#00d4ff' },
+      { icon:'🏆', label:'Rp 500 JT',  threshold:500000000,  color:'#e8800a' },
+    ];
+    function renderBadges() {
+      const box = document.getElementById('badgesBox');
+      const content = document.getElementById('badgesContent');
+      if (!box || !content || total <= 0) { if(box) box.style.display='none'; return; }
+      box.style.display = 'block';
+      content.innerHTML = BADGES.map(b => {
+        const unlocked = total >= b.threshold || b.threshold === 0;
+        return '<div class="badge-item">'
+          +'<div class="badge-circle '+(unlocked?'unlocked':'locked')+'" style="'+(unlocked?'border-color:'+b.color+';background:'+b.color+'22':'')+'">'
+            +'<span style="font-size:20px;">'+b.icon+'</span>'
+          +'</div>'
+          +'<div class="badge-lbl '+(unlocked?'unlocked':'locked')+'" style="'+(unlocked?'color:'+b.color:'')+'">'+b.label+'</div>'
+        +'</div>';
+      }).join('');
+    }
+
     // ── Init ────────────────────────────────────────────────
-    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000);
+    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); fetchFearGreed(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000); setInterval(fetchFearGreed,300000);
   </script>
 </body>
 </html>
