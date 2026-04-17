@@ -1454,7 +1454,7 @@
       renderCalendar();
     }
 
-const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
+    function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
     // ── Language ─────────────────────────────────────────
     const lang = 'en';
