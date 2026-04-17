@@ -841,8 +841,14 @@
     let pnlData = [];
     try { pnlData = JSON.parse(localStorage.getItem('cr_pnl') || '[]'); } catch(e) {}
 
+    function resetPnL() {
+      localStorage.removeItem('cr_pnl');
+      pnlData = [];
+      document.getElementById('pnlBox').style.display = 'none';
+    }
+
     function updatePnL(currentTotal) {
-      if (!currentTotal || currentTotal < 500000) return; // skip partial loads
+      if (!currentTotal || currentTotal < 500000) return; // skip partial loads under 500k
       const now = new Date();
       const todayKey = now.toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'});
       const idx = pnlData.findIndex(d => d.date === todayKey);
@@ -850,7 +856,7 @@
         pnlData.push({ date:todayKey, open:currentTotal, close:currentTotal, high:currentTotal, low:currentTotal });
       } else {
         const d = pnlData[idx];
-        // Never change open — only update close/high/low
+        // Never update open — it is locked once set
         d.close = currentTotal; d.high = Math.max(d.high,currentTotal); d.low = Math.min(d.low,currentTotal);
         pnlData[idx] = d;
       }
@@ -882,9 +888,12 @@
           +'</div>';
       });
       box.innerHTML =
-        '<div style="display:flex;justify-content:space-between;margin-bottom:12px">'
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
           +'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L TODAY</div>'
-          +'<div style="font-size:9px;color:var(--text3)">'+today.date+'</div>'
+          +'<div style="display:flex;align-items:center;gap:8px">'
+            +'<div style="font-size:9px;color:var(--text3)">'+today.date+'</div>'
+            +'<button onclick="resetPnL()" style="background:transparent;border:1px solid rgba(208,90,74,0.3);padding:2px 7px;color:var(--red);font-family:\'IBM Plex Mono\',monospace;font-size:9px;cursor:pointer;letter-spacing:1px" title="Reset P&L data">↺</button>'
+          +'</div>'
         +'</div>'
         +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:'+(hist?'12px':'4px')+'">'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">PROFIT/LOSS</div>'
