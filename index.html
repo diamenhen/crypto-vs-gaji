@@ -321,12 +321,13 @@
     <div class="chart-card" id="chartCard" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="sec-l" style="margin-bottom:0;flex:1">PORTFOLIO VALUE</div>
-        <div style="display:flex;gap:2px">
+        <div style="display:flex;gap:2px;align-items:center">
           <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
           <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
           <button onclick="setTf('1D')" id="tf1D" class="tf-btn tf-active">1D</button>
           <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
           <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
+          <button onclick="resetChartData()" class="tf-btn" style="margin-left:6px;border-color:rgba(208,90,74,0.3);color:var(--red)" title="Clear chart history">↺</button>
         </div>
       </div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
@@ -464,7 +465,7 @@
 
     // ── 3. Portfolio History Chart ──────────────────────────
     let currentTf = '1D';
-    let _lastChartRecord = 0;
+    let _lastChartTs = 0;
 
     function setTf(tf) {
       currentTf = tf;
@@ -474,22 +475,27 @@
       renderChart();
     }
 
+    function resetChartData() {
+      localStorage.removeItem('cr_history');
+      _lastChartTs = 0;
+      if (portfolioChart) { portfolioChart.destroy(); portfolioChart = null; }
+      document.getElementById('chartCard').style.display = 'none';
+    }
+
     function updateChart(val) {
-      // Only record if value is meaningful (>100k IDR) and throttle to once per 5 min
+      if (!val || val < 500000) return; // skip values under 500k (partial loads)
       const now = Date.now();
-      if (val < 100000) return;
-      if (now - _lastChartRecord < 300000) {
-        // Still show chart with existing data even if not recording
-        document.getElementById('chartCard').style.display = 'block';
+      // Throttle: only record once per 5 minutes
+      if (now - _lastChartTs < 300000) {
         renderChart(); return;
       }
-      _lastChartRecord = now;
+      _lastChartTs = now;
       const key = 'cr_history'; let history = [];
       try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
-      // Migrate old format
-      history = history.map((h,i) => h.ts ? h : { ts: now - ((history.length-i)*300000), v: h.v });
+      // Drop old malformed data (no ts field)
+      history = history.filter(h => h.ts && h.v > 500000);
       history.push({ ts: now, v: val });
-      if (history.length > 8640) history = history.slice(-8640); // 30 days @ 5min
+      if (history.length > 8640) history = history.slice(-8640);
       try { localStorage.setItem(key, JSON.stringify(history)); } catch(e) {}
       document.getElementById('chartCard').style.display = 'block';
       renderChart();
@@ -498,16 +504,16 @@
     function renderChart() {
       const key = 'cr_history'; let history = [];
       try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
-      const now = Date.now();
-      history = history.map((h,i) => h.ts ? h : { ts: now - ((history.length-i)*300000), v: h.v });
+      history = history.filter(h => h.ts && h.v > 500000);
       if (history.length < 2) return;
+      document.getElementById('chartCard').style.display = 'block';
 
+      const now = Date.now();
       const tfMs = { '1H':3600000, '4H':14400000, '1D':86400000, '7D':604800000, '30D':2592000000 };
       const cutoff = now - (tfMs[currentTf] || 86400000);
       let display = history.filter(h => h.ts >= cutoff);
       if (display.length < 2) display = history.slice(-20);
 
-      // Downsample max 80 pts
       let sampled = display;
       if (display.length > 80) {
         const step = Math.floor(display.length / 80);
@@ -685,7 +691,7 @@
         renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updatePnL(total);
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
         refreshDisplay(); updatePnL(total); renderFact(window._solBalance||0);
-        updateChart(total); // record final total after all tokens loaded
+        updateChart(total);
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -929,7 +935,7 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => { const days=(hours/8).toFixed(1); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
+        insight: (sol,total,hours) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days</strong> of work as a Senior SE at GoTo. 🚀'; },
         modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
         cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
       },
@@ -951,7 +957,7 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL to:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => { const days=(hours/8).toFixed(1); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
+        insight: (sol,total,hours) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days</strong> of work as a Senior SE at GoTo. 🚀'; },
         modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
         cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
         jobs: JOBS_EN,
