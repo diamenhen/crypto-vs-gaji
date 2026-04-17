@@ -575,7 +575,14 @@
 
       let display;
       if (currentTf === 'ALL') {
-        display = history; // show everything
+        display = [...history];
+        // Always add current value as latest point if total is available
+        if (total > 500000) {
+          const last = display[display.length-1];
+          if (!last || Math.abs(last.v - total) > 10000) {
+            display.push({ ts: Date.now(), v: total });
+          }
+        }
       } else {
         const cutoff = now - (tfMs[currentTf] || 86400000);
         display = history.filter(h => h.ts >= cutoff);
@@ -1138,6 +1145,9 @@
         localStorage.setItem('cr_initial_data', JSON.stringify(cacheData));
 
         renderAllTimePnL(total);
+        // Switch chart to ALL view to show exponential growth
+        setTf('ALL');
+        document.getElementById('chartCard').style.display = 'block';
       } catch(e) {
         console.error('fetchInitialValue:', e);
         content.innerHTML = '<div style="font-size:10px;color:var(--red)">Error: '+e.message+'<br><span style="color:var(--text3)">Try again or check console</span></div>';
