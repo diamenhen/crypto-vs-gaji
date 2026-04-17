@@ -459,7 +459,11 @@
       const display = history.slice(-7);
       if (portfolioChart) portfolioChart.destroy();
       const ctx=document.getElementById('portfolioChart').getContext('2d');
-      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>h.t),datasets:[{data:display.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{min:0,ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+      const vals = display.map(h=>h.v);
+      const minVal = Math.min(...vals);
+      const maxVal = Math.max(...vals);
+      const pad = (maxVal - minVal) * 0.2 || maxVal * 0.05;
+      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>h.t),datasets:[{data:vals,borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{min:Math.max(0,minVal-pad),max:maxVal+pad,ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}}}); 
     }
 
     // ── 4. Retire Calculator ────────────────────────────────
@@ -841,7 +845,7 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours of work</strong> as a Senior SE at GoTo. 🚀',
+        insight: (sol,total,hours) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
         modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
         cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
       },
@@ -863,7 +867,7 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL to:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours of work</strong> as a Senior SE at GoTo. 🚀',
+        insight: (sol,total,hours) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
         modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
         cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
         jobs: JOBS_EN,
