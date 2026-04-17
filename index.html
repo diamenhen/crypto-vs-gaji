@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -238,7 +238,7 @@
   <div class="overlay" id="overlay" style="display:none" onclick="if(event.target===this)closeModal()">
     <div class="modal">
       <div class="modal-title">Select Wallet</div>
-      <div class="modal-sub">Wallet yang terinstall di browser kamu</div>
+      <div class="modal-sub">Wallets installed in your browser</div>
       <div id="wList"></div>
       <button class="modal-cancel" onclick="closeModal()">Cancel</button>
     </div>
@@ -263,8 +263,8 @@
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
-      <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">memuat...</div><div class="tick-chg" id="tChgI">--</div></div>
-      <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd">memuat...</div><div class="tick-chg" id="tChgU">--</div></div>
+      <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">loading...</div><div class="tick-chg" id="tChgI">--</div></div>
+      <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd">loading...</div><div class="tick-chg" id="tChgU">--</div></div>
       <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg up" id="tUsdIdrChg">+0.00%</div></div>
     </div>
 
@@ -301,10 +301,10 @@
     <div class="hero">
       <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
       <div class="hero-v" id="heroV">Rp 0</div>
-      <div class="hero-s" id="heroS">Connect wallet untuk melihat perbandingan realtime</div>
+      <div class="hero-s" id="heroS">Connect wallet to see realtime comparison</div>
       <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        Share ke X/Twitter
+        Share to X/Twitter
       </button>
     </div>
 
@@ -343,7 +343,7 @@
         <div>
           <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">SOLANA (SOL)</div>
           <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
-            <span id="donateAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('sol')" title="Klik untuk copy">5u7ng...JgA</span>
+            <span id="donateAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('sol')" title="Click to copy">5u7ng...JgA</span>
           </div>
         </div>
         <button onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY SOL</button>
@@ -352,7 +352,7 @@
         <div>
           <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">EVM (ETH/BSC/POLYGON)</div>
           <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
-            <span id="donateEvmAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('evm')" title="Klik untuk copy">0x1503...3E3a</span>
+            <span id="donateEvmAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('evm')" title="Click to copy">0x1503...3E3a</span>
           </div>
         </div>
         <button onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY EVM</button>
@@ -373,11 +373,11 @@
       return 'Rp '+n.toLocaleString('id-ID');
     }
     function fd(d) {
-      if (d<1) { const j=Math.ceil(d*24); return j<1?'<1 jam':j+' jam'; }
+      if (d<1) { const j=Math.ceil(d*24); return j<1?'<1 hr':j+' hr'; }
       d=Math.ceil(d);
-      if (d>=365){ const y=Math.floor(d/365),m=Math.floor((d%365)/30); return y+'thn'+(m?' '+m+'bln':''); }
-      if (d>=30) { const m=Math.floor(d/30),r=d%30; return m+'bln'+(r?' '+r+'hr':''); }
-      return d+' hari';
+      if (d>=365){ const y=Math.floor(d/365),m=Math.floor((d%365)/30); return y+'yr'+(m?' '+m+'mo':''); }
+      if (d>=30) { const m=Math.floor(d/30),r=d%30; return m+'mo'+(r?' '+r+'d':''); }
+      return d+' days';
     }
 
     const JOBS=[
@@ -409,7 +409,7 @@
     function shareTwitter() {
       if (total<=0) return;
       const days = Math.ceil(total/(JOBS[0].salary/30));
-      const text = 'My crypto is worth '+fi(total)+' = '+fd(days)+' work as CEO \uD83D\uDE80\n\nCek portfolio SOL kamu:\nhttps://crypto-vs-gaji.vercel.app\n\n#CryptoRetire #Solana';
+      const text = 'My crypto is worth '+fi(total)+' = '+fd(days)+' work as CEO \uD83D\uDE80\n\nCheck your SOL portfolio:\nhttps://crypto-vs-gaji.vercel.app\n\n#CryptoRetire #Solana';
       window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text),'_blank');
     }
 
@@ -468,21 +468,21 @@
       const returnRate=parseFloat(document.getElementById('retireReturn').value)/100||0.1;
       const monthlySaving=parseFloat(document.getElementById('retireSaving').value)||0;
       const currentVal=parseFloat(document.getElementById('retireCurrent').value)||total||0;
-      if (!targetMonthly) { document.getElementById('retireResult').textContent='-- tahun'; document.getElementById('retireSub').textContent='Isi target passive income per bulan'; return; }
+      if (!targetMonthly) { document.getElementById('retireResult').textContent='-- years'; document.getElementById('retireSub').textContent='Enter target passive income per month'; return; }
       const targetPortfolio=targetMonthly/(returnRate/12);
       const monthlyReturn=returnRate/12;
       let months=0, portfolio=currentVal;
       if (portfolio>=targetPortfolio) {
-        document.getElementById('retireResult').textContent='SEKARANG! \uD83C\uDF89';
-        document.getElementById('retireSub').textContent='Portfolio sudah cukup untuk retire!';
-        document.getElementById('retireDetail').textContent='Target: '+fi(targetPortfolio)+' \xB7 Kamu: '+fi(portfolio);
+        document.getElementById('retireResult').textContent='NOW! \uD83C\uDF89';
+        document.getElementById('retireSub').textContent='Portfolio is enough to retire!';
+        document.getElementById('retireDetail').textContent='Target: '+fi(targetPortfolio)+' \xB7 You: '+fi(portfolio);
         return;
       }
       while (portfolio<targetPortfolio && months<1200) { portfolio=portfolio*(1+monthlyReturn)+monthlySaving; months++; }
       const years=Math.floor(months/12), remMo=months%12;
-      document.getElementById('retireResult').textContent=years>0?years+' tahun'+(remMo>0?' '+remMo+' bulan':''):remMo+' bulan';
-      document.getElementById('retireSub').textContent='Estimasi waktu retire dari crypto';
-      document.getElementById('retireDetail').textContent='Target portfolio: '+fi(targetPortfolio)+' \xB7 Passive income: '+fi(targetMonthly)+'/bln';
+      document.getElementById('retireResult').textContent=years>0?years+' yr'+(remMo>0?' '+remMo+' mo':''):remMo+' mo';
+      document.getElementById('retireSub').textContent='Estimated time to retire from crypto';
+      document.getElementById('retireDetail').textContent='Target portfolio: '+fi(targetPortfolio)+' \xB7 Passive income: '+fi(targetMonthly)+'/mo';
     }
 
     // ── Price ───────────────────────────────────────────────
@@ -695,7 +695,7 @@
         div.innerHTML='<div style="width:100%;text-align:center">'
           +(t.usd===60000 ? '<div style="margin-bottom:8px"><img src="https://flagcdn.com/w40/id.png" width="36" height="24" style="border-radius:3px" alt="Indonesia"></div>' : '<div style="font-size:26px;margin-bottom:8px">'+t.icon+'</div>')
           +'<div style="font-size:14px;font-weight:700;color:'+C+';margin-bottom:4px">'+t.label+'</div>'
-          +(reached?'<div style="font-size:10px;background:'+C+'22;color:'+C+';border:1px solid '+C+'44;border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px">TERCAPAI ✓</div>':'')
+          +(reached?'<div style="font-size:10px;background:'+C+'22;color:'+C+';border:1px solid '+C+'44;border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px">ACHIEVED ✓</div>':'')
           +'<div style="font-size:10px;color:'+C+';margin-bottom:12px;line-height:1.5">'+t.desc+'</div>'
           +'<div style="font-size:22px;font-weight:700;color:'+C+';margin-bottom:4px">'+pct.toFixed(1)+'%</div>'
           +'<div class="bw" style="margin-bottom:8px"><div class="bf" id="tb'+t.usd+'" style="width:0%;background:'+C+'"></div></div>'
@@ -703,7 +703,7 @@
             +'<span style="color:'+C+'">You: <span style="font-weight:700">'+fi(myIDR)+'</span></span>'
             +'<span style="color:'+C+'">Target: <span style="font-weight:700">'+fi(targetIDR)+'</span></span>'
           +'</div>'
-          +'<div style="font-size:11px;">'+(reached?'<span style="color:'+C+'">'+'🎉'+' Reached!</span>':'<span style="color:'+RED+'">Kurang: <span style="font-weight:700">'+fi(remaining)+'</span></span>')+'</div>'
+          +'<div style="font-size:11px;">'+(reached?'<span style="color:'+C+'">'+'🎉'+' Reached!</span>':'<span style="color:'+RED+'">Short: <span style="font-weight:700">'+fi(remaining)+'</span></span>')+'</div>'
           +'</div>';
         box.appendChild(div); setTimeout(()=>{const b=document.getElementById('tb'+t.usd);if(b)b.style.width=pct+'%';},200);
       });
@@ -717,15 +717,15 @@
         const days=total>0?total/perHari:null, uid='b'+job.pct;
         const div=document.createElement('div'); div.className='job';
         div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid">'
-          +'<div><div class="jnl">PER DETIK</div><div class="jnv">'+fi(perDetik)+'</div></div>'
-          +'<div><div class="jnl">PER JAM</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
-          +'<div><div class="jnl">PER HARI</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
-          +'<div><div class="jnl">PER MINGGU</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
-          +'<div><div class="jnl">PER BULAN</div><div class="jnv">'+fi(perBulan)+'</div></div>'
-          +'<div><div class="jnl">PER TAHUN</div><div class="jnv">'+fi(perTahun)+'</div></div>'
-          +'<div><div class="jnl">35 TAHUN</div><div class="jnv">'+fi(per35thn)+'</div></div>'
+          +'<div><div class="jnl">PER SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
+          +'<div><div class="jnl">PER HOUR</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
+          +'<div><div class="jnl">PER DAY</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
+          +'<div><div class="jnl">PER WEEK</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
+          +'<div><div class="jnl">PER MONTH</div><div class="jnv">'+fi(perBulan)+'</div></div>'
+          +'<div><div class="jnl">PER YEAR</div><div class="jnv">'+fi(perTahun)+'</div></div>'
+          +'<div><div class="jnl">35 YEARS</div><div class="jnv">'+fi(per35thn)+'</div></div>'
           +'</div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div>'
-          +'<div class="jr"><div class="jrl">HARUS KERJA</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
+          +'<div class="jr"><div class="jrl">MUST WORK</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
           +'<div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' '+L.blnGaji:L.hubungkan)+'</div></div>';
         box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
       });
@@ -799,22 +799,22 @@
       });
       box.innerHTML =
         '<div style="display:flex;justify-content:space-between;margin-bottom:12px">'
-          +'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L HARI INI</div>'
+          +'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L TODAY</div>'
           +'<div style="font-size:9px;color:var(--text3)">'+today.date+'</div>'
         +'</div>'
         +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:'+(hist?'12px':'4px')+'">'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">PROFIT/LOSS</div>'
             +'<div style="font-size:16px;font-weight:700;color:'+col+'">'+sgn+fi(pl)+'</div>'
             +'<div style="font-size:10px;color:'+col+'">'+sgn+pct.toFixed(2)+'%</div></div>'
-          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">SEKARANG</div>'
+          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">CURRENT</div>'
             +'<div style="font-size:16px;font-weight:700;color:var(--text)">'+fi(cur)+'</div></div>'
-          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">OPEN HARI INI</div>'
+          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">OPEN TODAY</div>'
             +'<div style="font-size:16px;font-weight:700;color:var(--text2)">'+fi(today.open)+'</div></div>'
         +'</div>'
-        +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px">HISTORY 7 HARI</div>'+hist:'');
+        +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px">7-DAY HISTORY</div>'+hist:'');
     }
 
-    function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('id-ID',{hour12:false})+' WIB';}
+    function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
     // ── Language ─────────────────────────────────────────
     const lang = 'en';
