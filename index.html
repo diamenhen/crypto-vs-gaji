@@ -1100,7 +1100,24 @@
         });
         const hours = Math.ceil(total / (bestJob.salary / 30 / 24));
         const totalSOL = parseFloat(sol) || parseFloat(document.getElementById('wSol')?.textContent) || 0;
-        document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours, bestJob);
+
+        // PnL insight
+        let pnlInsight = '';
+        if (pnlData.length >= 1) {
+          const today = pnlData[pnlData.length-1];
+          const prev  = pnlData.length > 1 ? pnlData[pnlData.length-2] : null;
+          const pl    = prev ? total - prev.close : total - today.open;
+          const pct   = prev && prev.close > 0 ? (pl/prev.close*100) : (today.open > 0 ? (pl/today.open*100) : 0);
+          if (Math.abs(pl) > 0) {
+            const up = pl >= 0;
+            const col = up ? 'var(--green)' : '#d05a4a';
+            const sign = up ? '+' : '';
+            pnlInsight = '<br><br>📊 Today\'s P&L: <strong style="color:'+col+'">'+sign+fi(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>) — '
+              + (up ? 'you\'re up today! 🚀' : 'down today, stay strong 💪');
+          }
+        }
+
+        document.getElementById('factTxt').innerHTML = pnlInsight ? pnlInsight + '<br><br>' + L.insight(totalSOL, total, hours, bestJob) : L.insight(totalSOL, total, hours, bestJob);
       } catch(e) { console.error('renderFact error:', e); }
     }
 
