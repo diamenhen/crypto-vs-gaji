@@ -186,7 +186,7 @@
     }
     .job:hover { border-color:var(--bdr2); background:var(--bg3); }
     .jl { flex:1; min-width:0; }
-    .jt { font-size:12px; font-weight:700; margin-bottom:2px; color:var(--text); letter-spacing:0.3px; text-transform:uppercase; }
+    .jt { font-size:12px; font-weight:700; margin-bottom:2px; color:var(--accent); letter-spacing:0.3px; text-transform:uppercase; }
     .jc { font-size:10px; color:var(--text); margin-bottom:10px; }
     .jgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px 14px; margin-bottom:4px; }
     @media(max-width:600px){ .jgrid{grid-template-columns:repeat(2,1fr);} }
@@ -717,16 +717,16 @@
         const days=total>0?total/perHari:null, uid='b'+job.pct;
         const div=document.createElement('div'); div.className='job';
         div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid">'
-          +'<div><div class="jnl">PER SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
-          +'<div><div class="jnl">PER HOUR</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
-          +'<div><div class="jnl">PER DAY</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
-          +'<div><div class="jnl">PER WEEK</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
-          +'<div><div class="jnl">PER MONTH</div><div class="jnv">'+fi(perBulan)+'</div></div>'
-          +'<div><div class="jnl">PER YEAR</div><div class="jnv">'+fi(perTahun)+'</div></div>'
+          +'<div><div class="jnl">SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
+          +'<div><div class="jnl">HOUR</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
+          +'<div><div class="jnl">DAY</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
+          +'<div><div class="jnl">WEEK</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
+          +'<div><div class="jnl">MONTH</div><div class="jnv">'+fi(perBulan)+'</div></div>'
+          +'<div><div class="jnl">YEAR</div><div class="jnv">'+fi(perTahun)+'</div></div>'
           +'<div><div class="jnl">35 YEARS</div><div class="jnv">'+fi(per35thn)+'</div></div>'
           +'</div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div>'
           +'<div class="jr"><div class="jrl">MUST WORK</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
-          +'<div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' '+L.blnGaji:L.hubungkan)+'</div></div>';
+          +'</div>';
         box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
       });
     }
