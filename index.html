@@ -750,12 +750,7 @@
       document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours);
     }
 
-    // ── Translations ────────────────────────────────────────
-    let lang='id';
-    const T={
-      id:{subtitle:'IDR REALTIME TRACKER',connectLabel:'HUBUNGKAN DOMPET',connectBtn:'Hubungkan Dompet',heroLabel:'TOTAL NILAI CRYPTO KAMU (IDR)',heroSub:'Hubungkan dompet untuk melihat perbandingan realtime',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'hubungkan dompet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+fd(days)+' kerja</strong> seorang SE Senior di GoTo. 🚀',footer:'DATA GAJI ESTIMASI MARKET INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 DETIK',pilihWallet:'Pilih Wallet',walletSub:'Wallet yang terinstall di browser kamu',batal:'Batal'},
-      en:{subtitle:'IDR REALTIME TRACKER',connectLabel:'HUBUNGKAN DOMPET',connectBtn:'Hubungkan Dompet',heroLabel:'YOUR TOTAL CRYPTO VALUE (IDR)',heroSub:'Connect wallet to see realtime comparison',secLabel:'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',harusKerja:'HARUS KERJA',perDetik:'PER DETIK',perJam:'PER JAM',perHari:'PER HARI',perMinggu:'PER MINGGU',perBulan:'PER BULAN',perTahun:'PER TAHUN',per35thn:'35 TAHUN',connectWallet:'hubungkan dompet',blnGaji:'bln gaji',insightText:(sol,total,days)=>'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+fd(days)+' kerja</strong> as Senior SE at GoTo. 🚀',footer:'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',pilihWallet:'Pilih Dompet',walletSub:'Dompet yang terinstall di browser',batal:'Batal'}
-    };
+    // T object removed - using LABELS instead
 
     function copyDonate(type) {
       const SOL_ADDR = '5u7ngES9qymhkQqVRPWYoBfXGSrEjveM2EZcWuRwcJgA';
