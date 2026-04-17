@@ -840,7 +840,15 @@
         refreshDisplay();
         renderJobs(); renderFact(sol); renderTargets(); calcRetire();
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
-        refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank(); renderFact(sol);
+        // After fetchLockedTokens, total is updated — refresh everything with latest total
+        document.getElementById('heroV').textContent = fi(total);
+        document.getElementById('wSolV').textContent = fi(total);
+        document.getElementById('wIdr').textContent  = fi(total);
+        document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
+        document.getElementById('retireCurrent').value = Math.round(total);
+        updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank();
+        renderJobs(); renderTargets(); calcRetire();
+        renderFact(parseFloat(document.getElementById('wSol').textContent) || sol);
         // Auto-fetch initial value from on-chain — use cache if already synced
         const cached = localStorage.getItem('cr_initial_data');
         if (!cached) { fetchInitialValue(); } // first time: fetch automatically
