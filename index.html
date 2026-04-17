@@ -264,7 +264,7 @@
       </div>
       <div class="header-right">
         <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
-        <div class="live-badge"><div class="live-dot"></div>LANGSUNG</div>
+        <div class="live-badge" id="liveBadge"><div class="live-dot"></div><span id="liveTxt">LANGSUNG</span></div>
       </div>
     </header>
 
@@ -348,15 +348,16 @@
     </div>
 
     <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-top:16px;margin-bottom:6px">
-      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:10px">DUKUNG CRYPTORETIRE</div>
+      <div id="donateTitleEl" style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:10px">DUKUNG CRYPTORETIRE</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
         <div>
           <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">SOLANA (SOL)</div>
           <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
+            <span id="donateSubSolEl" style="color:var(--text3);margin-right:4px">Kirim SOL:</span>
             <span id="donateAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('sol')" title="Klik untuk copy">5u7ng...JgA</span>
           </div>
         </div>
-        <button onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN SOL</button>
+        <button id="copyBtnSol" onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN SOL</button>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--bdr)">
         <div>
@@ -365,7 +366,7 @@
             <span id="donateEvmAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('evm')" title="Klik untuk copy">0x1503...3E3a</span>
           </div>
         </div>
-        <button onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN EVM</button>
+        <button id="copyBtnEvm" onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN EVM</button>
       </div>
     </div>
     <footer id="footerEl">DATA GAJI ESTIMASI PASAR INDONESIA 2024 &middot; HARGA SOL VIA BINANCE API &middot; PERBARUI 30 DETIK</footer>
@@ -888,28 +889,85 @@
 
     function applyLang() {
       const L = LABELS[lang];
-      // Header
+
+      // ── Wallet card ──────────────────────────────────────
       document.querySelector('.c-label').textContent = L.connectWallet;
       document.getElementById('btnConn').innerHTML = '<div class="btn-cw-icon">&#9678;</div> ' + L.connectBtn;
+      const dcBtn = document.querySelector('.btn-dc');
+      if (dcBtn) dcBtn.textContent = L.disconnect;
+
+      // ── Wallet info labels ────────────────────────────────
+      const wiLabels = document.querySelectorAll('.wi-l');
+      const wiKeys = ['SOL','NILAI IDR', L.network, ''];
+      // target NETWORK label specifically
+      wiLabels.forEach(el => {
+        if (el.textContent === 'JARINGAN' || el.textContent === 'NETWORK') el.textContent = L.network;
+      });
+
+      // ── Modal ─────────────────────────────────────────────
       document.querySelector('.modal-title').textContent = L.modalTitle;
       document.querySelector('.modal-sub').textContent = L.modalSub;
       document.querySelector('.modal-cancel').textContent = L.cancel;
-      // Hero
+      // Update wallet detected/not installed badges
+      document.querySelectorAll('.detected').forEach(el => el.textContent = L.detected);
+      document.querySelectorAll('.install').forEach(el => el.textContent = L.notInstalled);
+
+      // ── Hero ──────────────────────────────────────────────
       document.querySelector('.hero-l').textContent = L.heroLabel;
       if (total <= 0) document.getElementById('heroS').textContent = L.heroSub;
-      document.getElementById('btnShare').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> ' + L.share;
-      // Sections
+      const btnShare = document.getElementById('btnShare');
+      if (btnShare) btnShare.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> ' + L.share;
+
+      // ── Status bar ────────────────────────────────────────
+      const perbarui = document.querySelector('.status-bar');
+      if (perbarui) {
+        const spans = perbarui.querySelectorAll('span:not(#clockEl)');
+        if (lang === 'id') {
+          perbarui.innerHTML = 'SIS:<span>AKTIF</span> &nbsp; JAR:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; PERBARUI:<span>30D</span><span id="clockEl"></span>';
+        } else {
+          perbarui.innerHTML = 'SYS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; REFRESH:<span>30S</span><span id="clockEl"></span>';
+        }
+        updateClock();
+      }
+
+      // ── Sections labels ───────────────────────────────────
       const secLabelJobs = document.getElementById('secLabelJobs');
       if (secLabelJobs) secLabelJobs.textContent = L.jobsTitle;
-      // Chart
-      const chartTitle = document.querySelector('#chartCard .sec-l');
-      if (chartTitle) chartTitle.textContent = L.chartTitle;
-      // Target
-      const targetTitle = document.querySelector('#targetBox')?.previousElementSibling;
-      // Footer
+
+      // Target kekayaan label
+      const allSecL = document.querySelectorAll('.sec-l');
+      allSecL.forEach(el => {
+        if (el.textContent.includes('TARGET') || el.textContent.includes('KEKAYAAN') || el.textContent.includes('WEALTH')) {
+          el.textContent = L.targetTitle;
+        }
+        if (el.textContent.includes('RIWAYAT') || el.textContent.includes('HISTORY') || el.textContent.includes('PORTFOLIO')) {
+          el.textContent = L.chartTitle;
+        }
+      });
+
+      // ── PnL box ───────────────────────────────────────────
+      const pnlBox = document.getElementById('pnlBox');
+      if (pnlBox && pnlBox.style.display !== 'none') {
+        const pnlTitleEl = pnlBox.querySelector('div:first-child div:first-child');
+        if (pnlTitleEl) pnlTitleEl.textContent = L.pnlTitle;
+      }
+
+      // ── Donation box ──────────────────────────────────────
+      const donateTitleEl = document.getElementById('donateTitleEl');
+      if (donateTitleEl) donateTitleEl.textContent = L.donateTitle;
+      const donateSubSolEl = document.getElementById('donateSubSolEl');
+      if (donateSubSolEl) donateSubSolEl.textContent = L.donateSub;
+      const copyBtnSol = document.getElementById('copyBtnSol');
+      if (copyBtnSol) copyBtnSol.textContent = lang === 'id' ? 'SALIN SOL' : 'COPY SOL';
+      const copyBtnEvm = document.getElementById('copyBtnEvm');
+      if (copyBtnEvm) copyBtnEvm.textContent = lang === 'id' ? 'SALIN EVM' : 'COPY EVM';
+
+      // ── Live badge ────────────────────────────────────────
+      const liveTxt = document.getElementById('liveTxt');
+      if (liveTxt) liveTxt.textContent = lang === 'id' ? 'LANGSUNG' : 'LIVE';
+
+      // ── Footer ────────────────────────────────────────────
       document.getElementById('footerEl').innerHTML = L.footer;
-      // Donation
-      const donateTitle = document.querySelector('[style*="DUKUNG"]');
     }
 
     // ── Init ────────────────────────────────────────────────
