@@ -463,6 +463,10 @@
       <div id="badgesContent" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
     </div>
 
+    <div id="streakBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--accent);padding:14px 16px;margin-bottom:8px">
+      <div id="streakContent"></div>
+    </div>
+
     <div id="pnlCalendarBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L CALENDAR</div>
@@ -906,6 +910,7 @@
       document.getElementById('onboardBox').style.display='block';
       document.getElementById('demoWatermark').style.display='block';
       document.getElementById('badgesBox').style.display='none';
+      document.getElementById('streakBox').style.display='none';
       document.getElementById('pnlBox').style.display='none';
       document.getElementById('pnlCalendarBox').style.display='none';
       renderJobs(); renderTargets(); calcRetire();
@@ -965,7 +970,7 @@
         document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         document.getElementById('retireCurrent').value = Math.round(total);
         updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank();
-        renderJobs(); renderTargets(); calcRetire(); renderBadges(); updateCurrencyDisplay();
+        renderJobs(); renderTargets(); calcRetire(); renderBadges(); renderStreak(); updateCurrencyDisplay();
         renderFact(parseFloat(document.getElementById('wSol').textContent) || sol);
         // Auto-fetch initial value from on-chain — use cache if already synced
         const cached = localStorage.getItem('cr_initial_data');
@@ -1050,7 +1055,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL); renderBadges(); updateCurrencyDisplay();
+          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL); renderBadges(); renderStreak(); updateCurrencyDisplay();
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -1276,6 +1281,7 @@
       try { localStorage.setItem('cr_pnl', JSON.stringify(pnlData)); } catch(e) {}
       renderPnL(currentTotal);
       renderCalendar();
+      renderStreak();
     }
 
     function renderPnL(cur) {
@@ -1598,6 +1604,59 @@
     };
 
 
+
+    // ── Profit Streak ────────────────────────────────────────
+    function renderStreak() {
+      const box = document.getElementById('streakBox');
+      const content = document.getElementById('streakContent');
+      if (!box || !content || pnlData.length === 0) { if(box) box.style.display='none'; return; }
+
+      // Calculate current streak and best streak from pnlData
+      let currentStreak = 0, bestStreak = 0, tempStreak = 0;
+      const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
+
+      sorted.forEach((d, i) => {
+        const pl = d.close - d.open;
+        if (pl > 0) {
+          tempStreak++;
+          if (tempStreak > bestStreak) bestStreak = tempStreak;
+        } else {
+          tempStreak = 0;
+        }
+        if (i === sorted.length - 1) currentStreak = pl > 0 ? tempStreak : 0;
+      });
+
+      if (currentStreak === 0 && bestStreak === 0) { box.style.display='none'; return; }
+      box.style.display = 'block';
+
+      // Last 7 days bar chart
+      const last7 = sorted.slice(-7);
+      const bars = last7.map(d => {
+        const pl = d.close - d.open;
+        const col = pl >= 0 ? '#3a9e6a' : '#d05a4a';
+        const h = Math.min(32, Math.max(4, Math.abs(pl) / (Math.max(...last7.map(x => Math.abs(x.close - x.open))) || 1) * 32));
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <div style="width:14px;height:${h}px;background:${col};border-radius:1px;"></div>
+        </div>`;
+      }).join('');
+
+      const fireEmoji = currentStreak >= 7 ? '🔥🔥' : currentStreak >= 3 ? '🔥' : '📈';
+      const streakColor = currentStreak >= 7 ? '#ffd700' : currentStreak >= 3 ? '#e8800a' : '#3a9e6a';
+
+      content.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px">'
+          + '<div>'
+            + '<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">PROFIT STREAK</div>'
+            + '<div style="display:flex;align-items:baseline;gap:6px;">'
+              + '<span style="font-size:36px;font-weight:700;color:'+streakColor+';line-height:1;">'+currentStreak+'</span>'
+              + '<span style="font-size:11px;color:var(--text2);">days</span>'
+              + '<span style="font-size:20px;margin-left:4px;">'+fireEmoji+'</span>'
+            + '</div>'
+            + '<div style="font-size:9px;color:var(--text3);margin-top:4px;">Best: <span style="color:var(--text2);">'+bestStreak+' days</span></div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:flex-end;gap:3px;height:36px;">' + bars + '</div>'
+        + '</div>';
+    }
 
     // ── Currency Toggle ──────────────────────────────────────
     let currencyMode = 'IDR';
