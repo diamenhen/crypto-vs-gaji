@@ -824,46 +824,56 @@
     }
 
     async function fetchPrice() {
+      // Fetch SOL price first (critical)
       try {
-        const [rSol,rBtc,rEth,rBnb] = await Promise.all([
-          fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT'),
-          fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
-          fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT'),
-          fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT'),
-        ]);
-        const [dSol,dBtc,dEth,dBnb] = await Promise.all([rSol.json(),rBtc.json(),rEth.json(),rBnb.json()]);
-        if (!dSol.price) throw new Error('no price');
-        solUSD=parseFloat(dSol.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+        const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
+        const d=await r.json();
+        if (!d.price) throw new Error('no price');
+        solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
         document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
         document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
         document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
         document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
-        if (dBtc.price) { const p=parseFloat(dBtc.price); document.getElementById('tBtc').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
-        if (dEth.price) { const p=parseFloat(dEth.price); document.getElementById('tEth').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
-        if (dBnb.price) { const p=parseFloat(dBnb.price); document.getElementById('tBnb').textContent='$'+p.toFixed(2); document.getElementById('tBnbChg').textContent='realtime'; document.getElementById('tBnbChg').className='tick-chg up'; }
         const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
-        return;
-      } catch(e) {}
-      try {
-        const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-        const d=await r.json();
-        if (!d.solana?.usd) throw new Error('no price');
-        solUSD=d.solana.usd; solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
-        document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
-        document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
-        document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
-        document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
-        if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
-        return;
-      } catch(e) {}
-      if (!solIDR) {
-        solIDR=2850000; solUSD=174.85;
-        document.getElementById('tIdr').textContent='Rp 2.850.000*';
-        document.getElementById('tUsd').textContent='$174.85*';
-        const eb=document.getElementById('errBanner');
-        if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
+      } catch(e) {
+        // SOL fallback: CoinGecko
+        try {
+          const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+          const d=await r.json();
+          if (d.solana?.usd) {
+            solUSD=d.solana.usd; solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+            document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
+            document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
+            document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
+            document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
+            if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
+          }
+        } catch(e2) {
+          if (!solIDR) {
+            solIDR=2850000; solUSD=174.85;
+            document.getElementById('tIdr').textContent='Rp 2.850.000*';
+            document.getElementById('tUsd').textContent='$174.85*';
+            const eb=document.getElementById('errBanner');
+            if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
+          }
+        }
       }
+      // Fetch BTC, ETH, BNB independently — failures don't affect SOL
+      ['BTC','ETH','BNB'].forEach(async sym => {
+        try {
+          const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+sym+'USDT');
+          const d=await r.json();
+          if (!d.price) return;
+          const p=parseFloat(d.price);
+          const id = sym==='BTC'?'tBtc':sym==='ETH'?'tEth':'tBnb';
+          const idChg = sym==='BTC'?'tBtcChg':sym==='ETH'?'tEthChg':'tBnbChg';
+          const val = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
+          document.getElementById(id).textContent=val;
+          document.getElementById(idChg).textContent='realtime';
+          document.getElementById(idChg).className='tick-chg up';
+        } catch(e) {}
+      });
     }
 
     // ── Wallet ──────────────────────────────────────────────
