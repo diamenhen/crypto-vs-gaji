@@ -345,6 +345,21 @@
 
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
 
+    <div id="atplBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">ALL TIME P&amp;L</div>
+        <button onclick="editInitial()" style="background:transparent;border:1px solid var(--bdr2);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px">EDIT</button>
+      </div>
+      <div id="atplContent"></div>
+      <div id="atplInput" style="display:none;margin-top:10px">
+        <div style="font-size:9px;color:var(--text3);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase">Initial wallet value (IDR)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="initialInput" type="number" placeholder="e.g. 400000" style="background:var(--bg3);border:1px solid var(--bdr);padding:6px 10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;flex:1">
+          <button onclick="saveInitial()" style="background:var(--accent);border:none;padding:6px 14px;color:#1a1a0a;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase">SAVE</button>
+        </div>
+      </div>
+    </div>
+
     <div class="chart-card" id="chartCard" style="display:none">
       <div class="sec-l" style="margin-bottom:12px">PORTFOLIO VALUE HISTORY (7 DAYS)</div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
@@ -677,7 +692,7 @@
         refreshDisplay();
         renderJobs(); renderFact(sol); renderTargets(); calcRetire();
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
-        refreshDisplay(); updateChart(total); updatePnL(total); renderFact(window._solBalance||0);
+        refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -758,7 +773,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); calcRetire(); updateChart(total); updatePnL(total); renderFact(window._solBalance||0);
+          renderJobs(); renderTargets(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -841,14 +856,8 @@
     let pnlData = [];
     try { pnlData = JSON.parse(localStorage.getItem('cr_pnl') || '[]'); } catch(e) {}
 
-    function resetPnL() {
-      localStorage.removeItem('cr_pnl');
-      pnlData = [];
-      document.getElementById('pnlBox').style.display = 'none';
-    }
-
     function updatePnL(currentTotal) {
-      if (!currentTotal || currentTotal < 500000) return; // skip partial loads under 500k
+      if (!currentTotal || currentTotal <= 0) return;
       const now = new Date();
       const todayKey = now.toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'});
       const idx = pnlData.findIndex(d => d.date === todayKey);
@@ -856,7 +865,6 @@
         pnlData.push({ date:todayKey, open:currentTotal, close:currentTotal, high:currentTotal, low:currentTotal });
       } else {
         const d = pnlData[idx];
-        // Never update open — it is locked once set
         d.close = currentTotal; d.high = Math.max(d.high,currentTotal); d.low = Math.min(d.low,currentTotal);
         pnlData[idx] = d;
       }
@@ -888,12 +896,9 @@
           +'</div>';
       });
       box.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+        '<div style="display:flex;justify-content:space-between;margin-bottom:12px">'
           +'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L TODAY</div>'
-          +'<div style="display:flex;align-items:center;gap:8px">'
-            +'<div style="font-size:9px;color:var(--text3)">'+today.date+'</div>'
-            +'<button onclick="resetPnL()" style="background:transparent;border:1px solid rgba(208,90,74,0.3);padding:2px 7px;color:var(--red);font-family:\'IBM Plex Mono\',monospace;font-size:9px;cursor:pointer;letter-spacing:1px" title="Reset P&L data">↺</button>'
-          +'</div>'
+          +'<div style="font-size:9px;color:var(--text3)">'+today.date+'</div>'
         +'</div>'
         +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:'+(hist?'12px':'4px')+'">'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">PROFIT/LOSS</div>'
@@ -905,6 +910,51 @@
             +'<div style="font-size:16px;font-weight:700;color:var(--text2)">'+fi(today.open)+'</div></div>'
         +'</div>'
         +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px">7-DAY HISTORY</div>'+hist:'');
+    }
+
+    // ── All Time P&L ────────────────────────────────────────
+    function renderAllTimePnL(currentTotal) {
+      if (!currentTotal || currentTotal <= 0) return;
+      const initialVal = parseFloat(localStorage.getItem('cr_initial') || '0');
+      const box = document.getElementById('atplBox');
+      const content = document.getElementById('atplContent');
+      if (!box || !content) return;
+      box.style.display = 'block';
+      if (!initialVal) {
+        content.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:4px 0">Set your initial wallet value to see all-time P&L</div>';
+        return;
+      }
+      const pl = currentTotal - initialVal;
+      const pct = (pl / initialVal * 100);
+      const up = pl >= 0;
+      const col = up ? 'var(--green)' : '#d05a4a';
+      const sgn = up ? '+' : '';
+      const multiplier = (currentTotal / initialVal).toFixed(2);
+      content.innerHTML =
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">'
+          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">INITIAL</div>'
+            +'<div style="font-size:16px;font-weight:700;color:var(--text2)">'+fi(initialVal)+'</div></div>'
+          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">CURRENT</div>'
+            +'<div style="font-size:16px;font-weight:700;color:var(--text)">'+fi(currentTotal)+'</div></div>'
+          +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">ALL TIME P&amp;L</div>'
+            +'<div style="font-size:16px;font-weight:700;color:'+col+'">'+sgn+fi(pl)+'</div>'
+            +'<div style="font-size:10px;color:'+col+'">'+sgn+pct.toFixed(1)+'% &nbsp;·&nbsp; '+multiplier+'x</div></div>'
+        +'</div>';
+    }
+
+    function editInitial() {
+      const inp = document.getElementById('atplInput');
+      const cur = localStorage.getItem('cr_initial') || '';
+      document.getElementById('initialInput').value = cur;
+      inp.style.display = inp.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function saveInitial() {
+      const val = parseFloat(document.getElementById('initialInput').value);
+      if (!val || val <= 0) return;
+      localStorage.setItem('cr_initial', val.toString());
+      document.getElementById('atplInput').style.display = 'none';
+      if (total > 0) renderAllTimePnL(total);
     }
 
     function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
