@@ -1145,9 +1145,26 @@
         localStorage.setItem('cr_initial_data', JSON.stringify(cacheData));
 
         renderAllTimePnL(total);
-        // Switch chart to ALL view to show exponential growth
-        setTf('ALL');
+
+        // Force add current value to chart history so ALL chart has 2 points minimum
+        const key = 'cr_history'; let hist = [];
+        try { hist = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
+        hist = hist.filter(h => h.ts && h.v > 500000);
+        // Add anchor point at initial ts if not already there
+        if (!hist.find(h => Math.abs(h.ts - (firstTs*1000)) < 60000)) {
+          hist.unshift({ ts: firstTs * 1000, v: initialIDR });
+        }
+        // Add current point
+        hist.push({ ts: Date.now(), v: total > 0 ? total : initialIDR });
+        try { localStorage.setItem(key, JSON.stringify(hist)); } catch(e) {}
+
+        // Switch chart to ALL view
+        currentTf = 'ALL';
+        document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('tf-active'));
+        const allBtn = document.getElementById('tfALL');
+        if (allBtn) allBtn.classList.add('tf-active');
         document.getElementById('chartCard').style.display = 'block';
+        renderChart();
       } catch(e) {
         console.error('fetchInitialValue:', e);
         content.innerHTML = '<div style="font-size:10px;color:var(--red)">Error: '+e.message+'<br><span style="color:var(--text3)">Try again or check console</span></div>';
