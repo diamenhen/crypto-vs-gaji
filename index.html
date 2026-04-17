@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CryptoRetire — Crypto vs Gaji Indonesia</title>
+  <title>CryptoRetire</title>
   <meta name="description" content="Bandingkan nilai crypto kamu dengan gaji tertinggi di Indonesia. Realtime SOL, BTC, ETH tracker dengan Garut Wealth Rank.">
   <meta name="keywords" content="crypto, solana, SOL, IDR, gaji Indonesia, wealth tracker, Garut">
   <meta property="og:title" content="CryptoRetire — Crypto vs Gaji Indonesia">
@@ -333,7 +333,7 @@
       #pnlBox > div > div[style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr 1fr !important; gap:10px !important; }
       #targetBox { grid-template-columns:1fr !important; }
       .job { flex-direction:column; padding:10px 12px; }
-      .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:8px 12px; }
+      .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:6px 12px; margin-top:8px; }
       .jgrid { grid-template-columns:repeat(2,1fr); gap:6px 10px; }
       .jt { font-size:11px; }
       .jnv { font-size:11px; }
@@ -1500,7 +1500,7 @@
 
       // Build lookup from pnlData — key: "DD MMM YYYY" (id-ID format used in pnlData)
       const lookup = {};
-      pnlData.forEach(d => {
+      pnlData.forEach((d, i) => {
         const parts = d.date.split(' ');
         if (parts.length === 3) {
           const day = parseInt(parts[0]);
@@ -1508,7 +1508,10 @@
           const year = parseInt(parts[2]);
           const mIdx = ['jan','feb','mar','apr','mei','jun','jul','agu','sep','okt','nov','des'].indexOf(monthStr);
           if (mIdx !== -1 && year === calYear && mIdx === calMonth) {
-            lookup[day] = { pl: d.close - d.open, close: d.close, open: d.open };
+            // Use prev day's close as open baseline (same logic as renderPnL)
+            const prevClose = i > 0 ? pnlData[i-1].close : d.open;
+            const pl = d.close - prevClose;
+            lookup[day] = { pl, close: d.close, open: prevClose };
           }
         }
       });
@@ -1616,7 +1619,8 @@
       const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
 
       sorted.forEach((d, i) => {
-        const pl = d.close - d.open;
+        const prevClose = i > 0 ? sorted[i-1].close : d.open;
+        const pl = d.close - prevClose;
         if (pl > 0) {
           tempStreak++;
           if (tempStreak > bestStreak) bestStreak = tempStreak;
@@ -1631,10 +1635,11 @@
 
       // Last 7 days bar chart
       const last7 = sorted.slice(-7);
-      const bars = last7.map(d => {
-        const pl = d.close - d.open;
+      const bars = last7.map((d, i) => {
+        const prevClose = i > 0 ? last7[i-1].close : d.open;
+        const pl = d.close - prevClose;
         const col = pl >= 0 ? '#3a9e6a' : '#d05a4a';
-        const h = Math.min(32, Math.max(4, Math.abs(pl) / (Math.max(...last7.map(x => Math.abs(x.close - x.open))) || 1) * 32));
+        const h = Math.min(32, Math.max(4, Math.abs(pl) / (Math.max(...last7.map((x, j) => Math.abs(x.close - (j > 0 ? last7[j-1].close : x.open)))) || 1) * 32));
         return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
           <div style="width:14px;height:${h}px;background:${col};border-radius:1px;"></div>
         </div>`;
