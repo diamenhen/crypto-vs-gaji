@@ -607,7 +607,12 @@
       const vals = sampled.map(h => h.v);
       const minVal = Math.min(...vals);
       const maxVal = Math.max(...vals);
-      const pad = (maxVal - minVal) * 0.1 || maxVal * 0.05;
+      const range = maxVal - minVal;
+      // If range is very small (< 1% of max), use 2% of max as range for visual clarity
+      const effectiveRange = range < maxVal * 0.01 ? maxVal * 0.02 : range;
+      const pad = effectiveRange * 0.15;
+      const yMin = Math.max(0, minVal - pad);
+      const yMax = maxVal + pad;
 
       if (portfolioChart) portfolioChart.destroy();
       const ctx = document.getElementById('portfolioChart').getContext('2d');
@@ -632,7 +637,7 @@
           plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>' '+fi(c.raw)}} },
           scales: {
             x: { ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:6,maxRotation:0}, grid:{color:'rgba(255,255,255,0.03)'} },
-            y: { min:Math.max(0,minVal-pad), max:maxVal+pad, ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)}, grid:{color:'rgba(255,255,255,0.03)'} }
+            y: { min:yMin, max:yMax, ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)}, grid:{color:'rgba(255,255,255,0.03)'} }
           }
         }
       });
