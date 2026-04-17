@@ -5,8 +5,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CryptoRetire</title>
-  <!-- Bloomberg Dark: IBM Plex Mono, muted tones -->
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Professional & Trendy: DM Sans + DM Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
@@ -29,7 +29,7 @@
     html { font-size:13px; }
     body {
       background:var(--bg); color:var(--text);
-      font-family:'IBM Plex Mono',monospace;
+      font-family:'DM Sans', sans-serif;
       min-height:100vh; -webkit-font-smoothing:antialiased;
     }
     /* Top accent line */
@@ -57,15 +57,16 @@
       display:flex; flex-direction:column; justify-content:center;
       padding:0 16px; border-right:1px solid var(--bdr);
     }
-    .logo-title { font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+    .logo-title { font-size:14px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; font-family:'DM Sans',sans-serif; }
     .logo-title span { color:var(--accent); }
-    .logo-sub { font-size:9px; color:var(--text3); letter-spacing:2.5px; margin-top:1px; }
+    .logo-sub { font-size:9px; color:var(--text3); letter-spacing:2px; margin-top:2px; font-family:'DM Mono',monospace; }
     .header-right { display:flex; align-items:center; gap:0; }
     .live-badge {
       display:flex; align-items:center; gap:7px;
       font-size:10px; font-weight:600; letter-spacing:1.5px;
       color:var(--green); border:none; border-left:1px solid var(--bdr);
       background:transparent; border-radius:0; padding:0 16px; height:100%;
+      font-family:'DM Mono',monospace;
     }
     .live-dot {
       width:5px; height:5px; border-radius:50%; background:var(--green);
@@ -77,7 +78,8 @@
     .status-bar {
       background:var(--bg2); border-bottom:1px solid var(--bdr);
       padding:4px 10px; display:flex; gap:20px; align-items:center;
-      font-size:10px; color:var(--text3); letter-spacing:1px; margin-bottom:10px;
+      font-size:10px; color:var(--text3); letter-spacing:0.8px; margin-bottom:10px;
+      font-family:'DM Mono',monospace;
     }
     .status-bar span { color:var(--accent); font-weight:600; }
     #clockEl { margin-left:auto; color:var(--text2); }
@@ -88,54 +90,54 @@
       background:var(--bg2); border:1px solid var(--bdr);
       border-top:2px solid var(--accent); padding:10px 14px;
     }
-    .tick-label { font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; margin-bottom:6px; text-transform:uppercase; }
-    .tick-val { font-size:17px; font-weight:600; color:var(--text); letter-spacing:-0.5px; }
-    .tick-chg { font-size:10px; margin-top:3px; font-weight:600; letter-spacing:0.5px; }
+    .tick-label { font-size:9px; color:var(--accent); letter-spacing:1.5px; font-weight:600; margin-bottom:6px; text-transform:uppercase; font-family:'DM Mono',monospace; }
+    .tick-val { font-size:17px; font-weight:600; color:var(--text); letter-spacing:-0.5px; font-family:'DM Sans',sans-serif; }
+    .tick-chg { font-size:10px; margin-top:3px; font-weight:500; letter-spacing:0.3px; font-family:'DM Mono',monospace; }
     .up { color:var(--green); } .dn { color:var(--red); }
 
     /* ── WALLET ── */
     .c-card { background:var(--bg2); border:1px solid var(--bdr); margin-bottom:6px; transition:border-color 0.2s; }
     .c-card.on { border-color:rgba(90,158,111,0.3); }
     .c-label {
-      font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700;
+      font-size:9px; color:var(--accent); letter-spacing:1.5px; font-weight:600;
       text-transform:uppercase; padding:7px 14px; background:var(--bg3);
-      border-bottom:1px solid var(--bdr); display:block;
+      border-bottom:1px solid var(--bdr); display:block; font-family:'DM Mono',monospace;
     }
     .c-body { padding:14px 16px; }
     .btn-cw {
       display:inline-flex; align-items:center; gap:0;
       background:var(--accent); color:#1a1a0a; border:none;
-      padding:9px 18px; font-family:'IBM Plex Mono',monospace;
+      padding:9px 18px; font-family:'DM Sans',sans-serif;
       font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s;
-      letter-spacing:1px; text-transform:uppercase;
+      letter-spacing:0.5px; text-transform:uppercase;
     }
     .btn-cw:hover { background:var(--accent2); }
     .btn-cw-icon { display:none; }
     .btn-dc {
       background:transparent; border:1px solid rgba(192,87,74,0.35);
-      padding:6px 12px; color:var(--red); font-family:'IBM Plex Mono',monospace;
-      font-size:10px; font-weight:700; cursor:pointer; letter-spacing:1px;
+      padding:6px 12px; color:var(--red); font-family:'DM Sans',sans-serif;
+      font-size:10px; font-weight:600; cursor:pointer; letter-spacing:0.5px;
       text-transform:uppercase; transition:all 0.15s;
     }
     .btn-dc:hover { background:rgba(192,87,74,0.1); }
     .btn-share {
       display:inline-flex; align-items:center; gap:7px;
       background:transparent; border:1px solid var(--bdr2);
-      padding:7px 14px; color:var(--text2); font-family:'IBM Plex Mono',monospace;
-      font-size:10px; font-weight:600; cursor:pointer; transition:all 0.15s;
-      letter-spacing:1px; margin-top:8px;
+      padding:7px 14px; color:var(--text2); font-family:'DM Sans',sans-serif;
+      font-size:10px; font-weight:500; cursor:pointer; transition:all 0.15s;
+      letter-spacing:0.5px; margin-top:8px;
     }
     .btn-share:hover { border-color:var(--accent); color:var(--accent); }
     .wi { display:flex; gap:0; padding-top:12px; border-top:1px solid var(--bdr); flex-wrap:wrap; }
     .wi > div { padding-right:20px; margin-right:20px; border-right:1px solid var(--bdr); padding-top:2px; padding-bottom:2px; }
     .wi > div:last-child { border-right:none; }
-    .wi-l { font-size:9px; color:var(--text3); letter-spacing:2px; font-weight:700; margin-bottom:4px; text-transform:uppercase; }
-    .wi-v { font-size:15px; font-weight:600; color:var(--green); }
-    .wi-s { font-size:10px; color:var(--text2); margin-top:1px; }
+    .wi-l { font-size:9px; color:var(--text3); letter-spacing:1.5px; font-weight:600; margin-bottom:4px; text-transform:uppercase; font-family:'DM Mono',monospace; }
+    .wi-v { font-size:15px; font-weight:600; color:var(--green); font-family:'DM Sans',sans-serif; }
+    .wi-s { font-size:10px; color:var(--text2); margin-top:1px; font-family:'DM Mono',monospace; }
     .token-pills { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px; padding-top:10px; border-top:1px solid var(--bdr); }
     .token-pill { display:flex; align-items:center; gap:5px; background:var(--bg3); border:1px solid var(--bdr); padding:3px 10px; font-size:11px; }
-    .token-pill-sym { color:var(--accent); font-weight:700; }
-    .token-pill-val { color:var(--text2); }
+    .token-pill-sym { color:var(--accent); font-weight:700; font-family:'DM Mono',monospace; }
+    .token-pill-val { color:var(--text2); font-family:'DM Mono',monospace; }
 
     /* ── HERO ── */
     .hero {
@@ -144,36 +146,38 @@
       padding:24px 22px; margin-bottom:6px;
       text-align:center; display:flex; flex-direction:column; align-items:center;
     }
-    .hero-l { font-size:9px; color:var(--accent); letter-spacing:2.5px; font-weight:700; margin-bottom:10px; text-transform:uppercase; }
+    .hero-l { font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; margin-bottom:10px; text-transform:uppercase; font-family:'DM Mono',monospace; }
     .hero-v {
       font-size:clamp(28px,5vw,50px); font-weight:700;
       letter-spacing:-1px; color:var(--text); margin-bottom:6px; line-height:1;
+      font-family:'DM Sans',sans-serif;
     }
-    .hero-s { font-size:11px; color:var(--text2); margin-bottom:14px; letter-spacing:0.5px; }
+    .hero-s { font-size:11px; color:var(--text2); margin-bottom:14px; letter-spacing:0.3px; font-family:'DM Sans',sans-serif; }
 
     /* ── MODAL ── */
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:100; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
     .modal { background:var(--bg2); border:1px solid var(--bdr2); border-top:2px solid var(--accent); width:100%; max-width:380px; margin:20px; }
-    .modal-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:12px 16px; background:var(--bg3); border-bottom:1px solid var(--bdr); color:var(--accent); }
-    .modal-sub { font-size:10px; color:var(--text3); padding:10px 16px 0; letter-spacing:1px; }
+    .modal-title { font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:12px 16px; background:var(--bg3); border-bottom:1px solid var(--bdr); color:var(--accent); font-family:'DM Sans',sans-serif; }
+    .modal-sub { font-size:10px; color:var(--text3); padding:10px 16px 0; letter-spacing:0.5px; font-family:'DM Sans',sans-serif; }
     .modal-body { padding:10px 16px; }
-    .w-btn { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--bdr); padding:11px 13px; cursor:pointer; width:100%; text-align:left; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-bottom:6px; transition:all 0.15s; }
+    .w-btn { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--bdr); padding:11px 13px; cursor:pointer; width:100%; text-align:left; color:var(--text); font-family:'DM Sans',sans-serif; font-size:12px; margin-bottom:6px; transition:all 0.15s; }
     .w-btn:hover { border-color:var(--accent); background:var(--bg4); }
     .w-btn:disabled { opacity:0.25; cursor:not-allowed; }
     .w-icon { width:34px; height:34px; background:var(--bg4); border:1px solid var(--bdr); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
-    .w-name { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
-    .w-desc { font-size:10px; color:var(--text3); margin-top:1px; }
-    .w-badge { margin-left:auto; font-size:9px; padding:3px 8px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+    .w-name { font-size:12px; font-weight:700; letter-spacing:0.3px; text-transform:uppercase; }
+    .w-desc { font-size:10px; color:var(--text3); margin-top:1px; font-family:'DM Mono',monospace; }
+    .w-badge { margin-left:auto; font-size:9px; padding:3px 8px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; font-family:'DM Mono',monospace; }
     .detected { background:var(--green-bg); color:var(--green); border:1px solid rgba(90,158,111,0.3); }
     .install { background:rgba(255,255,255,0.03); color:var(--text3); border:1px solid var(--bdr); }
-    .modal-cancel { width:calc(100% - 32px); margin:0 16px 14px; background:transparent; border:1px solid var(--bdr); padding:9px; color:var(--text3); font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; display:block; }
+    .modal-cancel { width:calc(100% - 32px); margin:0 16px 14px; background:transparent; border:1px solid var(--bdr); padding:9px; color:var(--text3); font-family:'DM Sans',sans-serif; font-size:11px; cursor:pointer; letter-spacing:0.5px; text-transform:uppercase; display:block; }
     .modal-cancel:hover { border-color:var(--red); color:var(--red); }
 
     /* ── SECTION LABEL ── */
     .sec-l {
-      font-size:9px; color:var(--accent); letter-spacing:2.5px; font-weight:700;
+      font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600;
       margin-bottom:6px; text-transform:uppercase;
       display:flex; align-items:center; gap:8px;
+      font-family:'DM Mono',monospace;
     }
     .sec-l::after { content:''; flex:1; height:1px; background:var(--bdr); }
 
@@ -186,12 +190,12 @@
     }
     .job:hover { border-color:var(--bdr2); background:var(--bg3); }
     .jl { flex:1; min-width:0; }
-    .jt { font-size:12px; font-weight:700; margin-bottom:2px; color:var(--text); letter-spacing:0.3px; text-transform:uppercase; }
-    .jc { font-size:10px; color:var(--text); margin-bottom:10px; }
+    .jt { font-size:12px; font-weight:700; margin-bottom:2px; color:var(--text); letter-spacing:0.3px; text-transform:uppercase; font-family:'DM Sans',sans-serif; }
+    .jc { font-size:10px; color:var(--text2); margin-bottom:10px; font-family:'DM Sans',sans-serif; }
     .jgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px 14px; margin-bottom:4px; }
     @media(max-width:600px){ .jgrid{grid-template-columns:repeat(2,1fr);} }
-    .jnl { font-size:8px; color:var(--text3); letter-spacing:1.5px; margin-bottom:2px; font-weight:700; text-transform:uppercase; }
-    .jnv { font-size:12px; font-weight:500; color:var(--text); }
+    .jnl { font-size:8px; color:var(--text3); letter-spacing:1.5px; margin-bottom:2px; font-weight:600; text-transform:uppercase; font-family:'DM Mono',monospace; }
+    .jnv { font-size:12px; font-weight:500; color:var(--text); font-family:'DM Mono',monospace; }
     .bw { height:1px; background:var(--bg4); margin-top:10px; overflow:hidden; }
     .bf { height:100%; background:var(--accent); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); }
     .jr {
@@ -200,21 +204,21 @@
       border-left:2px solid var(--accent);
       padding:9px 13px; min-width:120px;
     }
-    .jrl { font-size:8px; color:var(--accent); letter-spacing:2px; margin-bottom:4px; font-weight:700; text-transform:uppercase; }
-    .jrv { font-size:16px; font-weight:700; color:var(--text); }
-    .jrs { font-size:10px; color:var(--text3); margin-top:3px; }
+    .jrl { font-size:8px; color:var(--accent); letter-spacing:1.5px; margin-bottom:4px; font-weight:600; text-transform:uppercase; font-family:'DM Mono',monospace; }
+    .jrv { font-size:18px; font-weight:700; color:var(--text); font-family:'DM Sans',sans-serif; }
+    .jrs { font-size:10px; color:var(--text3); margin-top:3px; font-family:'DM Mono',monospace; }
 
     /* ── FACT ── */
     .fact { background:var(--bg2); border:1px solid var(--bdr); border-left:2px solid var(--accent); padding:12px 16px; display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
-    .fact-t { font-size:9px; color:var(--accent); letter-spacing:2px; margin-bottom:4px; font-weight:700; text-transform:uppercase; }
-    .fact-b { font-size:12px; color:var(--text2); line-height:1.7; }
+    .fact-t { font-size:9px; color:var(--accent); letter-spacing:1.5px; margin-bottom:4px; font-weight:600; text-transform:uppercase; font-family:'DM Mono',monospace; }
+    .fact-b { font-size:12px; color:var(--text2); line-height:1.75; font-family:'DM Sans',sans-serif; }
     .fact-b strong { color:var(--text); font-weight:600; }
 
     /* ── CHART ── */
     .chart-card { background:var(--bg2); border:1px solid var(--bdr); padding:14px 16px; margin-bottom:10px; }
 
     /* ── HIDDEN RETIRE ── */
-    .retire-inp { background:var(--bg3); border:1px solid var(--bdr); padding:8px 12px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; width:100%; }
+    .retire-inp { background:var(--bg3); border:1px solid var(--bdr); padding:8px 12px; color:var(--text); font-family:'DM Mono',monospace; font-size:12px; outline:none; width:100%; }
     .retire-inp:focus { border-color:var(--accent); }
 
     /* ── SPIN ── */
@@ -222,7 +226,7 @@
     @keyframes sp { to{transform:rotate(360deg)} }
 
     /* ── FOOTER ── */
-    footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
+    footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:1.5px; font-weight:500; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; font-family:'DM Mono',monospace; }
 
     @media(max-width:600px){
       .ticker{grid-template-columns:1fr 1fr;}
@@ -342,20 +346,20 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
         <div>
           <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">SOLANA (SOL)</div>
-          <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
+          <div style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace">
             <span id="donateAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('sol')" title="Click to copy">5u7ng...JgA</span>
           </div>
         </div>
-        <button onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY SOL</button>
+        <button onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY SOL</button>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--bdr)">
         <div>
           <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">EVM (ETH/BSC/POLYGON)</div>
-          <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
+          <div style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace">
             <span id="donateEvmAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('evm')" title="Click to copy">0x1503...3E3a</span>
           </div>
         </div>
-        <button onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY EVM</button>
+        <button onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY EVM</button>
       </div>
     </div>
     <footer id="footerEl">SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC</footer>
