@@ -529,13 +529,17 @@
     function updateChart(val) {
       if (!val || val < 500000) return;
       const now = Date.now();
-      // Throttle: record once per 5 minutes max
-      if (now - _lastChartTs < 300000) { renderChart(); return; }
-      _lastChartTs = now;
       const key = 'cr_history'; let history = [];
       try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
-      // Migrate old format (no ts field)
       history = history.filter(h => h.ts && h.v > 500000);
+
+      const isEmpty = history.length === 0;
+      // Throttle: record once per 5 min — but always record if empty (first point)
+      if (!isEmpty && now - _lastChartTs < 300000) {
+        document.getElementById('chartCard').style.display = 'block';
+        renderChart(); return;
+      }
+      _lastChartTs = now;
       history.push({ ts: now, v: val });
       if (history.length > 8640) history = history.slice(-8640);
       try { localStorage.setItem(key, JSON.stringify(history)); } catch(e) {}
@@ -552,16 +556,18 @@
       const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
       if (currentTf === 'ALL' && cached?.initialIDR && cached?.initialTs) {
         const anchor = { ts: cached.initialTs, v: cached.initialIDR };
-        // Only prepend if it's older than our history
         if (!history.length || anchor.ts < history[0].ts) {
           history = [anchor, ...history];
         }
       }
 
-      if (history.length < 2) {
-        if (history.length === 1) document.getElementById('chartCard').style.display = 'block';
-        return;
+      // Need at least 1 point to show chart (will add current as second if only 1)
+      if (history.length === 0) return;
+      if (history.length === 1 && total > 0) {
+        history.push({ ts: Date.now(), v: total });
       }
+      if (history.length < 2) return;
+
       document.getElementById('chartCard').style.display = 'block';
 
       const now = Date.now();
