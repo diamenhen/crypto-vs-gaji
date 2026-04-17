@@ -4,7 +4,17 @@
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CryptoRetire</title>
+  <title>CryptoRetire — Crypto vs Gaji Indonesia</title>
+  <meta name="description" content="Bandingkan nilai crypto kamu dengan gaji tertinggi di Indonesia. Realtime SOL, BTC, ETH tracker dengan Garut Wealth Rank.">
+  <meta name="keywords" content="crypto, solana, SOL, IDR, gaji Indonesia, wealth tracker, Garut">
+  <meta property="og:title" content="CryptoRetire — Crypto vs Gaji Indonesia">
+  <meta property="og:description" content="Bandingkan nilai crypto kamu dengan gaji tertinggi di Indonesia. Connect wallet untuk lihat ranking kekayaanmu.">
+  <meta property="og:url" content="https://cryptoretire.app">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="CryptoRetire — Crypto vs Gaji Indonesia">
+  <meta name="twitter:description" content="Track nilai crypto vs gaji Indonesia. Realtime SOL tracker + Garut Wealth Rank.">
+  <meta name="twitter:site" content="@AriantheChain">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMTMxNjFiIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIxNiwyIDMwLDE2IDE2LDMwIDIsMTYiIGZpbGw9IiNlODgwMGEiLz4KPC9zdmc+">
   <!-- Bloomberg Dark: IBM Plex Mono, muted tones -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -282,50 +292,61 @@
     .badge-lbl { font-size:7px; letter-spacing:1px; font-weight:700; text-transform:uppercase; }
     .badge-lbl.locked { color:var(--text3); }
 
+    /* ── SKELETON ── */
+    .skel { background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:2px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── ERROR BANNER ── */
+    .err-banner { background:rgba(208,90,74,0.08); border:1px solid rgba(208,90,74,0.3); border-left:3px solid var(--red); padding:10px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+    .err-banner-msg { font-size:9px; color:var(--red); font-weight:700; letter-spacing:1px; margin-bottom:2px; }
+    .err-banner-sub { font-size:9px; color:var(--text3); }
+    .err-retry { background:transparent; border:1px solid rgba(208,90,74,0.4); padding:4px 12px; color:var(--red); font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:700; cursor:pointer; letter-spacing:1px; }
+    .err-retry:hover { background:rgba(208,90,74,0.1); }
+
+    /* ── ONBOARDING ── */
+    .onboard { background:rgba(232,128,10,0.05); border:1px solid rgba(232,128,10,0.2); padding:14px 16px; margin-bottom:8px; }
+    .onboard-step { display:flex; gap:12px; align-items:flex-start; margin-bottom:10px; }
+    .onboard-step:last-child { margin-bottom:0; }
+    .onboard-num { width:22px; height:22px; border-radius:50%; background:var(--accent); color:#1a1a0a; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .onboard-num.done { background:var(--green); }
+    .onboard-num.pending { background:var(--bg3); border:1px solid var(--bdr); color:var(--text3); }
+    .onboard-title { font-size:10px; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .onboard-sub { font-size:9px; color:var(--text3); }
+
+    /* ── EMPTY STATE DEMO ── */
+    .demo-overlay { position:relative; }
+    .demo-watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-15deg); font-size:48px; font-weight:700; color:rgba(232,128,10,0.06); letter-spacing:8px; pointer-events:none; z-index:1; white-space:nowrap; }
+
     /* ── FOOTER ── */
     footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
 
     @media(max-width:600px){
       .container { padding:0 12px 40px; }
-
-      /* Status bar - hide refresh on mobile, allow wrap */
       .status-bar { gap:10px; flex-wrap:wrap; font-size:9px; padding:4px 8px; }
       .status-bar #clockEl { font-size:9px; }
-
-      /* Ticker - 1 column stacked */
-      .ticker { grid-template-columns:1fr; }
-      .tick { padding:8px 12px; }
-      .tick-val { font-size:15px; }
-
-      /* Hero */
+      .ticker { grid-template-columns:repeat(2,1fr) !important; }
+      .tick { padding:8px 10px; }
+      .tick-val { font-size:13px; }
+      .tick-label { font-size:8px; }
       .hero-v { font-size:28px; }
-
-      /* P&L grid - stack on mobile */
+      .btn-cw { font-size:11px; padding:12px 18px; width:100%; justify-content:center; }
       #pnlBox > div > div[style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr 1fr !important; gap:10px !important; }
-
-      /* Target cards - single column */
       #targetBox { grid-template-columns:1fr !important; }
-
-      /* Job cards */
       .job { flex-direction:column; padding:10px 12px; }
       .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:8px 12px; }
       .jgrid { grid-template-columns:repeat(2,1fr); gap:6px 10px; }
       .jt { font-size:11px; }
       .jnv { font-size:11px; }
-
-      /* Wallet info */
       .wi { gap:0; }
       .wi > div { padding-right:12px; margin-right:12px; }
       .wi-v { font-size:13px; }
-
-      /* Chart timeframe buttons */
       .tf-btn { padding:3px 7px; font-size:8px; }
-
-      /* Modal */
       .modal { margin:12px; }
-
-      /* Buttons */
-      .btn-cw { font-size:10px; padding:8px 14px; }
+      .logo-text { display:none; }
+      .rank-current-icon { font-size:36px; }
+      .rank-current-name { font-size:14px; }
+      .badge-item { width:50px; }
+      .badge-circle { width:38px; height:38px; font-size:16px; }
     }
   </style>
 </head>
@@ -360,12 +381,33 @@
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
-      <div class="tick"><div class="tick-label">BTC/USD</div><div class="tick-val" id="tBtc">loading...</div><div class="tick-chg" id="tBtcChg">--</div></div>
-      <div class="tick"><div class="tick-label">ETH/USD</div><div class="tick-val" id="tEth">loading...</div><div class="tick-chg" id="tEthChg">--</div></div>
-      <div class="tick"><div class="tick-label">BNB/USD</div><div class="tick-val" id="tBnb">loading...</div><div class="tick-chg" id="tBnbChg">--</div></div>
-      <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd">loading...</div><div class="tick-chg" id="tChgU">--</div></div>
-      <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr">loading...</div><div class="tick-chg" id="tChgI">--</div></div>
-      <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg up" id="tUsdIdrChg">+0.00%</div></div>
+      <div class="tick"><div class="tick-label">BTC/USD</div><div class="tick-val" id="tBtc"><div class="skel" style="height:18px;width:80%;margin-bottom:4px"></div></div><div class="tick-chg" id="tBtcChg"></div></div>
+      <div class="tick"><div class="tick-label">ETH/USD</div><div class="tick-val" id="tEth"><div class="skel" style="height:18px;width:70%"></div></div><div class="tick-chg" id="tEthChg"></div></div>
+      <div class="tick"><div class="tick-label">BNB/USD</div><div class="tick-val" id="tBnb"><div class="skel" style="height:18px;width:75%"></div></div><div class="tick-chg" id="tBnbChg"></div></div>
+      <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd"><div class="skel" style="height:18px;width:65%"></div></div><div class="tick-chg" id="tChgU"></div></div>
+      <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr"><div class="skel" style="height:18px;width:80%"></div></div><div class="tick-chg" id="tChgI"></div></div>
+      <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg up" id="tUsdIdrChg">est.</div></div>
+    </div>
+
+    <div id="errBanner" style="display:none" class="err-banner">
+      <div><div class="err-banner-msg" id="errMsg">⚠ PRICE FEED UNAVAILABLE</div><div class="err-banner-sub" id="errSub">Using last known price</div></div>
+      <button class="err-retry" onclick="fetchPrice()">↻ RETRY</button>
+    </div>
+
+    <div id="onboardBox" class="onboard">
+      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;margin-bottom:12px;">GET STARTED</div>
+      <div class="onboard-step">
+        <div class="onboard-num" id="ob1">1</div>
+        <div><div class="onboard-title">Connect your Phantom Wallet</div><div class="onboard-sub">Click the button below to link your Solana wallet</div></div>
+      </div>
+      <div class="onboard-step" style="opacity:0.4" id="obStep2">
+        <div class="onboard-num pending">2</div>
+        <div><div class="onboard-title">See your Garut Wealth Rank</div><div class="onboard-sub">Compare your crypto vs local wealth tiers</div></div>
+      </div>
+      <div class="onboard-step" style="opacity:0.4;margin-bottom:0" id="obStep3">
+        <div class="onboard-num pending">3</div>
+        <div><div class="onboard-title">Track daily P&L & unlock badges</div><div class="onboard-sub">Monitor progress and celebrate milestones</div></div>
+      </div>
     </div>
 
     <div class="c-card" id="cCard">
@@ -398,10 +440,11 @@
       </div>
     </div>
 
-    <div class="hero">
+    <div class="hero demo-overlay" id="heroBox">
+      <div class="demo-watermark" id="demoWatermark">DEMO</div>
       <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
-      <div class="hero-v" id="heroV">Rp 0</div>
-      <div class="hero-s" id="heroS">Connect wallet to see realtime comparison</div>
+      <div class="hero-v" id="heroV" style="opacity:0.25">Rp 12.0 Jt</div>
+      <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
       <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         Share to X/Twitter
@@ -794,6 +837,7 @@
         if (dBtc.price) { const p=parseFloat(dBtc.price); document.getElementById('tBtc').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
         if (dEth.price) { const p=parseFloat(dEth.price); document.getElementById('tEth').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
         if (dBnb.price) { const p=parseFloat(dBnb.price); document.getElementById('tBnb').textContent='$'+p.toFixed(2); document.getElementById('tBnbChg').textContent='realtime'; document.getElementById('tBnbChg').className='tick-chg up'; }
+        const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
         return;
       } catch(e) {}
@@ -809,7 +853,13 @@
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
         return;
       } catch(e) {}
-      if (!solIDR) { solIDR=2850000; solUSD=174.85; document.getElementById('tIdr').textContent='Rp 2.850.000*'; document.getElementById('tUsd').textContent='$174.85*'; }
+      if (!solIDR) {
+        solIDR=2850000; solUSD=174.85;
+        document.getElementById('tIdr').textContent='Rp 2.850.000*';
+        document.getElementById('tUsd').textContent='$174.85*';
+        const eb=document.getElementById('errBanner');
+        if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
+      }
     }
 
     // ── Wallet ──────────────────────────────────────────────
@@ -835,6 +885,12 @@
       document.getElementById('notConn').style.display='none'; document.getElementById('isConn').style.display='block';
       document.getElementById('cCard').classList.add('on'); document.getElementById('addrTxt').textContent=pk.slice(0,5)+'...'+pk.slice(-4);
       document.getElementById('wNameTxt').textContent='';
+      // Hide onboarding & demo state
+      document.getElementById('onboardBox').style.display='none';
+      document.getElementById('demoWatermark').style.display='none';
+      document.getElementById('heroV').style.opacity='1';
+      // Mark step 1 done
+      document.getElementById('ob1').className='onboard-num done';
     }
     function doDisconnect() {
       try{if(provider?.disconnect)provider.disconnect();}catch(e){}
@@ -842,10 +898,16 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 0'; document.getElementById('heroS').textContent='Connect wallet to see realtime comparison';
+      document.getElementById('heroV').textContent='Rp 12.0 Jt'; document.getElementById('heroV').style.opacity='0.25';
+      document.getElementById('heroS').textContent='Connect wallet to see your real data';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
       document.getElementById('retireCurrent').value='';
+      document.getElementById('onboardBox').style.display='block';
+      document.getElementById('demoWatermark').style.display='block';
+      document.getElementById('badgesBox').style.display='none';
+      document.getElementById('pnlBox').style.display='none';
+      document.getElementById('pnlCalendarBox').style.display='none';
       renderJobs(); renderTargets(); calcRetire();
     }
     async function loadBalance(publicKey) {
