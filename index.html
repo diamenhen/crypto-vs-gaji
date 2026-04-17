@@ -212,6 +212,14 @@
 
     /* ── CHART ── */
     .chart-card { background:var(--bg2); border:1px solid var(--bdr); padding:14px 16px; margin-bottom:10px; }
+    .tf-btn {
+      background:transparent; border:1px solid var(--bdr); padding:3px 9px;
+      color:var(--text2); font-family:'IBM Plex Mono',monospace; font-size:9px;
+      font-weight:600; cursor:pointer; letter-spacing:1px; text-transform:uppercase;
+      transition:all 0.15s;
+    }
+    .tf-btn:hover { border-color:var(--bdr2); color:var(--accent); }
+    .tf-active { background:var(--bg3); border-color:var(--bdr2) !important; color:var(--accent) !important; }
 
     /* ── HIDDEN RETIRE ── */
     .retire-inp { background:var(--bg3); border:1px solid var(--bdr); padding:8px 12px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; width:100%; }
@@ -311,7 +319,16 @@
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
 
     <div class="chart-card" id="chartCard" style="display:none">
-      <div class="sec-l" style="margin-bottom:12px">PORTFOLIO VALUE HISTORY (7 DAYS)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="sec-l" style="margin-bottom:0;flex:1">PORTFOLIO VALUE</div>
+        <div style="display:flex;gap:2px">
+          <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
+          <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
+          <button onclick="setTf('1D')" id="tf1D" class="tf-btn tf-active">1D</button>
+          <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
+          <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
+        </div>
+      </div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
     </div>
 
@@ -446,20 +463,84 @@
     }
 
     // ── 3. Portfolio History Chart ──────────────────────────
+    let currentTf = '1D';
+
+    function setTf(tf) {
+      currentTf = tf;
+      document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('tf-active'));
+      const btn = document.getElementById('tf'+tf);
+      if (btn) btn.classList.add('tf-active');
+      renderChart();
+    }
+
     function updateChart(val) {
-      const now=new Date();
-      const key='cr_history'; let history=[];
-      try { history=JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){}
-      history.push({t:now.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}),v:val});
-      if (history.length>30) history=history.slice(-30);
-      try { localStorage.setItem(key,JSON.stringify(history)); } catch(e){}
-      if (history.length<2) return;
-      document.getElementById('chartCard').style.display='block';
-      // Show last 7 data points (1 week)
-      const display = history.slice(-7);
+      const now = new Date();
+      const key = 'cr_history'; let history = [];
+      try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
+      // Migrate old format (has 't' string key, no 'ts')
+      history = history.map(h => h.ts ? h : { ts: now.getTime() - (history.length * 30000), v: h.v });
+      // Push new point with timestamp
+      history.push({ ts: now.getTime(), v: val });
+      if (history.length > 5000) history = history.slice(-5000);
+      try { localStorage.setItem(key, JSON.stringify(history)); } catch(e) {}
+      document.getElementById('chartCard').style.display = 'block';
+      renderChart();
+    }
+
+    function renderChart() {
+      const key = 'cr_history'; let history = [];
+      try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
+      // Migrate old format if needed
+      const now = Date.now();
+      history = history.map((h,i) => h.ts ? h : { ts: now - ((history.length-i) * 30000), v: h.v });
+      if (history.length < 2) return;
+
+      const tfMs = { '1H':3600000, '4H':14400000, '1D':86400000, '7D':604800000, '30D':2592000000 };
+      const cutoff = now - (tfMs[currentTf] || 86400000);
+      let display = history.filter(h => h.ts >= cutoff);
+      if (display.length < 2) display = history.slice(-30);
+
+      // Downsample to max 60 points
+      let sampled = display;
+      if (display.length > 60) {
+        const step = Math.floor(display.length / 60);
+        sampled = display.filter((_, i) => i % step === 0);
+        if (sampled[sampled.length-1] !== display[display.length-1]) sampled.push(display[display.length-1]);
+      }
+
+      const fmtLabel = (ts) => {
+        const d = new Date(ts);
+        if (currentTf === '1H' || currentTf === '4H' || currentTf === '1D') return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+      };
+
       if (portfolioChart) portfolioChart.destroy();
-      const ctx=document.getElementById('portfolioChart').getContext('2d');
-      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>h.t),datasets:[{data:display.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+      const ctx = document.getElementById('portfolioChart').getContext('2d');
+      portfolioChart = new Chart(ctx, {
+        type:'line',
+        data:{
+          labels: sampled.map(h => fmtLabel(h.ts)),
+          datasets:[{
+            data: sampled.map(h => h.v),
+            borderColor:'#9945ff',
+            backgroundColor:'rgba(153,69,255,0.08)',
+            borderWidth:2,
+            pointBackgroundColor:'#9945ff',
+            pointRadius: sampled.length > 30 ? 0 : 3,
+            pointHoverRadius:4,
+            fill:true,
+            tension:0.4
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fi(c.raw)}}},
+          scales:{
+            x:{ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:6,maxRotation:0},grid:{color:'rgba(255,255,255,0.03)'}},
+            y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}
+          }
+        }
+      });
     }
 
     // ── 4. Retire Calculator ────────────────────────────────
@@ -595,9 +676,10 @@
           document.getElementById('wUsdV').textContent='~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         };
         refreshDisplay();
-        renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updateChart(total); updatePnL(total);
+        renderJobs(); renderFact(sol); renderTargets(); calcRetire(); updatePnL(total);
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
         refreshDisplay(); updatePnL(total); renderFact(window._solBalance||0);
+        updateChart(total); // record final total after all tokens loaded
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -841,7 +923,29 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => { const days=(hours/8).toFixed(1); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
+        insight: (sol,total,hours) => 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours of work</strong> as a Senior SE at GoTo. 🚀',
+        modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
+        cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
+      },
+      en: {
+        connectWallet: 'CONNECT WALLET', connectBtn: 'Connect Wallet',
+        disconnect: 'DISCONNECT', network: 'NETWORK',
+        heroLabel: 'YOUR TOTAL CRYPTO VALUE (IDR)',
+        heroSub: 'Connect wallet to see realtime comparison',
+        share: 'Share to X/Twitter',
+        chartTitle: 'PORTFOLIO VALUE HISTORY (7 DAYS)',
+        targetTitle: 'TOP 1% WEALTH TARGET',
+        jobsTitle: 'HIGH-PAYING JOBS IN INDONESIA COMPARISON',
+        harusKerja: 'MUST WORK', perDetik: 'PER SEC', perJam: 'PER HOUR',
+        perHari: 'PER DAY', perMinggu: 'PER WEEK', perBulan: 'PER MONTH',
+        perTahun: 'PER YEAR', per35thn: '35 YEARS',
+        blnGaji: 'mo salary', hubungkan: 'connect wallet',
+        pnlTitle: 'P&L TODAY', profit: 'PROFIT/LOSS',
+        sekarang: 'CURRENT', buka: 'OPEN TODAY', history: '7-DAY HISTORY',
+        donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL to:',
+        copyBtn: 'COPY ADDRESS',
+        footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
+        insight: (sol,total,hours) => 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours of work</strong> as a Senior SE at GoTo. 🚀',
         modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
         cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
         jobs: JOBS_EN,
