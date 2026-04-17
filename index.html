@@ -686,6 +686,9 @@
         renderJobs(); renderFact(sol); renderTargets(); calcRetire();
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
         refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
+        // Auto-fetch initial value from on-chain — use cache if already synced
+        const cached = localStorage.getItem('cr_initial_data');
+        if (!cached) { fetchInitialValue(); } // first time: fetch automatically
       } catch(e){ console.error('loadBalance:',e); }
     }
 
@@ -918,7 +921,7 @@
       const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
       if (!cached) {
         document.getElementById('atplContent').innerHTML =
-          '<div style="font-size:10px;color:var(--text3);padding:4px 0">Click <strong style="color:var(--accent)">↻ SYNC</strong> to load on-chain initial value</div>';
+          '<div style="font-size:10px;color:var(--text3);padding:4px 0"><span class="spin"></span> Fetching on-chain data...</div>';
         return;
       }
       const { initialIDR, initialDate, initialSOL, initialPriceUSD } = cached;
