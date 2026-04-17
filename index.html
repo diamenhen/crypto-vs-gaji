@@ -225,11 +225,46 @@
     footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
 
     @media(max-width:600px){
-      .ticker{grid-template-columns:1fr 1fr;}
-      .hero-v{font-size:26px;}
-      .job{flex-direction:column;}
-      .jr{width:100%;min-width:unset;text-align:left;border-left:2px solid var(--accent);border-top:none;}
-      #targetBox{grid-template-columns:1fr;}
+      .container { padding:0 12px 40px; }
+
+      /* Status bar - hide refresh on mobile, allow wrap */
+      .status-bar { gap:10px; flex-wrap:wrap; font-size:9px; padding:4px 8px; }
+      .status-bar #clockEl { font-size:9px; }
+
+      /* Ticker - 1 column stacked */
+      .ticker { grid-template-columns:1fr; }
+      .tick { padding:8px 12px; }
+      .tick-val { font-size:15px; }
+
+      /* Hero */
+      .hero-v { font-size:28px; }
+
+      /* P&L grid - stack on mobile */
+      #pnlBox > div > div[style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr 1fr !important; gap:10px !important; }
+
+      /* Target cards - single column */
+      #targetBox { grid-template-columns:1fr !important; }
+
+      /* Job cards */
+      .job { flex-direction:column; padding:10px 12px; }
+      .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:8px 12px; }
+      .jgrid { grid-template-columns:repeat(2,1fr); gap:6px 10px; }
+      .jt { font-size:11px; }
+      .jnv { font-size:11px; }
+
+      /* Wallet info */
+      .wi { gap:0; }
+      .wi > div { padding-right:12px; margin-right:12px; }
+      .wi-v { font-size:13px; }
+
+      /* Chart timeframe buttons */
+      .tf-btn { padding:3px 7px; font-size:8px; }
+
+      /* Modal */
+      .modal { margin:12px; }
+
+      /* Buttons */
+      .btn-cw { font-size:10px; padding:8px 14px; }
     }
   </style>
 </head>
@@ -464,7 +499,21 @@
       const maxVal = Math.max(...vals);
       const pad = (maxVal - minVal) * 0.2 || maxVal * 0.05;
       const fmtLbl = (h) => { if (h.ts) { const d=new Date(h.ts); return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); } return h.t||''; };
-      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>fmtLbl(h)),datasets:[{data:vals,borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{min:Math.max(0,minVal-pad),max:maxVal+pad,ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+      portfolioChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: display.map(h => fmtLbl(h)),
+          datasets: [{ data: vals, borderColor:'#9945ff', backgroundColor:'rgba(153,69,255,0.08)', borderWidth:2, pointBackgroundColor:'#9945ff', pointRadius:3, fill:true, tension:0.4 }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>' '+fi(c.raw)}} },
+          scales: {
+            x: { ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:5}, grid:{color:'rgba(255,255,255,0.03)'} },
+            y: { min:Math.max(0,minVal-pad), max:maxVal+pad, ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)}, grid:{color:'rgba(255,255,255,0.03)'} }
+          }
+        }
+      });
     }
 
     // ── 4. Retire Calculator ────────────────────────────────
@@ -514,15 +563,34 @@
     }
 
     async function fetchPrice() {
+      // Try Binance first
       try {
         const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
-        const d=await r.json(); solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*USD_IDR);
+        const d=await r.json();
+        if (!d.price) throw new Error('no price');
+        solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
         document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
         document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
         document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
         document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
         if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
-      } catch(e) { solIDR=2850000; solUSD=174.85; document.getElementById('tIdr').textContent='Rp 2.850.000*'; document.getElementById('tUsd').textContent='$174.85*'; }
+        return;
+      } catch(e) {}
+      // Fallback: CoinGecko (more mobile-friendly CORS)
+      try {
+        const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+        const d=await r.json();
+        if (!d.solana?.usd) throw new Error('no price');
+        solUSD=d.solana.usd; solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+        document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
+        document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
+        document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
+        document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
+        if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
+        return;
+      } catch(e) {}
+      // Last fallback: keep last known price or use estimate
+      if (!solIDR) { solIDR=2850000; solUSD=174.85; document.getElementById('tIdr').textContent='Rp 2.850.000*'; document.getElementById('tUsd').textContent='$174.85*'; }
     }
 
     // ── Wallet ──────────────────────────────────────────────
@@ -567,19 +635,26 @@
         let data=null;
         for (const rpc of RPCS) { try{ const r=await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[publicKey,{commitment:'confirmed'}]})}); data=await r.json(); if(data.result?.value!==undefined)break; }catch(e){continue;} }
         const sol=(data?.result?.value||0)/1e9;
-        // Selalu fetch harga terbaru saat loadBalance
+        // Fetch latest price - try Binance then CoinGecko
         try {
           const pr = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
           const pd = await pr.json();
+          if (!pd.price) throw new Error('no price');
           solUSD = parseFloat(pd.price);
           solIDR = Math.round(solUSD * (USD_IDR_RT || USD_IDR));
-          document.getElementById('tIdr').textContent = 'Rp ' + Math.round(solIDR).toLocaleString('id-ID');
-          document.getElementById('tUsd').textContent = '$' + solUSD.toFixed(2);
-          document.getElementById('tChgI').className = 'tick-chg up';
-          document.getElementById('tChgI').textContent = 'realtime';
-          document.getElementById('tChgU').className = 'tick-chg up';
-          document.getElementById('tChgU').textContent = 'realtime';
-        } catch(e) { if (!solIDR) { solIDR = 2850000; solUSD = 175; } }
+        } catch(e) {
+          try {
+            const pr = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+            const pd = await pr.json();
+            if (pd.solana?.usd) { solUSD = pd.solana.usd; solIDR = Math.round(solUSD * (USD_IDR_RT || USD_IDR)); }
+          } catch(e2) { if (!solIDR) { solIDR = 2850000; solUSD = 174.85; } }
+        }
+        document.getElementById('tIdr').textContent = 'Rp ' + Math.round(solIDR).toLocaleString('id-ID');
+        document.getElementById('tUsd').textContent = '$' + solUSD.toFixed(2);
+        document.getElementById('tChgI').className = 'tick-chg up';
+        document.getElementById('tChgI').textContent = 'realtime';
+        document.getElementById('tChgU').className = 'tick-chg up';
+        document.getElementById('tChgU').textContent = 'realtime';
         total = sol * solIDR; window._solBalance = sol; window._totalWithTokens = total;
         document.getElementById('wSol').textContent = sol.toFixed(4)+' SOL';
         // Update IDR values
