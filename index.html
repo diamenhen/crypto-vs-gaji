@@ -1091,15 +1091,17 @@
     function renderFact(sol) {
       if(total<=0){document.getElementById('factBox').style.display='none';return;}
       document.getElementById('factBox').style.display='flex';
-      const L = LABELS['en'];
-      const bestJob = JOBS_EN.reduce((best, job) => {
-        const months = total / job.salary;
-        const bestMonths = total / best.salary;
-        return Math.abs(months - 3) < Math.abs(bestMonths - 3) ? job : best;
-      });
-      const hours = Math.ceil(total / (bestJob.salary / 30 / 24));
-      const totalSOL = sol || parseFloat(document.getElementById('wSol')?.textContent) || 0;
-      document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours, bestJob);
+      try {
+        const L = LABELS['en'];
+        const bestJob = JOBS_EN.reduce((best, job) => {
+          const months = total / job.salary;
+          const bestMonths = total / best.salary;
+          return Math.abs(months - 3) < Math.abs(bestMonths - 3) ? job : best;
+        });
+        const hours = Math.ceil(total / (bestJob.salary / 30 / 24));
+        const totalSOL = parseFloat(sol) || parseFloat(document.getElementById('wSol')?.textContent) || 0;
+        document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours, bestJob);
+      } catch(e) { console.error('renderFact error:', e); }
     }
 
     // T object removed - using LABELS instead
