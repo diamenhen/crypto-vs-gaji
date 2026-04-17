@@ -824,7 +824,8 @@
     }
 
     async function fetchPrice() {
-      // Fetch SOL price first (critical)
+      // Try Binance for SOL
+      let solFetched = false;
       try {
         const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
         const d=await r.json();
@@ -835,11 +836,13 @@
         document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
         document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
         const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
-        if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
-      } catch(e) {
-        // SOL fallback: CoinGecko
+        solFetched = true;
+      } catch(e) {}
+
+      // Try CoinGecko for all coins at once (1 request)
+      if (!solFetched) {
         try {
-          const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+          const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,binancecoin&vs_currencies=usd');
           const d=await r.json();
           if (d.solana?.usd) {
             solUSD=d.solana.usd; solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
@@ -847,48 +850,42 @@
             document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
             document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
             document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
-            if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
+            const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
+            solFetched = true;
           }
-        } catch(e2) {
-          if (!solIDR) {
-            solIDR=2850000; solUSD=174.85;
-            document.getElementById('tIdr').textContent='Rp 2.850.000*';
-            document.getElementById('tUsd').textContent='$174.85*';
-            const eb=document.getElementById('errBanner');
-            if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
-          }
-        }
+          if (d.bitcoin?.usd) { document.getElementById('tBtc').textContent='$'+Math.round(d.bitcoin.usd).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
+          if (d.ethereum?.usd) { document.getElementById('tEth').textContent='$'+Math.round(d.ethereum.usd).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
+          if (d.binancecoin?.usd) { document.getElementById('tBnb').textContent='$'+d.binancecoin.usd.toFixed(2); document.getElementById('tBnbChg').textContent='realtime'; document.getElementById('tBnbChg').className='tick-chg up'; }
+        } catch(e) {}
       }
-      // Fetch BTC, ETH, BNB independently — failures don't affect SOL
-      ['BTC','ETH','BNB'].forEach(async sym => {
-        try {
-          const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+sym+'USDT');
-          const d=await r.json();
-          if (!d.price) throw new Error('no price');
-          const p=parseFloat(d.price);
-          const id = sym==='BTC'?'tBtc':sym==='ETH'?'tEth':'tBnb';
-          const idChg = sym==='BTC'?'tBtcChg':sym==='ETH'?'tEthChg':'tBnbChg';
-          const val = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
-          document.getElementById(id).textContent=val;
-          document.getElementById(idChg).textContent='realtime';
-          document.getElementById(idChg).className='tick-chg up';
-        } catch(e) {
-          // Fallback: CoinGecko
+
+      if (!solFetched) {
+        solIDR=solIDR||2850000; solUSD=solUSD||174.85;
+        document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID')+'*';
+        document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2)+'*';
+        const eb=document.getElementById('errBanner');
+        if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
+      }
+
+      // Only reload balance once after price is set
+      if (solFetched && provider?.publicKey) await loadBalance(provider.publicKey.toString());
+
+      // Try Binance for BTC/ETH/BNB separately (only if Binance worked for SOL)
+      if (solFetched) {
+        ['BTC','ETH','BNB'].forEach(async sym => {
           try {
-            const cgId = sym==='BTC'?'bitcoin':sym==='ETH'?'ethereum':'binancecoin';
-            const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+cgId+'&vs_currencies=usd');
+            const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+sym+'USDT');
             const d=await r.json();
-            const p=d[cgId]?.usd;
-            if (!p) return;
+            if (!d.price) return;
+            const p=parseFloat(d.price);
             const id = sym==='BTC'?'tBtc':sym==='ETH'?'tEth':'tBnb';
             const idChg = sym==='BTC'?'tBtcChg':sym==='ETH'?'tEthChg':'tBnbChg';
-            const val = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
-            document.getElementById(id).textContent=val;
+            document.getElementById(id).textContent = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
             document.getElementById(idChg).textContent='realtime';
             document.getElementById(idChg).className='tick-chg up';
-          } catch(e2) {}
-        }
-      });
+          } catch(e) {}
+        });
+      }
     }
 
     // ── Wallet ──────────────────────────────────────────────
