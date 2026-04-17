@@ -1112,8 +1112,11 @@
             const up = pl >= 0;
             const col = up ? 'var(--green)' : '#d05a4a';
             const sign = up ? '+' : '';
-            pnlInsight = '<br><br>📊 Today\'s P&L: <strong style="color:'+col+'">'+sign+fi(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>) — '
-              + (up ? 'you\'re up today! 🚀' : 'down today, stay strong 💪');
+            const plHours = Math.ceil(Math.abs(pl) / (bestJob.salary / 30 / 24));
+            const plDays = Math.ceil(plHours / 24);
+            pnlInsight = '📊 Today\'s P&L: <strong style="color:'+col+'">'+sign+fi(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>)'
+              + ' — equivalent to <strong>'+plHours+' hours</strong> or about <strong>'+plDays+' days of work</strong> as a '+bestJob.title+' at '+bestJob.company
+              + (up ? ' 🚀' : ' 💪');
           }
         }
 
