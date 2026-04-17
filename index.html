@@ -257,6 +257,22 @@
     .spin { display:inline-block; width:12px; height:12px; border:2px solid rgba(200,168,80,0.2); border-top-color:var(--accent); animation:sp 0.6s linear infinite; vertical-align:middle; margin-right:6px; }
     @keyframes sp { to{transform:rotate(360deg)} }
 
+    /* ── PNL CALENDAR ── */
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+    .cal-dow  { font-size:8px; color:var(--text3); text-align:center; padding:3px 0; letter-spacing:1px; font-weight:700; }
+    .cal-cell { background:var(--bg3); padding:5px 4px; min-height:48px; border-radius:2px; border:1px solid transparent; }
+    .cal-cell.profit { background:rgba(58,158,106,0.12); border-color:rgba(58,158,106,0.25); }
+    .cal-cell.loss   { background:rgba(208,90,74,0.12);  border-color:rgba(208,90,74,0.25); }
+    .cal-cell.today  { border-color:var(--accent) !important; }
+    .cal-cell.empty  { background:transparent; border-color:transparent; }
+    .cal-day  { font-size:9px; color:var(--text3); margin-bottom:2px; }
+    .cal-val  { font-size:9px; font-weight:700; }
+    .cal-pct  { font-size:8px; opacity:0.75; }
+    .cal-cell.profit .cal-day { color:rgba(58,158,106,0.7); }
+    .cal-cell.loss   .cal-day { color:rgba(208,90,74,0.7); }
+    .cal-cell.profit .cal-val, .cal-cell.profit .cal-pct { color:#3a9e6a; }
+    .cal-cell.loss   .cal-val, .cal-cell.loss   .cal-pct { color:#d05a4a; }
+
     /* ── FOOTER ── */
     footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
 
@@ -380,6 +396,18 @@
     </div>
 
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
+
+    <div id="pnlCalendarBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L CALENDAR</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button onclick="calPrevMonth()" style="background:transparent;border:1px solid var(--bdr);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9664;</button>
+          <span id="calMonthLabel" style="font-size:10px;color:var(--text);letter-spacing:1px;min-width:90px;text-align:center"></span>
+          <button onclick="calNextMonth()" style="background:transparent;border:1px solid var(--bdr);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9654;</button>
+        </div>
+      </div>
+      <div id="pnlCalendarGrid"></div>
+    </div>
 
     <div id="atplBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -1157,6 +1185,7 @@
       if (pnlData.length > 30) pnlData = pnlData.slice(-30);
       try { localStorage.setItem('cr_pnl', JSON.stringify(pnlData)); } catch(e) {}
       renderPnL(currentTotal);
+      renderCalendar();
     }
 
     function renderPnL(cur) {
@@ -1349,7 +1378,83 @@
       }
     }
 
-    function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
+    // ── PnL Calendar ────────────────────────────────────────
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const DAYS   = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+    function fi_short(n) {
+      const abs = Math.abs(n);
+      const sign = n < 0 ? '-' : '+';
+      if (abs >= 1e9)  return sign + (abs/1e9).toFixed(1) + 'M';
+      if (abs >= 1e6)  return sign + (abs/1e6).toFixed(1) + 'Jt';
+      if (abs >= 1e3)  return sign + Math.round(abs/1e3) + 'k';
+      return sign + Math.round(abs);
+    }
+
+    function renderCalendar() {
+      const box = document.getElementById('pnlCalendarBox');
+      const grid = document.getElementById('pnlCalendarGrid');
+      if (!box || !grid) return;
+      if (!pnlData || pnlData.length === 0) { box.style.display='none'; return; }
+      box.style.display = 'block';
+
+      document.getElementById('calMonthLabel').textContent = MONTHS[calMonth] + ' ' + calYear;
+
+      // Build lookup from pnlData — key: "DD MMM YYYY" (id-ID format used in pnlData)
+      const lookup = {};
+      pnlData.forEach(d => {
+        const parts = d.date.split(' ');
+        if (parts.length === 3) {
+          const day = parseInt(parts[0]);
+          const monthStr = parts[1].toLowerCase();
+          const year = parseInt(parts[2]);
+          const mIdx = ['jan','feb','mar','apr','mei','jun','jul','agu','sep','okt','nov','des'].indexOf(monthStr);
+          if (mIdx !== -1 && year === calYear && mIdx === calMonth) {
+            lookup[day] = { pl: d.close - d.open, close: d.close, open: d.open };
+          }
+        }
+      });
+
+      const today = new Date();
+      const firstDay = new Date(calYear, calMonth, 1);
+      let startDow = firstDay.getDay(); // 0=Sun
+      startDow = startDow === 0 ? 6 : startDow - 1; // convert to Mon=0
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      let html = '<div class="cal-grid" style="margin-bottom:4px">';
+      DAYS.forEach(d => { html += '<div class="cal-dow">'+d+'</div>'; });
+      html += '</div><div class="cal-grid">';
+
+      for (let i = 0; i < startDow; i++) html += '<div class="cal-cell empty"></div>';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const data = lookup[d];
+        const isToday = today.getDate()===d && today.getMonth()===calMonth && today.getFullYear()===calYear;
+        let cls = 'cal-cell';
+        if (data) cls += data.pl >= 0 ? ' profit' : ' loss';
+        if (isToday) cls += ' today';
+        const pct = data && data.open > 0 ? (data.pl / data.open * 100).toFixed(1) : null;
+        html += '<div class="'+cls+'">'
+          + '<div class="cal-day">'+d+'</div>'
+          + (data ? '<div class="cal-val">'+fi_short(data.pl)+'</div><div class="cal-pct">'+(data.pl>=0?'+':'')+pct+'%</div>' : '')
+          + '</div>';
+      }
+      html += '</div>';
+      grid.innerHTML = html;
+    }
+
+    function calPrevMonth() {
+      calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    }
+    function calNextMonth() {
+      calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendar();
+    }
+
+const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('en-GB',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
     // ── Language ─────────────────────────────────────────
     const lang = 'en';
