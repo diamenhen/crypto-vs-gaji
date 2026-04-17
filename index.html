@@ -237,10 +237,10 @@
 
   <div class="overlay" id="overlay" style="display:none" onclick="if(event.target===this)closeModal()">
     <div class="modal">
-      <div class="modal-title">Pilih Wallet</div>
+      <div class="modal-title">Select Wallet</div>
       <div class="modal-sub">Wallet yang terinstall di browser kamu</div>
       <div id="wList"></div>
-      <button class="modal-cancel" onclick="closeModal()">Batal</button>
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
     </div>
   </div>
 
@@ -259,7 +259,7 @@
     </header>
 
     <div class="status-bar">
-      SIS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; PERBARUI:<span>30S</span>
+      SYS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; REFRESH:<span>30S</span>
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
@@ -289,7 +289,7 @@
         </div>
         <div class="wi">
           <div><div class="wi-l">SOL</div><div class="wi-v up" id="wSol">--</div><div class="wi-s" id="wSolV">--</div></div>
-          <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
+          <div><div class="wi-l">IDR VALUE</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
           <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
         </div>
         <div id="tokenPills" style="display:none"></div>
@@ -299,7 +299,7 @@
     </div>
 
     <div class="hero">
-      <div class="hero-l">TOTAL NILAI CRYPTO KAMU (IDR)</div>
+      <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
       <div class="hero-v" id="heroV">Rp 0</div>
       <div class="hero-s" id="heroS">Connect wallet untuk melihat perbandingan realtime</div>
       <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
@@ -409,7 +409,7 @@
     function shareTwitter() {
       if (total<=0) return;
       const days = Math.ceil(total/(JOBS[0].salary/30));
-      const text = 'Crypto saya senilai '+fi(total)+' = '+fd(days)+' kerja CEO BUMN \uD83D\uDE80\n\nCek portfolio SOL kamu:\nhttps://crypto-vs-gaji.vercel.app\n\n#CryptoRetire #Solana';
+      const text = 'My crypto is worth '+fi(total)+' = '+fd(days)+' work as CEO \uD83D\uDE80\n\nCek portfolio SOL kamu:\nhttps://crypto-vs-gaji.vercel.app\n\n#CryptoRetire #Solana';
       window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text),'_blank');
     }
 
@@ -525,7 +525,7 @@
     function openModal() {
       const list=document.getElementById('wList'); list.innerHTML='';
       WALLETS.forEach(w=>{ const p=w.get(),ok=!!p; const btn=document.createElement('button'); btn.className='w-btn'; btn.disabled=!ok;
-        btn.innerHTML='<div class="w-icon" style="background:'+w.bg+'">'+w.icon+'</div><div><div class="w-name">'+w.name+'</div><div class="w-desc">'+w.desc+'</div></div><span class="w-badge '+(ok?'detected':'install')+'">'+(ok?'Terdeteksi':'Belum install')+'</span>';
+        btn.innerHTML='<div class="w-icon" style="background:'+w.bg+'">'+w.icon+'</div><div><div class="w-name">'+w.name+'</div><div class="w-desc">'+w.desc+'</div></div><span class="w-badge '+(ok?'detected':'install')+'">'+(ok?'Detected':'Not installed')+'</span>';
         if(ok) btn.onclick=()=>doConnect(w); list.appendChild(btn); });
       document.getElementById('overlay').style.display='flex';
     }
@@ -821,26 +821,26 @@
 
     const LABELS = {
       id: {
-        connectWallet: 'HUBUNGKAN DOMPET', connectBtn: 'Hubungkan Dompet',
-        disconnect: 'PUTUSKAN', network: 'JARINGAN',
-        heroLabel: 'TOTAL NILAI CRYPTO KAMU (IDR)',
+        connectWallet: 'CONNECT WALLET', connectBtn: 'Connect Wallet',
+        disconnect: 'DISCONNECT', network: 'NETWORK',
+        heroLabel: 'YOUR TOTAL CRYPTO VALUE (IDR)',
         heroSub: 'Connect wallet to see realtime comparison',
-        share: 'Bagikan ke X/Twitter',
-        chartTitle: 'RIWAYAT NILAI PORTFOLIO (7 HARI)',
-        targetTitle: 'TARGET KEKAYAAN TOP 1%',
-        jobsTitle: 'PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA',
-        harusKerja: 'HARUS KERJA', perDetik: 'PER DETIK', perJam: 'PER JAM',
-        perHari: 'PER HARI', perMinggu: 'PER MINGGU', perBulan: 'PER BULAN',
-        perTahun: 'PER TAHUN', per35thn: '35 TAHUN',
-        blnGaji: 'bln gaji', hubungkan: 'hubungkan dompet',
-        pnlTitle: 'P&L HARI INI', profit: 'PROFIT/LOSS',
-        sekarang: 'SEKARANG', buka: 'OPEN TODAY', history: '7-DAY HISTORY',
-        donateTitle: 'DUKUNG CRYPTORETIRE', donateSub: 'Kirim SOL:',
-        copyBtn: 'SALIN ALAMAT',
+        share: 'Share to X/Twitter',
+        chartTitle: 'PORTFOLIO VALUE HISTORY (7 DAYS)',
+        targetTitle: 'TOP 1% WEALTH TARGET',
+        jobsTitle: 'HIGH-PAYING JOBS IN INDONESIA',
+        harusKerja: 'MUST WORK', perDetik: 'PER SEC', perJam: 'PER HOUR',
+        perHari: 'PER DAY', perMinggu: 'PER WEEK', perBulan: 'PER MONTH',
+        perTahun: 'PER YEAR', per35thn: '35 YEARS',
+        blnGaji: 'mo salary', hubungkan: 'connect wallet',
+        pnlTitle: 'P&L TODAY', profit: 'PROFIT/LOSS',
+        sekarang: 'CURRENT', buka: 'OPEN TODAY', history: '7-DAY HISTORY',
+        donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL:',
+        copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => 'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+hours+' jam kerja</strong> seorang SE Senior di GoTo. 🚀',
-        modalTitle: 'Pilih Dompet', modalSub: 'Dompet yang terinstall di browser',
-        cancel: 'Batal', detected: 'Terdeteksi', notInstalled: 'Belum install',
+        insight: (sol,total,hours) => 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours of work</strong> as a Senior SE at GoTo. 🚀',
+        modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
+        cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
       },
       en: {
         connectWallet: 'CONNECT WALLET', connectBtn: 'Connect Wallet',
