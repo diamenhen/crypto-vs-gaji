@@ -311,7 +311,7 @@
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
 
     <div class="chart-card" id="chartCard" style="display:none">
-      <div class="sec-l" style="margin-bottom:12px">PORTFOLIO VALUE TODAY</div>
+      <div class="sec-l" style="margin-bottom:12px">PORTFOLIO VALUE HISTORY (7 DAYS)</div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
     </div>
 
@@ -450,22 +450,16 @@
       const now=new Date();
       const key='cr_history'; let history=[];
       try { history=JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){}
-      // Store with full timestamp for intraday display
-      history.push({t:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),d:now.toDateString(),v:val});
-      if (history.length>288) history=history.slice(-288); // max 24h @ 5min intervals
+      history.push({t:now.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}),v:val});
+      if (history.length>30) history=history.slice(-30);
       try { localStorage.setItem(key,JSON.stringify(history)); } catch(e){}
       if (history.length<2) return;
       document.getElementById('chartCard').style.display='block';
-      // Show only today's data points (1 day intraday)
-      const today=now.toDateString();
-      let display=history.filter(h=>h.d===today);
-      if (display.length<2) display=history.slice(-24); // fallback: last 24 points
-      // Update section label
-      const secLabel=document.querySelector('#chartCard .sec-l');
-      if (secLabel) secLabel.textContent='PORTFOLIO VALUE TODAY';
+      // Show last 7 data points (1 week)
+      const display = history.slice(-7);
       if (portfolioChart) portfolioChart.destroy();
       const ctx=document.getElementById('portfolioChart').getContext('2d');
-      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>h.t),datasets:[{data:display.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+      portfolioChart=new Chart(ctx,{type:'line',data:{labels:display.map(h=>h.t),datasets:[{data:display.map(h=>h.v),borderColor:'#9945ff',backgroundColor:'rgba(153,69,255,0.08)',borderWidth:2,pointBackgroundColor:'#9945ff',pointRadius:3,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fi(ctx.raw)}}},scales:{x:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#4a5568',font:{size:10},callback:v=>fi(v)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
     }
 
     // ── 4. Retire Calculator ────────────────────────────────
@@ -723,16 +717,16 @@
         const days=total>0?total/perHari:null, uid='b'+job.pct;
         const div=document.createElement('div'); div.className='job';
         div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid">'
-          +'<div><div class="jnl">PER SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
-          +'<div><div class="jnl">PER HOUR</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
-          +'<div><div class="jnl">PER DAY</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
-          +'<div><div class="jnl">PER WEEK</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
-          +'<div><div class="jnl">PER MONTH</div><div class="jnv">'+fi(perBulan)+'</div></div>'
-          +'<div><div class="jnl">PER YEAR</div><div class="jnv">'+fi(perTahun)+'</div></div>'
+          +'<div><div class="jnl">SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
+          +'<div><div class="jnl">HOUR</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
+          +'<div><div class="jnl">DAY</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
+          +'<div><div class="jnl">WEEK</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
+          +'<div><div class="jnl">MONTH</div><div class="jnv">'+fi(perBulan)+'</div></div>'
+          +'<div><div class="jnl">YEAR</div><div class="jnv">'+fi(perTahun)+'</div></div>'
           +'<div><div class="jnl">35 YEARS</div><div class="jnv">'+fi(per35thn)+'</div></div>'
           +'</div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div>'
           +'<div class="jr"><div class="jrl">MUST WORK</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
-          +'<div class="jrs">'+(total>0?'~'+(total/perBulan).toFixed(1)+' '+L.blnGaji:L.hubungkan)+'</div></div>';
+          +'</div>';
         box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
       });
     }
