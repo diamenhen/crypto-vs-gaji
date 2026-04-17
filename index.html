@@ -864,7 +864,7 @@
         try {
           const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+sym+'USDT');
           const d=await r.json();
-          if (!d.price) return;
+          if (!d.price) throw new Error('no price');
           const p=parseFloat(d.price);
           const id = sym==='BTC'?'tBtc':sym==='ETH'?'tEth':'tBnb';
           const idChg = sym==='BTC'?'tBtcChg':sym==='ETH'?'tEthChg':'tBnbChg';
@@ -872,7 +872,22 @@
           document.getElementById(id).textContent=val;
           document.getElementById(idChg).textContent='realtime';
           document.getElementById(idChg).className='tick-chg up';
-        } catch(e) {}
+        } catch(e) {
+          // Fallback: CoinGecko
+          try {
+            const cgId = sym==='BTC'?'bitcoin':sym==='ETH'?'ethereum':'binancecoin';
+            const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+cgId+'&vs_currencies=usd');
+            const d=await r.json();
+            const p=d[cgId]?.usd;
+            if (!p) return;
+            const id = sym==='BTC'?'tBtc':sym==='ETH'?'tEth':'tBnb';
+            const idChg = sym==='BTC'?'tBtcChg':sym==='ETH'?'tEthChg':'tBnbChg';
+            const val = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
+            document.getElementById(id).textContent=val;
+            document.getElementById(idChg).textContent='realtime';
+            document.getElementById(idChg).className='tick-chg up';
+          } catch(e2) {}
+        }
       });
     }
 
