@@ -840,7 +840,7 @@
         refreshDisplay();
         renderJobs(); renderFact(sol); renderTargets(); calcRetire();
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
-        refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank(); renderFact(window._solBalance||0);
+        refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank(); renderFact(sol);
         // Auto-fetch initial value from on-chain — use cache if already synced
         const cached = localStorage.getItem('cr_initial_data');
         if (!cached) { fetchInitialValue(); } // first time: fetch automatically
@@ -924,7 +924,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
+          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL);
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -1090,8 +1090,7 @@
         return Math.abs(months - 3) < Math.abs(bestMonths - 3) ? job : best;
       });
       const hours = Math.ceil(total / (bestJob.salary / 30 / 24));
-      const wSolText = document.getElementById('wSol')?.textContent || '0 SOL';
-      const totalSOL = parseFloat(wSolText) || window._totalSOL || sol || 0;
+      const totalSOL = sol || parseFloat(document.getElementById('wSol')?.textContent) || 0;
       document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours, bestJob);
     }
 
