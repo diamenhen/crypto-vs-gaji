@@ -210,7 +210,34 @@
     .fact-b { font-size:12px; color:var(--text2); line-height:1.7; }
     .fact-b strong { color:var(--text); font-weight:600; }
 
-    /* ── CHART ── */
+    /* ── GARUT RANK ── */
+    .rank-card {
+      display:flex; align-items:center; gap:16px;
+      background:var(--bg3); border:1px solid var(--bdr);
+      padding:14px 16px; margin-bottom:10px; position:relative;
+      transition:all 0.3s;
+    }
+    .rank-card.achieved { border-color:rgba(58,158,106,0.4); background:rgba(58,158,106,0.05); }
+    .rank-card.current  { border-color:var(--bdr2); background:rgba(232,128,10,0.05); }
+    .rank-card.locked   { opacity:0.45; }
+    .rank-icon { font-size:28px; flex-shrink:0; width:44px; text-align:center; }
+    .rank-info { flex:1; min-width:0; }
+    .rank-name { font-size:13px; font-weight:700; color:var(--text); letter-spacing:0.3px; text-transform:uppercase; margin-bottom:2px; }
+    .rank-desc { font-size:10px; color:var(--text2); margin-bottom:8px; }
+    .rank-target { font-size:10px; color:var(--text3); }
+    .rank-badge { flex-shrink:0; font-size:9px; padding:3px 10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+    .rank-badge.done  { background:rgba(58,158,106,0.15); color:var(--green); border:1px solid rgba(58,158,106,0.3); }
+    .rank-badge.now   { background:rgba(232,128,10,0.15); color:var(--accent); border:1px solid rgba(232,128,10,0.3); }
+    .rank-badge.next  { background:rgba(255,255,255,0.03); color:var(--text3); border:1px solid var(--bdr); }
+    .rank-prog { height:3px; background:var(--bg4); margin-top:6px; overflow:hidden; border-radius:2px; }
+    .rank-prog-fill { height:100%; background:var(--accent); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
+    .rank-current-banner {
+      text-align:center; padding:16px 12px 12px; margin-bottom:14px;
+    }
+    .rank-current-icon { font-size:48px; margin-bottom:8px; animation:rankPulse 2s ease-in-out infinite; }
+    @keyframes rankPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+    .rank-current-name { font-size:18px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+    .rank-current-sub  { font-size:10px; color:var(--text2); letter-spacing:1px; }
     .chart-card { background:var(--bg2); border:1px solid var(--bdr); padding:14px 16px; margin-bottom:10px; }
     .tf-btn {
       background:transparent; border:1px solid var(--bdr); padding:3px 9px;
@@ -378,7 +405,15 @@
     </div>
 
     <div class="sec-l" style="text-align:center">TOP 1% WEALTH TARGET</div>
-    <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px"></div>
+    <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px"></div>
+
+    <!-- Garut Wealth Rank -->
+    <div class="sec-l" style="margin-top:10px">GARUT WEALTH RANK</div>
+    <div id="garutRankBox" style="background:var(--bg2);border:1px solid var(--bdr);padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div id="garutRankContent">
+        <div style="font-size:10px;color:var(--text3);text-align:center;padding:10px 0">Connect wallet to see your Garut rank</div>
+      </div>
+    </div>
 
     <!-- Retire Calculator Hidden -->
     <div style="display:none">
@@ -804,7 +839,7 @@
         refreshDisplay();
         renderJobs(); renderFact(sol); renderTargets(); calcRetire();
         await fetchTokens(publicKey); await fetchLockedTokens(publicKey);
-        refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
+        refreshDisplay(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank(); renderFact(window._solBalance||0);
         // Auto-fetch initial value from on-chain — use cache if already synced
         const cached = localStorage.getItem('cr_initial_data');
         if (!cached) { fetchInitialValue(); } // first time: fetch automatically
@@ -888,7 +923,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
+          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(window._solBalance||0);
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -922,7 +957,108 @@
       });
     }
 
-    // ── Render Jobs ─────────────────────────────────────────
+    // ── Garut Wealth Rank ────────────────────────────────────
+    const GARUT_RANKS = [
+      { icon:'🌱', name:'Warga Biasa',       desc:'Masyarakat umum Garut',           target:0,           color:'#8892a8' },
+      { icon:'🥉', name:'Warga Berkecukupan',desc:'Masuk kelas menengah Garut',       target:100000000,   color:'#cd7f32' },
+      { icon:'🥈', name:'Orang Kaya Garut',  desc:'Top 10% kekayaan di Garut',       target:500000000,   color:'#a0a0a0' },
+      { icon:'🥇', name:'Elite Garut',       desc:'Top 1% kekayaan di Garut',        target:3000000000,  color:'#ffd700' },
+      { icon:'💎', name:'Konglomerat Garut', desc:'Setara pejabat & pengusaha besar', target:15000000000, color:'#00d4ff' },
+      { icon:'👑', name:'Raja Garut',        desc:'Orang terkaya di Garut',           target:100000000000,color:'#e8800a' },
+    ];
+
+    function renderGarutRank() {
+      const box = document.getElementById('garutRankContent');
+      if (!box) return;
+      const val = total || 0;
+      if (val <= 0) {
+        box.innerHTML = '<div style="font-size:10px;color:var(--text3);text-align:center;padding:10px 0">Connect wallet to see your Garut rank</div>';
+        return;
+      }
+
+      // Find current rank
+      let currentRankIdx = 0;
+      for (let i = GARUT_RANKS.length - 1; i >= 0; i--) {
+        if (val >= GARUT_RANKS[i].target) { currentRankIdx = i; break; }
+      }
+      const currentRank = GARUT_RANKS[currentRankIdx];
+      const nextRank = GARUT_RANKS[currentRankIdx + 1] || null;
+
+      // Progress to next rank
+      const pct = nextRank
+        ? Math.min(100, ((val - currentRank.target) / (nextRank.target - currentRank.target)) * 100)
+        : 100;
+
+      let html = '';
+
+      // Current rank banner
+      html += '<div class="rank-current-banner">'
+        + '<div class="rank-current-icon">'+currentRank.icon+'</div>'
+        + '<div class="rank-current-name" style="color:'+currentRank.color+'">'+currentRank.name+'</div>'
+        + '<div class="rank-current-sub">'+currentRank.desc+'</div>'
+        + '</div>';
+
+      // Progress to next
+      if (nextRank) {
+        const shortAmt = nextRank.target - val;
+        html += '<div style="background:var(--bg3);border:1px solid var(--bdr2);padding:12px 14px;margin-bottom:14px">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+            + '<div style="font-size:10px;color:var(--text2)">Next: <span style="color:var(--accent);font-weight:700">'+nextRank.icon+' '+nextRank.name+'</span></div>'
+            + '<div style="font-size:10px;color:var(--text3)">'+pct.toFixed(1)+'%</div>'
+          + '</div>'
+          + '<div class="rank-prog"><div class="rank-prog-fill" id="garutProgFill" style="width:0%"></div></div>'
+          + '<div style="font-size:9px;color:var(--red);margin-top:6px">Short: <span style="font-weight:700">'+fi(shortAmt)+'</span></div>'
+          + '</div>';
+      } else {
+        html += '<div style="background:rgba(58,158,106,0.08);border:1px solid rgba(58,158,106,0.3);padding:10px 14px;margin-bottom:14px;text-align:center">'
+          + '<div style="font-size:11px;color:var(--green);font-weight:700">👑 RANK TERTINGGI TERCAPAI!</div>'
+          + '</div>';
+      }
+
+      // All ranks list
+      html += '<div style="display:flex;flex-direction:column;gap:4px">';
+      GARUT_RANKS.slice(1).forEach((rank, i) => {
+        const rankIdx = i + 1;
+        const achieved = val >= rank.target;
+        const isCurrent = rankIdx === currentRankIdx;
+        const status = achieved ? 'achieved' : (isCurrent ? 'current' : 'locked');
+        const badgeClass = achieved ? 'done' : (isCurrent ? 'now' : 'next');
+        const badgeText = achieved ? '✓ ACHIEVED' : (isCurrent ? '● CURRENT' : 'LOCKED');
+        const rankPct = isCurrent && nextRank
+          ? Math.min(100, ((val - rank.target) / (GARUT_RANKS[rankIdx+1]?.target - rank.target || 1)) * 100)
+          : achieved ? 100 : 0;
+
+        html += '<div class="rank-card '+status+'">'
+          + '<div class="rank-icon">'+rank.icon+'</div>'
+          + '<div class="rank-info">'
+            + '<div class="rank-name" style="color:'+rank.color+'">'+rank.name+'</div>'
+            + '<div class="rank-desc">'+rank.desc+'</div>'
+            + '<div class="rank-target">Target: '+fi(rank.target)+'</div>'
+            + (isCurrent && nextRank ? '<div class="rank-prog"><div class="rank-prog-fill" id="garutProg'+rankIdx+'" style="width:0%"></div></div>' : '')
+          + '</div>'
+          + '<div class="rank-badge '+badgeClass+'">'+badgeText+'</div>'
+          + '</div>';
+      });
+      html += '</div>';
+
+      box.innerHTML = html;
+
+      // Animate progress bars
+      setTimeout(() => {
+        const mainFill = document.getElementById('garutProgFill');
+        if (mainFill) mainFill.style.width = pct + '%';
+        GARUT_RANKS.slice(1).forEach((_, i) => {
+          const rankIdx = i + 1;
+          const fill = document.getElementById('garutProg'+rankIdx);
+          if (fill) {
+            const rPct = rankIdx === currentRankIdx && nextRank
+              ? Math.min(100, ((val - GARUT_RANKS[rankIdx].target) / (GARUT_RANKS[rankIdx+1]?.target - GARUT_RANKS[rankIdx].target || 1)) * 100)
+              : val >= GARUT_RANKS[rankIdx].target ? 100 : 0;
+            fill.style.width = rPct + '%';
+          }
+        });
+      }, 200);
+    }
     function renderJobs() {
       const L=LABELS['en'], src=JOBS_EN, box=document.getElementById('jobsBox'); box.innerHTML='';
       src.forEach(job=>{
