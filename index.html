@@ -859,6 +859,30 @@
         } catch(e) {}
       }
 
+      // Try Kraken as second fallback for SOL + BTC + ETH
+      if (!solFetched) {
+        try {
+          const pairs = ['SOLUSD','XBTUSD','ETHUSD'];
+          const r=await fetch('https://api.kraken.com/0/public/Ticker?pair='+pairs.join(','));
+          const d=await r.json();
+          const res=d.result||{};
+          const solP=res['SOLUSD']||res['SOLZUSD'];
+          const btcP=res['XXBTZUSD']||res['XBTUSD'];
+          const ethP=res['XETHZUSD']||res['ETHUSD'];
+          if (solP) {
+            solUSD=parseFloat(solP.c[0]); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+            document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
+            document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
+            document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
+            document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
+            const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
+            solFetched=true;
+          }
+          if (btcP) { const p=parseFloat(btcP.c[0]); document.getElementById('tBtc').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
+          if (ethP) { const p=parseFloat(ethP.c[0]); document.getElementById('tEth').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
+        } catch(e) {}
+      }
+
       if (!solFetched) {
         solIDR=solIDR||2850000; solUSD=solUSD||174.85;
         document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID')+'*';
@@ -883,7 +907,23 @@
             document.getElementById(id).textContent = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
             document.getElementById(idChg).textContent='realtime';
             document.getElementById(idChg).className='tick-chg up';
-          } catch(e) {}
+          } catch(e) {
+            // Kraken fallback per coin
+            try {
+              const krakenPair = sym==='BTC'?'XXBTZUSD':sym==='ETH'?'XETHZUSD':'';
+              if (!krakenPair) return;
+              const r=await fetch('https://api.kraken.com/0/public/Ticker?pair='+krakenPair);
+              const d=await r.json();
+              const res=Object.values(d.result||{})[0];
+              if (!res) return;
+              const p=parseFloat(res.c[0]);
+              const id=sym==='BTC'?'tBtc':'tEth';
+              const idChg=sym==='BTC'?'tBtcChg':'tEthChg';
+              document.getElementById(id).textContent='$'+Math.round(p).toLocaleString('en');
+              document.getElementById(idChg).textContent='realtime';
+              document.getElementById(idChg).className='tick-chg up';
+            } catch(e2) {}
+          }
         });
       }
     }
