@@ -72,13 +72,6 @@
       animation:blink 1.2s step-end infinite;
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-    .lang-btn {
-      background:transparent; border:none; border-left:1px solid var(--bdr);
-      padding:0 16px; height:100%; color:var(--text2);
-      font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;
-      cursor:pointer; transition:all 0.15s; letter-spacing:1px;
-    }
-    .lang-btn:hover { background:rgba(200,168,80,0.1); color:var(--accent); }
 
     /* ── STATUS BAR ── */
     .status-bar {
@@ -229,8 +222,6 @@
     @keyframes sp { to{transform:rotate(360deg)} }
 
     /* ── FOOTER ── */
-    .lang-btn { background:transparent; border:1px solid var(--bdr2); padding:5px 13px; color:var(--text2); font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; letter-spacing:1px; }
-    .lang-btn:hover { border-color:var(--accent); color:var(--accent); }
     footer { text-align:left; margin-top:36px; font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:600; border-top:1px solid var(--bdr); padding-top:12px; text-transform:uppercase; }
 
     @media(max-width:600px){
@@ -263,13 +254,12 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
-        <div class="live-badge" id="liveBadge"><div class="live-dot"></div><span id="liveTxt">LANGSUNG</span></div>
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       </div>
     </header>
 
     <div class="status-bar">
-      SIS:<span>AKTIF</span> &nbsp; JAR:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; PERBARUI:<span>30S</span>
+      SIS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; PERBARUI:<span>30S</span>
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
@@ -279,14 +269,14 @@
     </div>
 
     <div class="c-card" id="cCard">
-      <div class="c-label">HUBUNGKAN DOMPET</div>
+      <div class="c-label">CONNECT WALLET</div>
       <div class="c-body">
       <div id="notConn">
         <button class="btn-cw" id="btnConn" onclick="openModal()">
           <div class="btn-cw-icon">&#9678;</div>
           Connect Wallet
         </button>
-        <div style="margin-top:10px;font-size:11px;color:#4a5568">Dukungan: Phantom Wallet</div>
+        <div style="margin-top:10px;font-size:11px;color:#4a5568">Support: Phantom Wallet</div>
       </div>
       <div id="isConn" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -295,12 +285,12 @@
             <span style="font-size:12px;color:#9945ff" id="addrTxt">--</span>
             <span style="font-size:11px;color:#4a5568" id="wNameTxt"></span>
           </div>
-          <button class="btn-dc" onclick="doDisconnect()">PUTUSKAN</button>
+          <button class="btn-dc" onclick="doDisconnect()">DISCONNECT</button>
         </div>
         <div class="wi">
           <div><div class="wi-l">SOL</div><div class="wi-v up" id="wSol">--</div><div class="wi-s" id="wSolV">--</div></div>
           <div><div class="wi-l">NILAI IDR</div><div class="wi-v" id="wIdr">--</div><div class="wi-s" id="wUsdV">--</div></div>
-          <div><div class="wi-l">JARINGAN</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
+          <div><div class="wi-l">NETWORK</div><div class="wi-v" style="color:#9945ff">Solana</div><div class="wi-s">Mainnet</div></div>
         </div>
         <div id="tokenPills" style="display:none"></div>
         <div style="display:none"><div id="wLocked"></div><div id="wLockedVal"></div><a id="wLockedLink" href="https://lock.jup.ag" target="_blank"></a></div>
@@ -321,11 +311,11 @@
     <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-bottom:8px"></div>
 
     <div class="chart-card" id="chartCard" style="display:none">
-      <div class="sec-l" style="margin-bottom:12px">RIWAYAT NILAI PORTFOLIO (7 HARI)</div>
+      <div class="sec-l" style="margin-bottom:12px">PORTFOLIO VALUE HISTORY (7 DAYS)</div>
       <canvas id="portfolioChart" style="max-height:180px"></canvas>
     </div>
 
-    <div class="sec-l" style="text-align:center">TARGET KEKAYAAN TOP 1%</div>
+    <div class="sec-l" style="text-align:center">TOP 1% WEALTH TARGET</div>
     <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px"></div>
 
     <!-- Retire Calculator Hidden -->
@@ -339,7 +329,7 @@
       <div id="retireDetail"></div>
     </div>
 
-    <div class="sec-l" id="secLabelJobs">PERBANDINGAN PEKERJAAN BERGAJI TINGGI DI INDONESIA</div>
+    <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA</div>
     <div class="jobs" id="jobsBox"></div>
 
     <div class="fact" id="factBox" style="display:none">
@@ -348,16 +338,15 @@
     </div>
 
     <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:14px 16px;margin-top:16px;margin-bottom:6px">
-      <div id="donateTitleEl" style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:10px">DUKUNG CRYPTORETIRE</div>
+      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:10px">SUPPORT CRYPTORETIRE</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
         <div>
           <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">SOLANA (SOL)</div>
           <div style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
-            <span id="donateSubSolEl" style="color:var(--text3);margin-right:4px">Kirim SOL:</span>
             <span id="donateAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('sol')" title="Klik untuk copy">5u7ng...JgA</span>
           </div>
         </div>
-        <button id="copyBtnSol" onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN SOL</button>
+        <button onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY SOL</button>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--bdr)">
         <div>
@@ -366,10 +355,10 @@
             <span id="donateEvmAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('evm')" title="Klik untuk copy">0x1503...3E3a</span>
           </div>
         </div>
-        <button id="copyBtnEvm" onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">SALIN EVM</button>
+        <button onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:5px 12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY EVM</button>
       </div>
     </div>
-    <footer id="footerEl">DATA GAJI ESTIMASI PASAR INDONESIA 2024 &middot; HARGA SOL VIA BINANCE API &middot; PERBARUI 30 DETIK</footer>
+    <footer id="footerEl">SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC</footer>
   </div>
 
   <script>
@@ -561,7 +550,7 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 0'; document.getElementById('heroS').textContent='Hubungkan dompet untuk melihat perbandingan realtime';
+      document.getElementById('heroV').textContent='Rp 0'; document.getElementById('heroS').textContent='Connect wallet to see realtime comparison';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
       document.getElementById('retireCurrent').value='';
@@ -722,7 +711,7 @@
 
     // ── Render Jobs ─────────────────────────────────────────
     function renderJobs() {
-      const L=LABELS[lang], src=L.jobs, box=document.getElementById('jobsBox'); box.innerHTML='';
+      const L=LABELS['en'], src=JOBS_EN, box=document.getElementById('jobsBox'); box.innerHTML='';
       src.forEach(job=>{
         const perDetik=job.salary/30/24/3600, perJam=job.salary/30/24, perHari=job.salary/30, perMinggu=job.salary/4.33, perBulan=job.salary, perTahun=job.salary*12, per35thn=job.salary*420;
         const days=total>0?total/perHari:null, uid='b'+job.pct;
@@ -744,7 +733,7 @@
     function renderFact(sol) {
       if(total<=0){document.getElementById('factBox').style.display='none';return;}
       document.getElementById('factBox').style.display='flex';
-      const L = LABELS[lang];
+      const L = LABELS['en'];
       const hours = Math.ceil(total/(JOBS_EN[3].salary/30/24));
       const wSolText = document.getElementById('wSol')?.textContent || '0 SOL';
       const totalSOL = parseFloat(wSolText) || window._totalSOL || sol || 0;
@@ -828,14 +817,14 @@
     function updateClock(){const n=new Date();const e=document.getElementById('clockEl');if(e)e.textContent=n.toLocaleTimeString('id-ID',{hour12:false})+' WIB';}
     updateClock(); setInterval(updateClock,1000);
     // ── Language ─────────────────────────────────────────
-    let lang = 'id';
+    const lang = 'en';
 
     const LABELS = {
       id: {
         connectWallet: 'HUBUNGKAN DOMPET', connectBtn: 'Hubungkan Dompet',
         disconnect: 'PUTUSKAN', network: 'JARINGAN',
         heroLabel: 'TOTAL NILAI CRYPTO KAMU (IDR)',
-        heroSub: 'Hubungkan dompet untuk melihat perbandingan realtime',
+        heroSub: 'Connect wallet to see realtime comparison',
         share: 'Bagikan ke X/Twitter',
         chartTitle: 'RIWAYAT NILAI PORTFOLIO (7 HARI)',
         targetTitle: 'TARGET KEKAYAAN TOP 1%',
@@ -844,15 +833,14 @@
         perHari: 'PER HARI', perMinggu: 'PER MINGGU', perBulan: 'PER BULAN',
         perTahun: 'PER TAHUN', per35thn: '35 TAHUN',
         blnGaji: 'bln gaji', hubungkan: 'hubungkan dompet',
-        pnlTitle: 'P&L HARI INI', profit: 'UNTUNG/RUGI',
-        sekarang: 'SEKARANG', buka: 'BUKA HARI INI', history: 'RIWAYAT 7 HARI',
+        pnlTitle: 'P&L HARI INI', profit: 'PROFIT/LOSS',
+        sekarang: 'SEKARANG', buka: 'OPEN TODAY', history: '7-DAY HISTORY',
         donateTitle: 'DUKUNG CRYPTORETIRE', donateSub: 'Kirim SOL:',
         copyBtn: 'SALIN ALAMAT',
-        footer: 'DATA GAJI ESTIMASI PASAR INDONESIA 2024 &middot; HARGA SOL VIA BINANCE API &middot; PERBARUI 30 DETIK',
+        footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
         insight: (sol,total,hours) => 'Kamu punya <strong>'+sol.toFixed(4)+' SOL</strong> senilai <strong>'+fi(total)+'</strong> — setara <strong>'+hours+' jam kerja</strong> seorang SE Senior di GoTo. 🚀',
         modalTitle: 'Pilih Dompet', modalSub: 'Dompet yang terinstall di browser',
         cancel: 'Batal', detected: 'Terdeteksi', notInstalled: 'Belum install',
-        jobs: JOBS,
       },
       en: {
         connectWallet: 'CONNECT WALLET', connectBtn: 'Connect Wallet',
@@ -879,99 +867,10 @@
       }
     };
 
-    function toggleLang() {
-      lang = lang === 'id' ? 'en' : 'id';
-      document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
-      applyLang();
-      renderJobs();
-      if (total > 0) renderFact(window._totalSOL || window._solBalance || 0);
-    }
 
-    function applyLang() {
-      const L = LABELS[lang];
-
-      // ── Wallet card ──────────────────────────────────────
-      document.querySelector('.c-label').textContent = L.connectWallet;
-      document.getElementById('btnConn').innerHTML = '<div class="btn-cw-icon">&#9678;</div> ' + L.connectBtn;
-      const dcBtn = document.querySelector('.btn-dc');
-      if (dcBtn) dcBtn.textContent = L.disconnect;
-
-      // ── Wallet info labels ────────────────────────────────
-      const wiLabels = document.querySelectorAll('.wi-l');
-      const wiKeys = ['SOL','NILAI IDR', L.network, ''];
-      // target NETWORK label specifically
-      wiLabels.forEach(el => {
-        if (el.textContent === 'JARINGAN' || el.textContent === 'NETWORK') el.textContent = L.network;
-      });
-
-      // ── Modal ─────────────────────────────────────────────
-      document.querySelector('.modal-title').textContent = L.modalTitle;
-      document.querySelector('.modal-sub').textContent = L.modalSub;
-      document.querySelector('.modal-cancel').textContent = L.cancel;
-      // Update wallet detected/not installed badges
-      document.querySelectorAll('.detected').forEach(el => el.textContent = L.detected);
-      document.querySelectorAll('.install').forEach(el => el.textContent = L.notInstalled);
-
-      // ── Hero ──────────────────────────────────────────────
-      document.querySelector('.hero-l').textContent = L.heroLabel;
-      if (total <= 0) document.getElementById('heroS').textContent = L.heroSub;
-      const btnShare = document.getElementById('btnShare');
-      if (btnShare) btnShare.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> ' + L.share;
-
-      // ── Status bar ────────────────────────────────────────
-      const perbarui = document.querySelector('.status-bar');
-      if (perbarui) {
-        const spans = perbarui.querySelectorAll('span:not(#clockEl)');
-        if (lang === 'id') {
-          perbarui.innerHTML = 'SIS:<span>AKTIF</span> &nbsp; JAR:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; PERBARUI:<span>30D</span><span id="clockEl"></span>';
-        } else {
-          perbarui.innerHTML = 'SYS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; REFRESH:<span>30S</span><span id="clockEl"></span>';
-        }
-        updateClock();
-      }
-
-      // ── Sections labels ───────────────────────────────────
-      const secLabelJobs = document.getElementById('secLabelJobs');
-      if (secLabelJobs) secLabelJobs.textContent = L.jobsTitle;
-
-      // Target kekayaan label
-      const allSecL = document.querySelectorAll('.sec-l');
-      allSecL.forEach(el => {
-        if (el.textContent.includes('TARGET') || el.textContent.includes('KEKAYAAN') || el.textContent.includes('WEALTH')) {
-          el.textContent = L.targetTitle;
-        }
-        if (el.textContent.includes('RIWAYAT') || el.textContent.includes('HISTORY') || el.textContent.includes('PORTFOLIO')) {
-          el.textContent = L.chartTitle;
-        }
-      });
-
-      // ── PnL box ───────────────────────────────────────────
-      const pnlBox = document.getElementById('pnlBox');
-      if (pnlBox && pnlBox.style.display !== 'none') {
-        const pnlTitleEl = pnlBox.querySelector('div:first-child div:first-child');
-        if (pnlTitleEl) pnlTitleEl.textContent = L.pnlTitle;
-      }
-
-      // ── Donation box ──────────────────────────────────────
-      const donateTitleEl = document.getElementById('donateTitleEl');
-      if (donateTitleEl) donateTitleEl.textContent = L.donateTitle;
-      const donateSubSolEl = document.getElementById('donateSubSolEl');
-      if (donateSubSolEl) donateSubSolEl.textContent = L.donateSub;
-      const copyBtnSol = document.getElementById('copyBtnSol');
-      if (copyBtnSol) copyBtnSol.textContent = lang === 'id' ? 'SALIN SOL' : 'COPY SOL';
-      const copyBtnEvm = document.getElementById('copyBtnEvm');
-      if (copyBtnEvm) copyBtnEvm.textContent = lang === 'id' ? 'SALIN EVM' : 'COPY EVM';
-
-      // ── Live badge ────────────────────────────────────────
-      const liveTxt = document.getElementById('liveTxt');
-      if (liveTxt) liveTxt.textContent = lang === 'id' ? 'LANGSUNG' : 'LIVE';
-
-      // ── Footer ────────────────────────────────────────────
-      document.getElementById('footerEl').innerHTML = L.footer;
-    }
 
     // ── Init ────────────────────────────────────────────────
-    applyLang(); renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000);
+    renderJobs(); renderTargets(); calcRetire(); fetchPrice(); fetchUsdIdr(); setInterval(fetchPrice,30000); setInterval(fetchUsdIdr,60000);
   </script>
 </body>
 </html>
