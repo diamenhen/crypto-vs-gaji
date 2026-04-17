@@ -1084,10 +1084,15 @@
       if(total<=0){document.getElementById('factBox').style.display='none';return;}
       document.getElementById('factBox').style.display='flex';
       const L = LABELS['en'];
-      const hours = Math.ceil(total/(JOBS_EN[3].salary/30/24));
+      const bestJob = JOBS_EN.reduce((best, job) => {
+        const months = total / job.salary;
+        const bestMonths = total / best.salary;
+        return Math.abs(months - 3) < Math.abs(bestMonths - 3) ? job : best;
+      });
+      const hours = Math.ceil(total / (bestJob.salary / 30 / 24));
       const wSolText = document.getElementById('wSol')?.textContent || '0 SOL';
       const totalSOL = parseFloat(wSolText) || window._totalSOL || sol || 0;
-      document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours);
+      document.getElementById('factTxt').innerHTML = L.insight(totalSOL, total, hours, bestJob);
     }
 
     // T object removed - using LABELS instead
@@ -1339,11 +1344,7 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
-        modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
-        cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
-      },
-      en: {
+        insight: (sol,total,hours,job) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days of work</strong> as a '+job.title+' at '+job.company+'. 🚀'; },
         connectWallet: 'CONNECT WALLET', connectBtn: 'Connect Wallet',
         disconnect: 'DISCONNECT', network: 'NETWORK',
         heroLabel: 'YOUR TOTAL CRYPTO VALUE (IDR)',
@@ -1361,7 +1362,7 @@
         donateTitle: 'SUPPORT CRYPTORETIRE', donateSub: 'Send SOL to:',
         copyBtn: 'COPY ADDRESS',
         footer: 'SALARY DATA ESTIMATE INDONESIA 2024 &middot; SOL PRICE VIA BINANCE API &middot; REFRESH 30 SEC',
-        insight: (sol,total,hours) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days of work</strong> as a Senior SE at GoTo. 🚀'; },
+        insight: (sol,total,hours,job) => { const days=Math.ceil(hours/24); return 'You have <strong>'+sol.toFixed(4)+' SOL</strong> worth <strong>'+fi(total)+'</strong> — equivalent to <strong>'+hours+' hours</strong> or about <strong>'+days+' days of work</strong> as a '+job.title+' at '+job.company+'. 🚀'; },
         modalTitle: 'Select Wallet', modalSub: 'Wallets installed in your browser',
         cancel: 'Cancel', detected: 'Detected', notInstalled: 'Not installed',
         jobs: JOBS_EN,
