@@ -561,6 +561,73 @@
   </div>
 
   <script>
+    // ── Supabase Config ──────────────────────────────────────
+    const SB_URL = 'https://geessxwsamrqwqsawrgm.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZXNzeHdzYW1ycXdxc2F3cmdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MDQ0NzQsImV4cCI6MjA5MjA4MDQ3NH0.DchMndI0kKj2YsVbabJdnFG33O0kJvPZcHJGeerQOD8';
+
+    async function sbFetch(path, method='GET', body=null) {
+      const opts = { method, headers: {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'} };
+      if (body) opts.body = JSON.stringify(body);
+      try { const r=await fetch(SB_URL+'/rest/v1/'+path,opts); return r.ok?await r.json():null; } catch(e){return null;}
+    }
+    async function sbSyncHistory(wallet) {
+      if (!wallet) return;
+      try {
+        let history=[]; try{history=JSON.parse(localStorage.getItem('cr_history')||'[]');}catch(e){}
+        if (!history.length) return;
+        const rows=history.map(h=>({wallet,ts:h.ts,v:h.v}));
+        for(let i=0;i<rows.length;i+=100) await sbFetch('portfolio_history?on_conflict=wallet,ts','POST',rows.slice(i,i+100));
+      } catch(e){}
+    }
+    async function sbLoadHistory(wallet) {
+      if (!wallet) return false;
+      try {
+        const data=await sbFetch('portfolio_history?wallet=eq.'+encodeURIComponent(wallet)+'&order=ts.asc&limit=8640');
+        if (!data||!data.length) return false;
+        try{localStorage.setItem('cr_history',JSON.stringify(data.map(r=>({ts:r.ts,v:r.v}))));}catch(e){}
+        return true;
+      } catch(e){return false;}
+    }
+    async function sbSyncPnL(wallet) {
+      if (!wallet||!pnlData.length) return;
+      try { await sbFetch('pnl_data?on_conflict=wallet,date','POST',pnlData.map(d=>({wallet,date:d.date,open:d.open,close:d.close}))); } catch(e){}
+    }
+    async function sbLoadPnL(wallet) {
+      if (!wallet) return false;
+      try {
+        const data=await sbFetch('pnl_data?wallet=eq.'+encodeURIComponent(wallet)+'&order=date.asc');
+        if (!data||!data.length) return false;
+        pnlData=data.map(r=>({date:r.date,open:r.open,close:r.close}));
+        try{localStorage.setItem('cr_pnl',JSON.stringify(pnlData));}catch(e){}
+        return true;
+      } catch(e){return false;}
+    }
+    async function sbSyncInitial(wallet) {
+      if (!wallet) return;
+      try {
+        const c=JSON.parse(localStorage.getItem('cr_initial_data')||'null'); if(!c) return;
+        await sbFetch('initial_data?on_conflict=wallet','POST',[{wallet,initial_idr:c.initialIDR,initial_sol:c.initialSOL,initial_price_usd:c.initialPriceUSD,initial_date:c.initialDate,initial_ts:c.initialTs}]);
+      } catch(e){}
+    }
+    async function sbLoadInitial(wallet) {
+      if (!wallet) return false;
+      try {
+        const data=await sbFetch('initial_data?wallet=eq.'+encodeURIComponent(wallet)+'&limit=1');
+        if (!data||!data.length) return false;
+        const r=data[0];
+        try{localStorage.setItem('cr_initial_data',JSON.stringify({initialIDR:r.initial_idr,initialSOL:r.initial_sol,initialPriceUSD:r.initial_price_usd,initialDate:r.initial_date,initialTs:r.initial_ts,ts:Date.now()}));}catch(e){}
+        return true;
+      } catch(e){return false;}
+    }
+    async function sbLoadAll(wallet) {
+      await Promise.all([sbLoadHistory(wallet),sbLoadPnL(wallet),sbLoadInitial(wallet)]);
+    }
+    function sbStartAutoSync(wallet) {
+      if (!wallet) return;
+      sbSyncHistory(wallet); sbSyncPnL(wallet); sbSyncInitial(wallet);
+      setInterval(()=>{sbSyncHistory(wallet);sbSyncPnL(wallet);sbSyncInitial(wallet);},300000);
+    }
+
     let USD_IDR = 17000; let USD_IDR_RT = 17000;
     let solIDR=0, solUSD=0, total=0, provider=null, wName='', portfolioChart=null;
     let _loadingBalance = false;
@@ -1016,7 +1083,13 @@
       try {
         const resp=await p.connect(); const pk=(resp?.publicKey||p.publicKey)?.toString();
         if(!pk) throw new Error('Tidak dapat baca public key');
-        provider=p; wName=walletDef.name; await loadBalance(pk); showConnected(pk);
+        provider=p; wName=walletDef.name;
+        // Load data from Supabase first, then load balance
+        await sbLoadAll(pk);
+        await loadBalance(pk);
+        showConnected(pk);
+        // Start auto sync to Supabase
+        sbStartAutoSync(pk);
       } catch(e) { btn.innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; btn.disabled=false; if(e.code!==4001) alert('Gagal connect: '+e.message); }
     }
     function showConnected(pk) {
