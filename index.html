@@ -494,7 +494,13 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="sec-l" style="margin-bottom:0;flex:1">PORTFOLIO VALUE</div>
         <div style="display:flex;gap:2px;align-items:center">
-          <button onclick="syncChart()" class="tf-btn" style="border-color:var(--bdr2);color:var(--accent)" title="Sync chart">↺</button>
+          <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
+          <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
+          <button onclick="setTf('1D')" id="tf1D" class="tf-btn">1D</button>
+          <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
+          <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
+          <button onclick="setTf('ALL')" id="tfALL" class="tf-btn tf-active">ALL</button>
+          <button onclick="syncChart()" class="tf-btn" style="margin-left:6px;border-color:var(--bdr2);color:var(--accent)" title="Sync chart">↺</button>
         </div>
       </div>
       <canvas id="portfolioChart" style="max-height:200px"></canvas>
