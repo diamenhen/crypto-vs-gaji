@@ -564,6 +564,7 @@
   <script>
     let USD_IDR = 17000; let USD_IDR_RT = 17000;
     let solIDR=0, solUSD=0, total=0, provider=null, wName='', portfolioChart=null;
+    let _loadingBalance = false;
 
     function fi(n) {
       n = Math.round(n);
@@ -892,14 +893,15 @@
       }
 
       if (!solFetched) {
-        if (!solIDR) { solIDR=2850000; solUSD=174.85; }
-        document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID')+'*';
-        document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2)+'*';
+        // Show error but DON'T call loadBalance with stale price
+        document.getElementById('tIdr').textContent='--';
+        document.getElementById('tUsd').textContent='--';
         const eb=document.getElementById('errBanner');
-        if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
+        if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='All APIs unreachable — click retry';}
+        return; // Don't load balance with wrong price
       }
 
-      if (solFetched && provider?.publicKey) await loadBalance(provider.publicKey.toString());
+      if (provider?.publicKey) await loadBalance(provider.publicKey.toString());
     }
 
     // ── Wallet ──────────────────────────────────────────────
@@ -952,6 +954,8 @@
       renderJobs(); renderTargets(); calcRetire();
     }
     async function loadBalance(publicKey) {
+      if (_loadingBalance) return;
+      _loadingBalance = true;
       try {
         const RPCS=['https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55','https://api.mainnet-beta.solana.com'];
         let data=null;
@@ -1011,7 +1015,7 @@
         // Auto-fetch initial value from on-chain — use cache if already synced
         const cached = localStorage.getItem('cr_initial_data');
         if (!cached) { fetchInitialValue(); } // first time: fetch automatically
-      } catch(e){ console.error('loadBalance:',e); }
+      } catch(e){ console.error('loadBalance:',e); } finally { _loadingBalance = false; }
     }
 
     // ── Jupiter Lock ────────────────────────────────────────
