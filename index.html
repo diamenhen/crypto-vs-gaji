@@ -697,11 +697,17 @@
       try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
       history = history.filter(h => h.ts && h.v > 500000);
 
-      // Remove spikes: filter out points that are >3x the median value
-      if (history.length > 3) {
-        const vals = [...history].map(h => h.v).sort((a,b)=>a-b);
-        const median = vals[Math.floor(vals.length/2)];
-        const cleaned = history.filter(h => h.v <= median * 3 && h.v >= median * 0.1);
+      // Aggressive spike removal: remove any point > 1.5x the next/prev point
+      if (history.length > 2) {
+        let cleaned = [history[0]];
+        for (let i = 1; i < history.length - 1; i++) {
+          const prev = cleaned[cleaned.length-1].v;
+          const next = history[i+1].v;
+          const cur = history[i].v;
+          const baseline = Math.max(prev, next);
+          if (cur <= baseline * 1.8) cleaned.push(history[i]);
+        }
+        cleaned.push(history[history.length-1]);
         if (cleaned.length !== history.length) {
           history = cleaned;
           try { localStorage.setItem(key, JSON.stringify(history)); } catch(e) {}
