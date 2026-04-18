@@ -333,8 +333,11 @@
       #pnlBox > div > div[style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr 1fr !important; gap:10px !important; }
       #targetBox { grid-template-columns:1fr !important; }
       .job { flex-direction:column; padding:10px 12px; }
-      .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:6px 12px; margin-top:8px; }
-      .jgrid { grid-template-columns:repeat(2,1fr); gap:6px 10px; }
+      .jr { width:100%; min-width:unset; text-align:left; border-left:2px solid var(--accent); border-top:none; padding:5px 10px; margin-top:6px; display:flex; align-items:center; justify-content:space-between; }
+      .jrl { margin-bottom:0; margin-right:8px; }
+      .jrv { font-size:14px; }
+      .jrs { display:none; }
+      .jgrid { grid-template-columns:repeat(2,1fr); gap:4px 10px; }
       .jt { font-size:11px; }
       .jnv { font-size:11px; }
       .wi { gap:0; }
@@ -347,6 +350,7 @@
       .rank-current-name { font-size:14px; }
       .badge-item { width:50px; }
       .badge-circle { width:38px; height:38px; font-size:16px; }
+      footer { font-size:8px; letter-spacing:1px; word-spacing:2px; }
     }
   </style>
 </head>
@@ -667,6 +671,12 @@
       try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
       history = history.filter(h => h.ts && h.v > 500000);
 
+      // Sanity check: skip if value is more than 3x previous (likely double-load artifact)
+      if (history.length > 0) {
+        const lastVal = history[history.length-1].v;
+        if (val > lastVal * 3) return;
+      }
+
       const isEmpty = history.length === 0;
       // Throttle: record once per 5 min — but always record if empty (first point)
       if (!isEmpty && now - _lastChartTs < 300000) {
@@ -824,108 +834,72 @@
     }
 
     async function fetchPrice() {
-      // Try Binance for SOL
       let solFetched = false;
-      try {
-        const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
-        const d=await r.json();
-        if (!d.price) throw new Error('no price');
-        solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
-        document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
-        document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
-        document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
-        document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
-        const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
-        solFetched = true;
-      } catch(e) {}
 
-      // Try CoinGecko for all coins at once (1 request)
-      if (!solFetched) {
-        try {
-          const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,binancecoin&vs_currencies=usd');
-          const d=await r.json();
-          if (d.solana?.usd) {
-            solUSD=d.solana.usd; solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
-            document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
-            document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
-            document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
-            document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
-            const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
-            solFetched = true;
-          }
-          if (d.bitcoin?.usd) { document.getElementById('tBtc').textContent='$'+Math.round(d.bitcoin.usd).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
-          if (d.ethereum?.usd) { document.getElementById('tEth').textContent='$'+Math.round(d.ethereum.usd).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
-          if (d.binancecoin?.usd) { document.getElementById('tBnb').textContent='$'+d.binancecoin.usd.toFixed(2); document.getElementById('tBnbChg').textContent='realtime'; document.getElementById('tBnbChg').className='tick-chg up'; }
-        } catch(e) {}
+      function setTicker(id, chgId, val) {
+        const el=document.getElementById(id); if(el) el.textContent=val;
+        const ce=document.getElementById(chgId); if(ce){ce.textContent='realtime';ce.className='tick-chg up';}
       }
 
-      // Try Kraken as second fallback for SOL + BTC + ETH
+      // CoinGecko first — 1 request, works on most mobile browsers
+      try {
+        const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,binancecoin&vs_currencies=usd');
+        const d=await r.json();
+        if (d.solana?.usd) {
+          solUSD=d.solana.usd; solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+          setTicker('tIdr','tChgI','Rp '+Math.round(solIDR).toLocaleString('id-ID'));
+          setTicker('tUsd','tChgU','$'+solUSD.toFixed(2));
+          const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
+          solFetched=true;
+        }
+        if (d.bitcoin?.usd) setTicker('tBtc','tBtcChg','$'+Math.round(d.bitcoin.usd).toLocaleString('en'));
+        if (d.ethereum?.usd) setTicker('tEth','tEthChg','$'+Math.round(d.ethereum.usd).toLocaleString('en'));
+        if (d.binancecoin?.usd) setTicker('tBnb','tBnbChg','$'+d.binancecoin.usd.toFixed(2));
+      } catch(e) {}
+
+      // Binance fallback for SOL
       if (!solFetched) {
         try {
-          const pairs = ['SOLUSD','XBTUSD','ETHUSD'];
-          const r=await fetch('https://api.kraken.com/0/public/Ticker?pair='+pairs.join(','));
+          const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
           const d=await r.json();
-          const res=d.result||{};
-          const solP=res['SOLUSD']||res['SOLZUSD'];
-          const btcP=res['XXBTZUSD']||res['XBTUSD'];
-          const ethP=res['XETHZUSD']||res['ETHUSD'];
-          if (solP) {
-            solUSD=parseFloat(solP.c[0]); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
-            document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID');
-            document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2);
-            document.getElementById('tChgI').textContent='realtime'; document.getElementById('tChgI').className='tick-chg up';
-            document.getElementById('tChgU').textContent='realtime'; document.getElementById('tChgU').className='tick-chg up';
+          if (d.price) {
+            solUSD=parseFloat(d.price); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+            setTicker('tIdr','tChgI','Rp '+Math.round(solIDR).toLocaleString('id-ID'));
+            setTicker('tUsd','tChgU','$'+solUSD.toFixed(2));
             const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
             solFetched=true;
           }
-          if (btcP) { const p=parseFloat(btcP.c[0]); document.getElementById('tBtc').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tBtcChg').textContent='realtime'; document.getElementById('tBtcChg').className='tick-chg up'; }
-          if (ethP) { const p=parseFloat(ethP.c[0]); document.getElementById('tEth').textContent='$'+Math.round(p).toLocaleString('en'); document.getElementById('tEthChg').textContent='realtime'; document.getElementById('tEthChg').className='tick-chg up'; }
+        } catch(e) {}
+      }
+
+      // Kraken fallback
+      if (!solFetched) {
+        try {
+          const r=await fetch('https://api.kraken.com/0/public/Ticker?pair=SOLUSD,XXBTZUSD,XETHZUSD');
+          const d=await r.json(); const res=d.result||{};
+          const solP=res['SOLUSD']||res['SOLZUSD'];
+          const btcP=res['XXBTZUSD']; const ethP=res['XETHZUSD'];
+          if (solP) {
+            solUSD=parseFloat(solP.c[0]); solIDR=Math.round(solUSD*(USD_IDR_RT||USD_IDR));
+            setTicker('tIdr','tChgI','Rp '+Math.round(solIDR).toLocaleString('id-ID'));
+            setTicker('tUsd','tChgU','$'+solUSD.toFixed(2));
+            const eb=document.getElementById('errBanner'); if(eb) eb.style.display='none';
+            solFetched=true;
+          }
+          if (btcP) setTicker('tBtc','tBtcChg','$'+Math.round(parseFloat(btcP.c[0])).toLocaleString('en'));
+          if (ethP) setTicker('tEth','tEthChg','$'+Math.round(parseFloat(ethP.c[0])).toLocaleString('en'));
         } catch(e) {}
       }
 
       if (!solFetched) {
-        solIDR=solIDR||2850000; solUSD=solUSD||174.85;
+        if (!solIDR) { solIDR=2850000; solUSD=174.85; }
         document.getElementById('tIdr').textContent='Rp '+Math.round(solIDR).toLocaleString('id-ID')+'*';
         document.getElementById('tUsd').textContent='$'+solUSD.toFixed(2)+'*';
         const eb=document.getElementById('errBanner');
         if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ PRICE FEED UNAVAILABLE';document.getElementById('errSub').textContent='Using estimated price — click retry';}
       }
 
-      // Only reload balance once after price is set
       if (solFetched && provider?.publicKey) await loadBalance(provider.publicKey.toString());
-
-      // Try Binance for BTC/ETH/BNB separately (only if Binance worked for SOL)
-      if (solFetched) {
-        ['BTC','ETH','BNB'].forEach(async sym => {
-          try {
-            const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+sym+'USDT');
-            const d=await r.json();
-            if (!d.price) return;
-            const p=parseFloat(d.price);
-            const id = sym==='BTC'?'tBtc':sym==='ETH'?'tEth':'tBnb';
-            const idChg = sym==='BTC'?'tBtcChg':sym==='ETH'?'tEthChg':'tBnbChg';
-            document.getElementById(id).textContent = sym==='BNB' ? '$'+p.toFixed(2) : '$'+Math.round(p).toLocaleString('en');
-            document.getElementById(idChg).textContent='realtime';
-            document.getElementById(idChg).className='tick-chg up';
-          } catch(e) {
-            // Kraken fallback per coin
-            try {
-              const krakenPair = sym==='BTC'?'XXBTZUSD':sym==='ETH'?'XETHZUSD':'';
-              if (!krakenPair) return;
-              const r=await fetch('https://api.kraken.com/0/public/Ticker?pair='+krakenPair);
-              const d=await r.json();
-              const res=Object.values(d.result||{})[0];
-              if (!res) return;
-              const p=parseFloat(res.c[0]);
-              const id=sym==='BTC'?'tBtc':'tEth';
-              const idChg=sym==='BTC'?'tBtcChg':'tEthChg';
-              document.getElementById(id).textContent='$'+Math.round(p).toLocaleString('en');
-              document.getElementById(idChg).textContent='realtime';
-              document.getElementById(idChg).className='tick-chg up';
-            } catch(e2) {}
-          }
-        });
-      }
     }
 
     // ── Wallet ──────────────────────────────────────────────
