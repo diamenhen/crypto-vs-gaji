@@ -465,7 +465,7 @@
 
     <div id="badgesBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:8px">
       <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px">YOUR BADGES</div>
-      <div id="badgesContent" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+      <div id="badgesContent" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"></div>
     </div>
 
     <div id="streakBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--accent);padding:14px 16px;margin-bottom:8px">
@@ -530,7 +530,7 @@
       <div id="retireDetail"></div>
     </div>
 
-    <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA</div>
+    <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
     <div class="jobs" id="jobsBox"></div>
 
     <div class="fact" id="factBox" style="display:none">
@@ -611,7 +611,7 @@
     function shareTwitter() {
       if (total<=0) return;
       const days = Math.ceil(total/(JOBS[0].salary/30));
-      const text = 'My crypto is worth '+fi(total)+' = '+fd(days)+' work as CEO \uD83D\uDE80\n\nCheck your SOL portfolio:\nhttps://crypto-vs-gaji.vercel.app\n\n#CryptoRetire #Solana';
+      const text = 'My crypto is worth '+fi(total)+' = '+fd(days)+' work as CEO \uD83D\uDE80\n\nCheck your SOL portfolio:\nhttps://cryptoretire.app\n\n#CryptoRetire #Solana';
       window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text),'_blank');
     }
 
@@ -975,6 +975,10 @@
       document.getElementById('streakBox').style.display='none';
       document.getElementById('pnlBox').style.display='none';
       document.getElementById('pnlCalendarBox').style.display='none';
+      document.getElementById('atplBox').style.display='none';
+      document.getElementById('fearGreedBox').style.display='none';
+      const grc = document.getElementById('garutRankContent');
+      if (grc) grc.innerHTML='<div style="font-size:10px;color:var(--text3);text-align:center;padding:10px 0">Connect wallet to see your Garut rank</div>';
       renderJobs(); renderTargets(); calcRetire();
     }
     async function loadBalance(publicKey) {
@@ -1257,9 +1261,12 @@
     }
     function renderJobs() {
       const L=LABELS['en'], src=JOBS_EN, box=document.getElementById('jobsBox'); box.innerHTML='';
+      const maxSalary = Math.max(...src.map(j=>j.salary));
+      const minSalary = Math.min(...src.map(j=>j.salary));
       src.forEach(job=>{
         const perDetik=job.salary/30/24/3600, perJam=job.salary/30/24, perHari=job.salary/30, perMinggu=job.salary/4.33, perBulan=job.salary, perTahun=job.salary*12, per35thn=job.salary*420;
         const days=total>0?total/perHari:null, uid='b'+job.pct;
+        const barPct = 20 + ((job.salary - minSalary) / (maxSalary - minSalary)) * 80;
         const div=document.createElement('div'); div.className='job';
         div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid">'
           +'<div><div class="jnl">SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
@@ -1272,7 +1279,7 @@
           +'</div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div>'
           +'<div class="jr"><div class="jrl">MUST WORK</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
           +'</div>';
-        box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=job.pct+'%';},150);
+        box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=barPct.toFixed(1)+'%';},150);
       });
     }
     function renderFact(sol) {
