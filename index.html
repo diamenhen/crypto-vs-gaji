@@ -385,9 +385,9 @@
       <span id="clockEl"></span>
     </div>
     <div class="ticker">
-      <div class="tick"><div class="tick-label">BTC/USD</div><div class="tick-val" id="tBtc"><div class="skel" style="height:18px;width:80%;margin-bottom:4px"></div></div><div class="tick-chg" id="tBtcChg"></div></div>
-      <div class="tick"><div class="tick-label">ETH/USD</div><div class="tick-val" id="tEth"><div class="skel" style="height:18px;width:70%"></div></div><div class="tick-chg" id="tEthChg"></div></div>
-      <div class="tick"><div class="tick-label">BNB/USD</div><div class="tick-val" id="tBnb"><div class="skel" style="height:18px;width:75%"></div></div><div class="tick-chg" id="tBnbChg"></div></div>
+      <div class="tick"><div class="tick-label">BTC/USD</div><div class="tick-val" id="tBtc">--</div><div class="tick-chg" id="tBtcChg"></div></div>
+      <div class="tick"><div class="tick-label">ETH/USD</div><div class="tick-val" id="tEth">--</div><div class="tick-chg" id="tEthChg"></div></div>
+      <div class="tick"><div class="tick-label">BNB/USD</div><div class="tick-val" id="tBnb">--</div><div class="tick-chg" id="tBnbChg"></div></div>
       <div class="tick"><div class="tick-label">SOL/USD</div><div class="tick-val" id="tUsd"><div class="skel" style="height:18px;width:65%"></div></div><div class="tick-chg" id="tChgU"></div></div>
       <div class="tick"><div class="tick-label">SOL/IDR</div><div class="tick-val" id="tIdr"><div class="skel" style="height:18px;width:80%"></div></div><div class="tick-chg" id="tChgI"></div></div>
       <div class="tick"><div class="tick-label">USD/IDR</div><div class="tick-val" id="tUsdIdr">Rp 17.000</div><div class="tick-chg up" id="tUsdIdrChg">est.</div></div>
@@ -697,6 +697,17 @@
       try { history = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e) {}
       history = history.filter(h => h.ts && h.v > 500000);
 
+      // Remove spikes: filter out points that are >3x the median value
+      if (history.length > 3) {
+        const vals = [...history].map(h => h.v).sort((a,b)=>a-b);
+        const median = vals[Math.floor(vals.length/2)];
+        const cleaned = history.filter(h => h.v <= median * 3 && h.v >= median * 0.1);
+        if (cleaned.length !== history.length) {
+          history = cleaned;
+          try { localStorage.setItem(key, JSON.stringify(history)); } catch(e) {}
+        }
+      }
+
       // For ALL timeframe, prepend the initial value as anchor point
       const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
       if (currentTf === 'ALL' && cached?.initialIDR && cached?.initialTs) {
@@ -854,9 +865,15 @@
           solFetched=true;
         }
         if (d.bitcoin?.usd) setTicker('tBtc','tBtcChg','$'+Math.round(d.bitcoin.usd).toLocaleString('en'));
+        else { const el=document.getElementById('tBtc'); if(el&&el.children.length) el.textContent='--'; }
         if (d.ethereum?.usd) setTicker('tEth','tEthChg','$'+Math.round(d.ethereum.usd).toLocaleString('en'));
+        else { const el=document.getElementById('tEth'); if(el&&el.children.length) el.textContent='--'; }
         if (d.binancecoin?.usd) setTicker('tBnb','tBnbChg','$'+d.binancecoin.usd.toFixed(2));
-      } catch(e) {}
+        else { const el=document.getElementById('tBnb'); if(el&&el.children.length) el.textContent='--'; }
+      } catch(e) {
+        // CoinGecko failed — mark BTC/ETH/BNB as unavailable
+        ['tBtc','tEth','tBnb'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent='--'; });
+      }
 
       // Binance fallback for SOL
       if (!solFetched) {
