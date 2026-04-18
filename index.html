@@ -979,6 +979,8 @@
         const cache = loadCache();
         if (cache?.sol) {
           applyCache(cache);
+          solUSD = cache.sol;
+          solIDR = Math.round(solUSD * (USD_IDR_RT || USD_IDR));
           solFetched=true;
           const eb=document.getElementById('errBanner');
           if(eb){eb.style.display='flex';document.getElementById('errMsg').textContent='⚠ USING CACHED PRICE';
@@ -1495,7 +1497,7 @@
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">CURRENT</div>'
             +'<div style="font-size:16px;font-weight:700;color:var(--text)">'+fi(currentTotal)+'</div></div>'
           +'<div><div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">ALL TIME P&amp;L</div>'
-            +'<div style="font-size:16px;font-weight:700;color:'+col+'">'+sgn+fi(pl)+'</div>'
+            +'<div style="font-size:clamp(11px,3vw,16px);font-weight:700;color:'+col+';white-space:nowrap">'+sgn+fi(pl)+'</div>'
             +'<div style="font-size:10px;color:'+col+'">'+sgn+pct.toFixed(1)+'% &middot; '+multiplier+'x</div></div>'
         +'</div>'
         +'<div style="font-size:9px;color:var(--text3);margin-top:4px">Entry: '+initialSOL.toFixed(4)+' SOL @ $'+initialPriceUSD.toFixed(2)+'</div>';
