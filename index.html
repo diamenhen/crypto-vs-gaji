@@ -41,7 +41,7 @@
     body {
       background:var(--bg); color:var(--text);
       font-family:'IBM Plex Mono',monospace;
-      min-height:100vh; -webkit-font-smoothing:antialiased;
+      height:fit-content; -webkit-font-smoothing:antialiased;
     }
     /* Top accent line */
     body::after {
@@ -292,9 +292,9 @@
     .badge-circle { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px; border:2px solid; transition:transform 0.2s; }
     .badge-circle.unlocked { border-color:var(--accent); box-shadow:0 0 12px rgba(232,128,10,0.2); }
     .badge-circle.unlocked:hover { transform:scale(1.1); }
-    .badge-circle.locked   { background:var(--bg3); border-color:var(--bdr); filter:grayscale(1); opacity:0.45; }
+    .badge-circle.locked   { background:var(--bg3); border-color:rgba(255,255,255,0.12); filter:grayscale(1); opacity:0.55; }
     .badge-lbl { font-size:8px; letter-spacing:1px; font-weight:700; text-transform:uppercase; line-height:1.4; }
-    .badge-lbl.locked { color:var(--text2); opacity:0.45; }
+    .badge-lbl.locked { color:var(--text2); opacity:0.55; }
 
     /* ── SKELETON ── */
     .skel { background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:2px; }
@@ -1528,19 +1528,24 @@
       const col   = up ? 'var(--green)' : '#d05a4a';
       const sgn   = up ? '+' : '';
       let hist = '';
-      const histRows = [...pnlData].slice(-8).reverse();
-      histRows.forEach((d, i) => {
-        if (i === 0) return; // skip today (already shown above)
-        const dp = d.close - d.open;
-        const dc = dp >= 0 ? 'var(--green)' : '#d05a4a';
-        const dpPct = d.open > 0 ? (dp / d.open * 100).toFixed(1) : '0.0';
-        hist += '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;align-items:center">'
-          + '<span style="color:var(--text2)">'+d.date+'</span>'
-          + '<span style="color:var(--text);font-weight:600">'+fi(d.close)+'</span>'
-          + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right">'+(dp>=0?'+':'')+fi(dp)+'</span>'
-          + '<span style="color:'+dc+';font-size:10px;min-width:50px;text-align:right">'+(dp>=0?'+':'')+dpPct+'%</span>'
-          + '</div>';
-      });
+      // Show all days except today (last entry), oldest first → newest at bottom
+      const histRows = [...pnlData].slice(-8); // up to 8 entries
+      // Remove today (last item) from history display
+      const histWithoutToday = histRows.slice(0, histRows.length - 1);
+      if (histWithoutToday.length > 0) {
+        // Show oldest first
+        histWithoutToday.forEach((d) => {
+          const dp = d.close - d.open;
+          const dc = dp >= 0 ? 'var(--green)' : '#d05a4a';
+          const dpPct = d.open > 0 ? (dp / d.open * 100).toFixed(1) : '0.0';
+          hist += '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;align-items:center">'
+            + '<span style="color:var(--text2)">'+d.date+'</span>'
+            + '<span style="color:var(--text);font-weight:600">'+fi(d.close)+'</span>'
+            + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right">'+(dp>=0?'+':'')+fi(dp)+'</span>'
+            + '<span style="color:'+dc+';font-size:10px;min-width:50px;text-align:right">'+(dp>=0?'+':'')+dpPct+'%</span>'
+            + '</div>';
+        });
+      }
       box.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
           +'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L TODAY</div>'
@@ -1555,7 +1560,7 @@
           +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">OPEN TODAY</div>'
             +'<div style="font-size:20px;font-weight:700;color:var(--text2);letter-spacing:-0.5px;line-height:1.1">'+fi(today.open)+'</div></div>'
         +'</div>'
-        +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:8px;padding-top:4px;border-top:1px solid var(--bdr)">7-DAY HISTORY</div>'+hist:'');
+        +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:8px;padding-top:12px;border-top:1px solid var(--bdr)">PREVIOUS DAYS</div>'+hist:'');
     }
 
     // ── All Time P&L (Birdeye + Helius) ─────────────────────
@@ -1865,18 +1870,21 @@
         if (i === sorted.length - 1) currentStreak = pl > 0 ? tempStreak : 0;
       });
 
-      if (currentStreak === 0 && bestStreak === 0) { box.style.display='none'; return; }
+      if (pnlData.length === 0) { box.style.display='none'; return; }
       box.style.display = 'block';
 
-      // Last 7 days bar chart
+      // Last 7 days bar chart — show even if only 1-2 bars
       const last7 = sorted.slice(-7);
+      const maxAbs = Math.max(...last7.map((x, j) => Math.abs(x.close - (j > 0 ? last7[j-1].close : x.open)))) || 1;
       const bars = last7.map((d, i) => {
         const prevClose = i > 0 ? last7[i-1].close : d.open;
         const pl = d.close - prevClose;
         const col = pl >= 0 ? '#3a9e6a' : '#d05a4a';
-        const h = Math.min(40, Math.max(6, Math.abs(pl) / (Math.max(...last7.map((x, j) => Math.abs(x.close - (j > 0 ? last7[j-1].close : x.open)))) || 1) * 40));
-        return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
-          <div style="width:16px;height:${h}px;background:${col};border-radius:2px;opacity:0.9;"></div>
+        const h = Math.min(40, Math.max(8, Math.abs(pl) / maxAbs * 40));
+        const dayLabel = d.date.split(' ')[0]; // just the day number
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:18px;height:${h}px;background:${col};border-radius:2px;opacity:0.9;"></div>
+          <div style="font-size:8px;color:var(--text3)">${dayLabel}</div>
         </div>`;
       }).join('');
 
@@ -1896,7 +1904,7 @@
             + '</div>'
             + '<div style="font-size:9px;color:var(--text3);margin-top:5px;letter-spacing:0.5px">Best: <span style="color:var(--text2);font-weight:600">'+bestStreak+' days</span></div>'
           + '</div>'
-          + '<div style="display:flex;align-items:flex-end;gap:4px;height:40px;">' + bars + '</div>'
+          + '<div style="display:flex;align-items:flex-end;gap:4px;height:52px;">' + bars + '</div>'
         + '</div>';
     }
 
