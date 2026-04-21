@@ -22,363 +22,481 @@
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     :root {
-      --accent:  #9945ff;   /* orange — medium brightness */
-      --accent2: #b76dff;
-      --green:   #14f195;   /* medium green */
-      --green-bg:rgba(20,241,149,0.08);
-      --red:     #ff5c7a;
-      --bg:      #0d0f15;
-      --bg2:     #14171f;
-      --bg3:     #1c2028;
-      --bg4:     #252932;
-      --bdr:     rgba(255,255,255,0.08);
-      --bdr2:    rgba(153,69,255,0.25);
-      --text:    #e6e8f0;
-      --text2:   #8892a8;
-      --text3:   #50586a;
+      --accent:   #9945ff;
+      --accent2:  #b76dff;
+      --accent3:  #7a2ce8;
+      --green:    #14f195;
+      --green-bg: rgba(20,241,149,0.08);
+      --green-glow: rgba(20,241,149,0.15);
+      --red:      #ff5c7a;
+      --amber:    #ffb547;
+      --bg:       #0a0c12;
+      --bg2:      #13161f;
+      --bg3:      #1a1e28;
+      --bg4:      #232836;
+      --bdr:      rgba(255,255,255,0.06);
+      --bdr2:     rgba(153,69,255,0.35);
+      --bdr3:     rgba(255,255,255,0.12);
+      --text:     #e8ebf3;
+      --text2:    #9ba3b8;
+      --text3:    #5a6275;
+      --glow:     0 0 40px rgba(153,69,255,0.15);
+      --glow-lg:  0 0 80px rgba(153,69,255,0.2);
     }
-    html { font-size:13px; }
+    html { font-size:13px; scroll-behavior:smooth; }
     body {
       background:var(--bg); color:var(--text);
-      font-family:'IBM Plex Mono',monospace;
-      height:fit-content; -webkit-font-smoothing:antialiased;
+      font-family:'IBM Plex Sans',system-ui,sans-serif;
+      -webkit-font-smoothing:antialiased; min-height:100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(153,69,255,0.12), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 100% 10%, rgba(20,241,149,0.04), transparent 60%);
+      background-attachment:fixed;
     }
+    .mono { font-family:'IBM Plex Mono',monospace; font-feature-settings:'tnum'; }
     /* Top accent line */
     body::after {
-      content:''; position:fixed; top:0; left:0; right:0; height:2px;
-      background:linear-gradient(90deg,transparent,var(--accent),transparent);
-      z-index:1000; pointer-events:none;
+      content:''; position:fixed; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent 10%,var(--accent) 50%,transparent 90%);
+      z-index:1000; pointer-events:none; opacity:0.6;
     }
-    .container { max-width:1060px; margin:0 auto; padding:0 20px 40px; position:relative; z-index:1; }
+    .container { max-width:1140px; margin:0 auto; padding:16px 24px 60px; position:relative; z-index:1; }
 
     /* ── HEADER ── */
     header {
-      display:flex; align-items:stretch; justify-content:space-between;
-      border-bottom:1px solid var(--bdr2); margin-bottom:2px; padding:0;
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:14px; padding:8px 0;
     }
-    .logo { display:flex; align-items:center; gap:0; }
+    .logo { display:flex; align-items:center; gap:12px; }
     .logo-icon {
-      background:var(--accent); color:#1a0a33;
-      width:auto; height:40px; padding:0 14px;
+      background:linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+      color:#fff; width:40px; height:40px; border-radius:10px;
       display:flex; align-items:center; justify-content:center;
-      font-size:16px; font-weight:700; letter-spacing:-1px;
+      font-size:18px; font-weight:700; letter-spacing:-1px;
+      box-shadow: 0 4px 20px rgba(153,69,255,0.3);
     }
     .logo-icon::after { content:'◆'; }
-    .logo-text {
-      display:flex; flex-direction:column; justify-content:center;
-      padding:0 16px; border-right:1px solid var(--bdr);
-    }
-    .logo-title { font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+    .logo-text { display:flex; flex-direction:column; }
+    .logo-title { font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600; letter-spacing:-0.3px; }
     .logo-title span { color:var(--accent); }
-    .logo-sub { font-size:9px; color:var(--text3); letter-spacing:2.5px; margin-top:1px; }
-    .header-right { display:flex; align-items:center; gap:0; }
+    .logo-sub { display:none; }
+    .header-right { display:flex; align-items:center; gap:6px; }
+
+    #currBtn {
+      background:var(--bg2)!important; border:1px solid var(--bdr)!important;
+      border-radius:8px!important; height:36px!important; padding:0 12px!important;
+      color:var(--accent)!important; font-family:'IBM Plex Mono',monospace!important;
+      font-size:11px!important; font-weight:600!important; cursor:pointer;
+      letter-spacing:1px!important; transition:all 0.15s;
+    }
+    #currBtn:hover { background:var(--bg3)!important; border-color:var(--bdr2)!important; }
     .live-badge {
-      display:flex; align-items:center; gap:7px;
+      display:flex; align-items:center; gap:6px;
+      font-family:'IBM Plex Mono',monospace;
       font-size:10px; font-weight:600; letter-spacing:1.5px;
-      color:var(--green); border:none; border-left:1px solid var(--bdr);
-      background:transparent; border-radius:0; padding:0 16px; height:100%;
+      color:var(--green); background:var(--green-bg);
+      border:1px solid rgba(20,241,149,0.2); border-radius:8px;
+      padding:0 10px; height:36px;
     }
     .live-dot {
-      width:5px; height:5px; border-radius:50%; background:var(--green);
-      animation:blink 1.2s step-end infinite;
+      width:6px; height:6px; border-radius:50%; background:var(--green);
+      box-shadow:0 0 8px var(--green);
+      animation:pulse 2s ease-in-out infinite;
     }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
 
     /* ── STATUS BAR ── */
     .status-bar {
-      background:var(--bg2); border-bottom:1px solid var(--bdr);
-      padding:4px 10px; display:flex; gap:20px; align-items:center;
-      font-size:10px; color:var(--text3); letter-spacing:1px; margin-bottom:10px;
+      background:var(--bg2); border:1px solid var(--bdr); border-radius:10px;
+      padding:8px 14px; display:flex; gap:18px; align-items:center; flex-wrap:wrap;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:10px; color:var(--text3); letter-spacing:1px; margin-bottom:12px;
     }
     .status-bar span { color:var(--accent); font-weight:600; }
     #clockEl { margin-left:auto; color:var(--text2); }
 
     /* ── TICKER ── */
-    .ticker { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-bottom:10px; }
-    @media(min-width:700px){ .ticker { grid-template-columns:repeat(6,1fr); } }
+    .ticker { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+    @media(min-width:760px){ .ticker { grid-template-columns:repeat(6,1fr); } }
     .tick {
-      background:var(--bg2); border:1px solid var(--bdr);
-      border-top:2px solid var(--accent); padding:12px 16px;
+      background:var(--bg2); border:1px solid var(--bdr); border-radius:10px;
+      padding:12px 14px; transition:all 0.2s;
+      position:relative; overflow:hidden;
     }
-    .tick-label { font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; margin-bottom:6px; text-transform:uppercase; }
-    .tick-val { font-size:18px; font-weight:600; color:var(--text); letter-spacing:-0.5px; }
-    .tick-chg { font-size:10px; margin-top:4px; font-weight:600; letter-spacing:0.5px; }
+    .tick::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity:0.4;
+    }
+    .tick:hover { border-color:var(--bdr2); transform:translateY(-1px); }
+    .tick-label { font-size:9px; color:var(--text2); letter-spacing:1.5px; font-weight:600; margin-bottom:6px; text-transform:uppercase; font-family:'IBM Plex Sans',sans-serif; }
+    .tick-val { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; color:var(--text); letter-spacing:-0.3px; }
+    .tick-chg { font-family:'IBM Plex Mono',monospace; font-size:10px; margin-top:3px; font-weight:500; letter-spacing:0.3px; }
     .up { color:var(--green); } .dn { color:var(--red); }
 
-    /* ── WALLET ── */
-    .c-card { background:var(--bg2); border:1px solid var(--bdr); margin-bottom:6px; transition:border-color 0.2s; }
-    .c-card.on { border-color:rgba(20,241,149,0.3); }
+    /* ── CARD BASE ── */
+    .c-card, .chart-card, #pnlBox, #fearGreedBox, #badgesBox, #streakBox,
+    #pnlCalendarBox, #atplBox, #garutRankBox, .fact {
+      background:var(--bg2)!important; border:1px solid var(--bdr)!important; border-radius:14px!important;
+      margin-bottom:14px!important; transition:border-color 0.2s;
+    }
+    .c-card.on { border-color:rgba(20,241,149,0.25)!important; background:linear-gradient(180deg, rgba(20,241,149,0.03), var(--bg2))!important; }
     .c-label {
-      font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700;
-      text-transform:uppercase; padding:7px 14px; background:var(--bg3);
-      border-bottom:1px solid var(--bdr); display:block;
+      font-family:'IBM Plex Sans',sans-serif;
+      font-size:11px; color:var(--text2); letter-spacing:1.5px; font-weight:600;
+      text-transform:uppercase; padding:12px 18px; 
+      border-bottom:1px solid var(--bdr); display:flex; align-items:center; gap:8px;
     }
-    .c-body { padding:16px 18px; }
+    .c-label::before {
+      content:''; width:6px; height:6px; border-radius:50%; background:var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .c-body { padding:18px; }
+
+    /* ── BUTTONS ── */
     .btn-cw {
-      display:inline-flex; align-items:center; gap:0;
-      background:var(--accent); color:#1a0a33; border:none;
-      padding:12px 24px; font-family:'IBM Plex Mono',monospace;
-      font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s;
-      letter-spacing:1.5px; text-transform:uppercase;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+      color:#fff; border:none; border-radius:12px;
+      padding:14px 28px; font-family:'IBM Plex Sans',sans-serif;
+      font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;
+      letter-spacing:0.5px;
+      box-shadow: 0 4px 20px rgba(153,69,255,0.3);
     }
-    .btn-cw:hover { background:var(--accent2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(153,69,255,0.3); }
-    .btn-cw-icon { display:none; }
+    .btn-cw:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(153,69,255,0.5); }
+    .btn-cw-icon { font-size:16px; }
     .btn-dc {
-      background:transparent; border:1px solid rgba(255,92,122,0.35);
-      padding:6px 12px; color:var(--red); font-family:'IBM Plex Mono',monospace;
-      font-size:10px; font-weight:700; cursor:pointer; letter-spacing:1px;
-      text-transform:uppercase; transition:all 0.15s;
+      background:transparent; border:1px solid rgba(255,92,122,0.3); border-radius:8px;
+      padding:7px 14px; color:var(--red); font-family:'IBM Plex Sans',sans-serif;
+      font-size:11px; font-weight:600; cursor:pointer; letter-spacing:0.5px;
+      transition:all 0.15s;
     }
-    .btn-dc:hover { background:rgba(255,92,122,0.1); }
+    .btn-dc:hover { background:rgba(255,92,122,0.1); border-color:var(--red); }
     .btn-share {
-      display:inline-flex; align-items:center; gap:7px;
-      background:transparent; border:1px solid var(--bdr2);
-      padding:7px 14px; color:var(--text2); font-family:'IBM Plex Mono',monospace;
-      font-size:10px; font-weight:600; cursor:pointer; transition:all 0.15s;
-      letter-spacing:1px; margin-top:8px;
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--bg3); border:1px solid var(--bdr); border-radius:10px;
+      padding:9px 16px; color:var(--text); font-family:'IBM Plex Sans',sans-serif;
+      font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s;
+      margin-top:14px;
     }
-    .btn-share:hover { border-color:var(--accent); color:var(--accent); }
-    .wi { display:flex; gap:0; padding-top:14px; border-top:1px solid var(--bdr); flex-wrap:wrap; }
-    .wi > div { padding-right:24px; margin-right:24px; border-right:1px solid var(--bdr); padding-top:2px; padding-bottom:2px; }
-    .wi > div:last-child { border-right:none; }
-    .wi-l { font-size:9px; color:var(--text3); letter-spacing:2px; font-weight:700; margin-bottom:5px; text-transform:uppercase; }
-    .wi-v { font-size:17px; font-weight:600; color:var(--text); letter-spacing:-0.5px; }
-    .wi-s { font-size:11px; color:var(--text2); margin-top:2px; }
-    .token-pills { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px; padding-top:10px; border-top:1px solid var(--bdr); }
-    .token-pill { display:flex; align-items:center; gap:5px; background:var(--bg3); border:1px solid var(--bdr); padding:3px 10px; font-size:11px; }
+    .btn-share:hover { border-color:var(--accent); color:var(--accent); background:rgba(153,69,255,0.08); }
+
+    /* ── WALLET INFO ── */
+    .wi { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding-top:16px; border-top:1px solid var(--bdr); }
+    .wi > div { padding:2px 0; }
+    .wi-l { font-size:10px; color:var(--text3); letter-spacing:1.5px; font-weight:600; margin-bottom:6px; text-transform:uppercase; font-family:'IBM Plex Sans',sans-serif; }
+    .wi-v { font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600; color:var(--text); letter-spacing:-0.3px; }
+    .wi-s { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text2); margin-top:3px; }
+    .token-pills { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; padding-top:12px; border-top:1px solid var(--bdr); }
+    .token-pill { display:flex; align-items:center; gap:6px; background:var(--bg3); border:1px solid var(--bdr); border-radius:999px; padding:5px 12px; font-size:11px; font-family:'IBM Plex Mono',monospace; }
     .token-pill-sym { color:var(--accent); font-weight:700; }
     .token-pill-val { color:var(--text2); }
 
     /* ── HERO ── */
     .hero {
-      background:var(--bg2); border:1px solid var(--bdr);
-      border-left:3px solid var(--accent);
-      padding:28px 24px; margin-bottom:6px;
+      position:relative; overflow:hidden;
+      background:linear-gradient(180deg, rgba(153,69,255,0.04), transparent 60%), var(--bg2);
+      border:1px solid var(--bdr2)!important; border-radius:20px!important;
+      padding:48px 32px 40px!important; margin-bottom:14px!important;
       text-align:center; display:flex; flex-direction:column; align-items:center;
-      overflow:hidden;
+      box-shadow: var(--glow-lg);
     }
-    .hero-l { font-size:9px; color:var(--accent); letter-spacing:2.5px; font-weight:700; margin-bottom:10px; text-transform:uppercase; }
+    .hero::before {
+      content:''; position:absolute; top:-40%; left:50%; transform:translateX(-50%);
+      width:120%; height:80%;
+      background:radial-gradient(ellipse at center, rgba(153,69,255,0.2), transparent 55%);
+      pointer-events:none;
+    }
+    .hero-l {
+      position:relative;
+      font-family:'IBM Plex Sans',sans-serif;
+      font-size:11px; color:var(--accent); letter-spacing:2.5px; font-weight:600;
+      margin-bottom:14px; text-transform:uppercase;
+      padding:4px 14px; background:rgba(153,69,255,0.1);
+      border:1px solid rgba(153,69,255,0.2); border-radius:999px;
+    }
     .hero-v {
-      font-size:clamp(28px,4.5vw,48px); font-weight:700;
-      letter-spacing:-1px; color:var(--text); margin-bottom:8px; line-height:1.1;
+      position:relative;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:clamp(38px,7vw,72px); font-weight:600;
+      letter-spacing:-2px; color:var(--text); margin-bottom:10px; line-height:1.05;
       width:100%; text-align:center;
+      background:linear-gradient(180deg, var(--text), #b0b8cc);
+      -webkit-background-clip:text; background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
-    .hero-s { font-size:11px; color:var(--text2); margin-bottom:14px; letter-spacing:0.5px; }
+    .hero-s { position:relative; font-size:12px; color:var(--text2); margin-bottom:4px; letter-spacing:0.2px; }
 
     /* ── MODAL ── */
-    .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:100; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
-    .modal { background:var(--bg2); border:1px solid var(--bdr2); border-top:2px solid var(--accent); width:100%; max-width:380px; margin:20px; }
-    .modal-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:12px 16px; background:var(--bg3); border-bottom:1px solid var(--bdr); color:var(--accent); }
-    .modal-sub { font-size:10px; color:var(--text3); padding:10px 16px 0; letter-spacing:1px; }
-    .modal-body { padding:10px 16px; }
-    .w-btn { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--bdr); padding:11px 13px; cursor:pointer; width:100%; text-align:left; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-bottom:6px; transition:all 0.15s; }
-    .w-btn:hover { border-color:var(--accent); background:var(--bg4); }
-    .w-btn:disabled { opacity:0.25; cursor:not-allowed; }
-    .w-icon { width:34px; height:34px; background:var(--bg4); border:1px solid var(--bdr); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
-    .w-name { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
-    .w-desc { font-size:10px; color:var(--text3); margin-top:1px; }
-    .w-badge { margin-left:auto; font-size:9px; padding:3px 8px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+    .overlay { position:fixed; inset:0; background:rgba(6,8,12,0.85); z-index:100; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
+    .modal { background:var(--bg2); border:1px solid var(--bdr2); border-radius:16px; width:100%; max-width:400px; margin:20px; overflow:hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
+    .modal-title { font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.2px; padding:16px 18px 6px; color:var(--text); }
+    .modal-sub { font-size:11px; color:var(--text3); padding:0 18px 12px; }
+    .modal-body { padding:0 14px 14px; }
+    .w-btn { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--bdr); border-radius:10px; padding:12px 14px; cursor:pointer; width:calc(100% - 28px); text-align:left; color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:13px; margin:0 14px 8px; transition:all 0.15s; }
+    .w-btn:hover { border-color:var(--accent); background:var(--bg4); transform:translateX(2px); }
+    .w-btn:disabled { opacity:0.3; cursor:not-allowed; }
+    .w-icon { width:40px; height:40px; background:var(--bg4); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .w-name { font-size:13px; font-weight:600; letter-spacing:0.2px; }
+    .w-desc { font-size:10px; color:var(--text3); margin-top:2px; }
+    .w-badge { margin-left:auto; font-size:9px; padding:4px 10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; border-radius:999px; }
     .detected { background:var(--green-bg); color:var(--green); border:1px solid rgba(20,241,149,0.3); }
     .install { background:rgba(255,255,255,0.03); color:var(--text3); border:1px solid var(--bdr); }
-    .modal-cancel { width:calc(100% - 32px); margin:0 16px 14px; background:transparent; border:1px solid var(--bdr); padding:9px; color:var(--text3); font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; display:block; }
+    .modal-cancel { width:calc(100% - 28px); margin:4px 14px 14px; background:transparent; border:1px solid var(--bdr); border-radius:10px; padding:11px; color:var(--text2); font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; display:block; transition:all 0.15s; }
     .modal-cancel:hover { border-color:var(--red); color:var(--red); }
 
     /* ── SECTION LABEL ── */
     .sec-l {
-      font-size:9px; color:var(--accent); letter-spacing:2.5px; font-weight:700;
-      margin-bottom:6px; text-transform:uppercase;
-      display:flex; align-items:center; gap:8px;
+      font-family:'IBM Plex Sans',sans-serif;
+      font-size:11px; color:var(--text2); letter-spacing:2px; font-weight:600;
+      margin:24px 0 12px; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px;
     }
-    .sec-l::after { content:''; flex:1; height:1px; background:var(--bdr); }
+    .sec-l::before {
+      content:''; width:3px; height:14px; background:var(--accent); border-radius:2px;
+      box-shadow:0 0 8px var(--accent);
+    }
+    .sec-l::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--bdr),transparent); }
 
-    /* ── JOBS ── */
-    .jobs { display:flex; flex-direction:column; gap:3px; margin-bottom:16px; }
+    /* ── JOBS (NEW DESIGN) ── */
+    .jobs { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:10px; margin-bottom:18px; }
     .job {
-      background:var(--bg2); border:1px solid var(--bdr);
-      padding:14px 18px; display:flex; justify-content:space-between;
-      align-items:flex-start; gap:16px; transition:all 0.15s;
+      background:linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+      border:1px solid var(--bdr); border-radius:14px;
+      padding:18px 20px; transition:all 0.2s;
+      position:relative; overflow:hidden;
+      display:flex; flex-direction:column; gap:10px;
     }
-    .job:hover { border-color:var(--bdr2); background:var(--bg3); }
-    .jl { flex:1; min-width:0; }
-    .jt { font-size:13px; font-weight:700; margin-bottom:3px; color:var(--accent); letter-spacing:0.3px; text-transform:uppercase; }
-    .jc { font-size:10px; color:var(--text2); margin-bottom:12px; }
-    .jgrid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px 10px; margin-bottom:4px; }
-    @media(max-width:900px){ .jgrid{grid-template-columns:repeat(4,1fr);} }
-    @media(max-width:600px){ .jgrid{grid-template-columns:repeat(2,1fr);} }
-    .jnl { font-size:8px; color:var(--text3); letter-spacing:1.5px; margin-bottom:2px; font-weight:700; text-transform:uppercase; }
-    .jnv { font-size:11px; font-weight:600; color:var(--text); }
-    .bw { height:1px; background:var(--bg4); margin-top:10px; overflow:hidden; }
-    .bf { height:100%; background:var(--accent); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); }
-    .jr {
-      text-align:right; flex-shrink:0;
-      background:var(--bg3); border:1px solid var(--bdr);
-      border-left:2px solid var(--accent);
-      padding:10px 16px; min-width:130px;
+    .job::before {
+      content:''; position:absolute; top:0; right:0; width:80px; height:80px;
+      background:radial-gradient(circle at top right, rgba(153,69,255,0.12), transparent 70%);
+      pointer-events:none;
     }
-    .jrl { font-size:8px; color:var(--accent); letter-spacing:2px; margin-bottom:4px; font-weight:700; text-transform:uppercase; }
-    .jrv { font-size:20px; font-weight:700; color:var(--text); letter-spacing:-0.5px; }
-    .jrs { font-size:10px; color:var(--text3); margin-top:3px; }
+    .job:hover { border-color:var(--bdr2); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+    .jt { font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; color:var(--text); letter-spacing:-0.2px; }
+    .jc { font-size:11px; color:var(--text3); margin-top:-6px; }
+    .jhero {
+      display:flex; align-items:baseline; gap:8px;
+      padding:14px 0 12px; border-top:1px solid var(--bdr); border-bottom:1px solid var(--bdr);
+      margin:4px 0;
+    }
+    .jhero-v { font-family:'IBM Plex Mono',monospace; font-size:38px; font-weight:600; color:var(--accent); letter-spacing:-1.5px; line-height:1; }
+    .jhero-u { font-family:'IBM Plex Sans',sans-serif; font-size:11px; color:var(--text2); font-weight:500; letter-spacing:1.5px; text-transform:uppercase; }
+    .jstats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .jstat { font-size:10px; }
+    .jstat-l { color:var(--text3); letter-spacing:1px; text-transform:uppercase; font-weight:600; font-family:'IBM Plex Sans',sans-serif; margin-bottom:3px; font-size:9px; }
+    .jstat-v { color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; }
+    .bw { height:2px; background:var(--bg4); margin-top:10px; overflow:hidden; border-radius:2px; }
+    .bf { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
 
     /* ── FACT ── */
-    .fact { background:var(--bg2); border:1px solid var(--bdr); border-left:2px solid var(--accent); padding:12px 16px; display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
-    .fact-t { font-size:9px; color:var(--accent); letter-spacing:2px; margin-bottom:4px; font-weight:700; text-transform:uppercase; }
-    .fact-b { font-size:12px; color:var(--text2); line-height:1.7; }
+    .fact { border-left:3px solid var(--accent)!important; padding:16px 20px!important; display:flex; gap:14px; align-items:flex-start; }
+    .fact-icon { font-size:22px; flex-shrink:0; }
+    .fact-t { font-family:'IBM Plex Sans',sans-serif; font-size:10px; color:var(--accent); letter-spacing:2px; margin-bottom:6px; font-weight:600; text-transform:uppercase; }
+    .fact-b { font-size:13px; color:var(--text2); line-height:1.75; }
     .fact-b strong { color:var(--text); font-weight:600; }
 
-    /* ── GARUT RANK ── */
-    .rank-card {
-      display:flex; align-items:center; gap:18px;
-      background:var(--bg3); border:1px solid var(--bdr);
-      padding:16px 18px; margin-bottom:6px; position:relative;
+    /* ── GARUT RANK — HORIZONTAL PATH ── */
+    #garutRankBox { padding:24px 20px 18px; }
+    .grank-current-hero {
+      text-align:center; padding:14px 10px 20px; margin-bottom:18px;
+      position:relative;
+    }
+    .grank-current-icon {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:72px; height:72px; border-radius:50%;
+      background:radial-gradient(circle, rgba(153,69,255,0.15), transparent 70%);
+      font-size:48px; margin-bottom:10px;
+      animation:rankPulse 3s ease-in-out infinite;
+    }
+    @keyframes rankPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+    .grank-current-name { font-family:'IBM Plex Sans',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; margin-bottom:4px; }
+    .grank-current-sub { font-size:12px; color:var(--text2); }
+    .grank-path {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 4px 22px; overflow-x:auto; gap:4px;
+      scrollbar-width:thin;
+    }
+    .grank-path::-webkit-scrollbar { height:4px; }
+    .grank-path::-webkit-scrollbar-thumb { background:var(--bdr2); border-radius:2px; }
+    .grank-node { display:flex; flex-direction:column; align-items:center; flex-shrink:0; min-width:80px; text-align:center; position:relative; }
+    .grank-dot {
+      width:44px; height:44px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; margin-bottom:8px;
+      border:2px solid var(--bdr); background:var(--bg3);
       transition:all 0.3s;
     }
-    .rank-card.achieved { border-color:rgba(20,241,149,0.4); background:rgba(20,241,149,0.05); }
-    .rank-card.current  { border-color:var(--bdr2); background:rgba(153,69,255,0.05); }
-    .rank-card.locked   { opacity:0.4; }
-    .rank-icon { font-size:30px; flex-shrink:0; width:46px; text-align:center; }
-    .rank-info { flex:1; min-width:0; }
-    .rank-name { font-size:13px; font-weight:700; color:var(--text); letter-spacing:0.3px; text-transform:uppercase; margin-bottom:3px; }
-    .rank-desc { font-size:10px; color:var(--text2); margin-bottom:6px; }
-    .rank-target { font-size:10px; color:var(--text3); }
-    .rank-badge { flex-shrink:0; font-size:9px; padding:4px 12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
-    .rank-badge.done  { background:rgba(20,241,149,0.15); color:var(--green); border:1px solid rgba(20,241,149,0.3); }
-    .rank-badge.now   { background:rgba(153,69,255,0.15); color:var(--accent); border:1px solid rgba(153,69,255,0.3); }
-    .rank-badge.next  { background:rgba(255,255,255,0.03); color:var(--text3); border:1px solid var(--bdr); }
-    .rank-prog { height:3px; background:var(--bg4); margin-top:6px; overflow:hidden; border-radius:2px; }
-    .rank-prog-fill { height:100%; background:var(--accent); transition:width 1.4s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
-    .rank-current-banner {
-      text-align:center; padding:16px 12px 12px; margin-bottom:14px;
+    .grank-node.achieved .grank-dot {
+      border-color:var(--green); background:rgba(20,241,149,0.1);
+      box-shadow:0 0 16px rgba(20,241,149,0.3);
     }
-    .rank-current-icon { font-size:48px; margin-bottom:8px; animation:rankPulse 2s ease-in-out infinite; }
-    @keyframes rankPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
-    .rank-current-name { font-size:18px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
-    .rank-current-sub  { font-size:10px; color:var(--text2); letter-spacing:1px; }
-    .chart-card { background:var(--bg2); border:1px solid var(--bdr); padding:16px 18px; margin-bottom:10px; }
+    .grank-node.current .grank-dot {
+      width:54px; height:54px; font-size:28px;
+      border-color:var(--accent); background:rgba(153,69,255,0.15);
+      box-shadow:0 0 24px rgba(153,69,255,0.5);
+      animation:currentRankPulse 2s ease-in-out infinite;
+    }
+    @keyframes currentRankPulse {
+      0%,100% { box-shadow:0 0 24px rgba(153,69,255,0.5); }
+      50% { box-shadow:0 0 36px rgba(153,69,255,0.8); }
+    }
+    .grank-node.locked .grank-dot { opacity:0.4; filter:grayscale(0.6); }
+    .grank-label { font-family:'IBM Plex Sans',sans-serif; font-size:10px; font-weight:600; color:var(--text2); letter-spacing:0.3px; line-height:1.3; margin-bottom:2px; white-space:nowrap; }
+    .grank-node.achieved .grank-label { color:var(--green); }
+    .grank-node.current .grank-label { color:var(--accent); font-weight:700; }
+    .grank-node.locked .grank-label { color:var(--text3); }
+    .grank-target { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); }
+    .grank-node.current::after {
+      content:'YOU'; position:absolute; bottom:-16px;
+      font-family:'IBM Plex Sans',sans-serif; font-size:8px; font-weight:700;
+      color:var(--accent); letter-spacing:1.5px; background:var(--bg);
+      padding:2px 8px; border-radius:999px; border:1px solid var(--bdr2);
+    }
+    .grank-line {
+      flex:1; height:2px; margin:0 -2px; margin-bottom:40px;
+      background:var(--bg4); min-width:12px; position:relative; flex-shrink:1;
+    }
+    .grank-line.completed { background:var(--green); box-shadow:0 0 8px rgba(20,241,149,0.4); }
+    .grank-line.locked { background:var(--bg4); background-image:linear-gradient(90deg, var(--bdr) 50%, transparent 50%); background-size:6px 2px; }
+    .grank-progress-bar {
+      margin-top:8px; padding:14px 16px;
+      background:linear-gradient(90deg, rgba(153,69,255,0.06), transparent);
+      border:1px solid var(--bdr2); border-radius:12px;
+    }
+    .grank-progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .grank-next-label { font-size:11px; color:var(--text2); }
+    .grank-next-label strong { color:var(--accent); font-weight:600; }
+    .grank-pct { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent); font-weight:600; }
+    .grank-progress-track { height:6px; background:var(--bg4); border-radius:3px; overflow:hidden; }
+    .grank-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--green)); border-radius:3px; transition:width 1.5s cubic-bezier(0.4,0,0.2,1); box-shadow:0 0 12px rgba(153,69,255,0.5); }
+    .grank-short { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text3); margin-top:6px; }
+    .grank-short strong { color:var(--red); font-weight:600; }
+
+    /* ── CHART ── */
+    .chart-card { padding:18px 20px!important; }
     .tf-btn {
-      background:transparent; border:1px solid var(--bdr); padding:3px 9px;
-      color:var(--text2); font-family:'IBM Plex Mono',monospace; font-size:9px;
-      font-weight:600; cursor:pointer; letter-spacing:1px; text-transform:uppercase;
+      background:transparent; border:1px solid var(--bdr); border-radius:6px;
+      padding:4px 9px; color:var(--text2); font-family:'IBM Plex Mono',monospace;
+      font-size:10px; font-weight:600; cursor:pointer; letter-spacing:0.5px;
       transition:all 0.15s;
     }
     .tf-btn:hover { border-color:var(--bdr2); color:var(--accent); }
-    .tf-active { background:var(--bg3); border-color:var(--bdr2) !important; color:var(--accent) !important; }
+    .tf-active { background:rgba(153,69,255,0.12); border-color:var(--bdr2)!important; color:var(--accent)!important; }
 
-    /* ── HIDDEN RETIRE ── */
-    .retire-inp { background:var(--bg3); border:1px solid var(--bdr); padding:8px 12px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; width:100%; }
+    /* ── RETIRE ── */
+    .retire-inp { background:var(--bg3); border:1px solid var(--bdr); border-radius:8px; padding:9px 12px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; width:100%; }
     .retire-inp:focus { border-color:var(--accent); }
 
     /* ── SPIN ── */
-    .spin { display:inline-block; width:12px; height:12px; border:2px solid rgba(153,69,255,0.2); border-top-color:var(--accent); animation:sp 0.6s linear infinite; vertical-align:middle; margin-right:6px; }
+    .spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(153,69,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:sp 0.6s linear infinite; vertical-align:middle; margin-right:6px; }
     @keyframes sp { to{transform:rotate(360deg)} }
 
     /* ── PNL CALENDAR ── */
-    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-    .cal-dow  { font-size:8px; color:var(--text3); text-align:center; padding:4px 0; letter-spacing:1px; font-weight:700; }
-    .cal-cell { background:var(--bg3); padding:6px 5px; min-height:54px; border-radius:3px; border:1px solid transparent; }
-    .cal-cell.profit { background:rgba(20,241,149,0.12); border-color:rgba(20,241,149,0.3); }
-    .cal-cell.loss   { background:rgba(255,92,122,0.12);  border-color:rgba(255,92,122,0.3); }
-    .cal-cell.today  { border-color:var(--accent) !important; box-shadow:0 0 0 1px rgba(153,69,255,0.3); }
+    #pnlCalendarBox { padding:18px 20px; }
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-dow { font-family:'IBM Plex Sans',sans-serif; font-size:9px; color:var(--text3); text-align:center; padding:4px 0; letter-spacing:1px; font-weight:600; }
+    .cal-cell { background:var(--bg3); padding:6px 5px; min-height:56px; border-radius:6px; border:1px solid transparent; transition:all 0.15s; }
+    .cal-cell.profit { background:rgba(20,241,149,0.1); border-color:rgba(20,241,149,0.25); }
+    .cal-cell.loss   { background:rgba(255,92,122,0.1); border-color:rgba(255,92,122,0.25); }
+    .cal-cell.today  { border-color:var(--accent)!important; box-shadow:0 0 0 2px rgba(153,69,255,0.25); }
     .cal-cell.empty  { background:transparent; border-color:transparent; }
-    .cal-day  { font-size:9px; color:var(--text3); margin-bottom:3px; }
-    .cal-val  { font-size:10px; font-weight:700; line-height:1.2; }
-    .cal-pct  { font-size:8px; opacity:0.8; margin-top:1px; }
+    .cal-cell:hover:not(.empty) { transform:scale(1.05); }
+    .cal-day { font-size:10px; color:var(--text3); margin-bottom:3px; font-family:'IBM Plex Sans',sans-serif; }
+    .cal-val { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; line-height:1.2; }
+    .cal-pct { font-family:'IBM Plex Mono',monospace; font-size:8px; opacity:0.8; margin-top:1px; }
     .cal-cell.profit .cal-day { color:rgba(20,241,149,0.7); }
-    .cal-cell.loss   .cal-day { color:rgba(255,92,122,0.7); }
-    .cal-cell.profit .cal-val, .cal-cell.profit .cal-pct { color:#14f195; }
-    .cal-cell.loss   .cal-val, .cal-cell.loss   .cal-pct { color:#ff5c7a; }
+    .cal-cell.loss .cal-day { color:rgba(255,92,122,0.7); }
+    .cal-cell.profit .cal-val, .cal-cell.profit .cal-pct { color:var(--green); }
+    .cal-cell.loss .cal-val, .cal-cell.loss .cal-pct { color:var(--red); }
 
     /* ── BADGES ── */
-    .badge-item { text-align:center; width:100%; }
-    .badge-circle { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px; border:2px solid; transition:transform 0.2s; }
-    .badge-circle.unlocked { border-color:var(--accent); box-shadow:0 0 12px rgba(153,69,255,0.2); }
-    .badge-circle.unlocked:hover { transform:scale(1.1); }
-    .badge-circle.locked   { background:var(--bg3); border-color:rgba(255,255,255,0.12); filter:grayscale(1); opacity:0.55; }
-    .badge-lbl { font-size:8px; letter-spacing:1px; font-weight:700; text-transform:uppercase; line-height:1.4; }
-    .badge-lbl.locked { color:var(--text2); opacity:0.55; }
+    #badgesBox { padding:20px; }
+    .badge-item { text-align:center; }
+    .badge-circle { width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 10px; border:2px solid; transition:all 0.2s; }
+    .badge-circle.unlocked { border-color:var(--accent); background:rgba(153,69,255,0.1); box-shadow:0 0 20px rgba(153,69,255,0.25); }
+    .badge-circle.unlocked:hover { transform:scale(1.12) rotate(-5deg); }
+    .badge-circle.locked { background:var(--bg3); border-color:var(--bdr); filter:grayscale(1); opacity:0.45; }
+    .badge-lbl { font-family:'IBM Plex Sans',sans-serif; font-size:9px; letter-spacing:0.5px; font-weight:600; text-transform:uppercase; line-height:1.4; }
+    .badge-lbl.locked { color:var(--text3); opacity:0.55; }
 
     /* ── SKELETON ── */
-    .skel { background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:2px; }
+    .skel { background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:4px; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
     /* ── ERROR BANNER ── */
-    .err-banner { background:rgba(255,92,122,0.08); border:1px solid rgba(255,92,122,0.3); border-left:3px solid var(--red); padding:10px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
-    .err-banner-msg { font-size:9px; color:var(--red); font-weight:700; letter-spacing:1px; margin-bottom:2px; }
-    .err-banner-sub { font-size:9px; color:var(--text3); }
-    .err-retry { background:transparent; border:1px solid rgba(255,92,122,0.4); padding:4px 12px; color:var(--red); font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:700; cursor:pointer; letter-spacing:1px; }
+    .err-banner { background:rgba(255,92,122,0.08); border:1px solid rgba(255,92,122,0.25); border-left:3px solid var(--red); border-radius:10px; padding:12px 16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+    .err-banner-msg { font-family:'IBM Plex Sans',sans-serif; font-size:11px; color:var(--red); font-weight:600; letter-spacing:0.5px; margin-bottom:3px; }
+    .err-banner-sub { font-size:10px; color:var(--text3); }
+    .err-retry { background:transparent; border:1px solid rgba(255,92,122,0.35); border-radius:8px; padding:5px 12px; color:var(--red); font-family:'IBM Plex Sans',sans-serif; font-size:10px; font-weight:600; cursor:pointer; letter-spacing:0.5px; }
     .err-retry:hover { background:rgba(255,92,122,0.1); }
 
     /* ── ONBOARDING ── */
-    .onboard { background:rgba(153,69,255,0.04); border:1px solid rgba(153,69,255,0.18); padding:16px 18px; margin-bottom:8px; }
-    .onboard-step { display:flex; gap:14px; align-items:flex-start; margin-bottom:12px; }
+    .onboard { background:linear-gradient(180deg, rgba(153,69,255,0.06), rgba(153,69,255,0.02)); border:1px solid var(--bdr2); border-radius:14px; padding:18px 20px; margin-bottom:12px; }
+    .onboard-step { display:flex; gap:14px; align-items:flex-start; margin-bottom:14px; }
     .onboard-step:last-child { margin-bottom:0; }
-    .onboard-num { width:24px; height:24px; border-radius:50%; background:var(--accent); color:#1a0a33; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .onboard-num.done { background:var(--green); }
-    .onboard-num.pending { background:var(--bg3); border:1px solid var(--bdr); color:var(--text3); }
-    .onboard-title { font-size:11px; font-weight:700; color:var(--text); margin-bottom:3px; }
-    .onboard-sub { font-size:9px; color:var(--text3); line-height:1.5; }
+    .onboard-num { width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 8px rgba(153,69,255,0.4); }
+    .onboard-num.done { background:var(--green); box-shadow:0 2px 8px rgba(20,241,149,0.4); }
+    .onboard-num.pending { background:var(--bg3); border:1px solid var(--bdr); color:var(--text3); box-shadow:none; }
+    .onboard-title { font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; }
+    .onboard-sub { font-size:10px; color:var(--text3); line-height:1.5; }
 
     /* ── EMPTY STATE DEMO ── */
     .demo-overlay { position:relative; }
-    .demo-watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-15deg); font-size:48px; font-weight:700; color:rgba(153,69,255,0.06); letter-spacing:8px; pointer-events:none; z-index:1; white-space:nowrap; }
+    .demo-watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-12deg); font-size:56px; font-weight:700; color:rgba(153,69,255,0.05); letter-spacing:12px; pointer-events:none; z-index:1; white-space:nowrap; font-family:'IBM Plex Sans',sans-serif; }
 
     /* ── FOOTER ── */
     footer { 
-      text-align:left; margin-top:36px; font-size:9px; color:var(--text3); 
-      letter-spacing:1.5px; border-top:1px solid var(--bdr); padding-top:14px; 
+      text-align:left; margin-top:40px; font-size:10px; color:var(--text3); 
+      letter-spacing:1px; border-top:1px solid var(--bdr); padding-top:18px; 
       text-transform:uppercase; display:flex; justify-content:space-between; 
       align-items:center; flex-wrap:wrap; gap:8px;
+      font-family:'IBM Plex Sans',sans-serif;
     }
     footer .footer-left { color:var(--text3); }
-    footer .footer-right a { color:var(--accent); text-decoration:none; font-weight:600; letter-spacing:2px; transition:color 0.15s; }
+    footer .footer-right a { color:var(--accent); text-decoration:none; font-weight:600; letter-spacing:1.5px; transition:color 0.15s; }
     footer .footer-right a:hover { color:var(--accent2); }
-    @media(max-width:600px){ footer { font-size:8px; letter-spacing:1px; flex-direction:column; align-items:flex-start; } }
-
 
     @media(max-width:600px){
-      .container { padding:0 12px 40px; }
-      .status-bar { gap:10px; flex-wrap:wrap; font-size:9px; padding:4px 8px; }
+      .container { padding:12px 14px 50px; }
+      header { margin-bottom:10px; }
+      .logo-title { font-size:14px; }
+      .status-bar { gap:10px; flex-wrap:wrap; font-size:9px; padding:6px 10px; border-radius:8px; }
       .status-bar #clockEl { font-size:9px; }
-      .ticker { grid-template-columns:repeat(2,1fr) !important; }
-      .tick { padding:8px 10px; }
+      .ticker { grid-template-columns:repeat(2,1fr)!important; gap:6px; }
+      .tick { padding:10px 12px; border-radius:8px; }
       .tick-val { font-size:14px; }
-      .tick-label { font-size:8px; }
-      .hero-v { font-size:28px; letter-spacing:-0.5px; }
-      .btn-cw { font-size:11px; padding:12px 18px; width:100%; justify-content:center; }
-      #targetBox { grid-template-columns:1fr !important; }
+      .hero { padding:36px 20px 28px!important; border-radius:16px!important; }
+      .hero-v { font-size:32px; letter-spacing:-1px; }
+      .btn-cw { font-size:12px; padding:12px 22px; width:100%; }
 
-      /* Fix PnL Today — smaller numbers on mobile to prevent wrapping */
-      #pnlBox .pnl-grid { grid-template-columns:repeat(3,1fr) !important; gap:10px !important; }
+      #targetBox { grid-template-columns:1fr!important; }
 
-      /* Fix job card layout on mobile */
-      .job { flex-direction:column; padding:10px 12px; }
+      #pnlBox .pnl-grid { grid-template-columns:repeat(3,1fr)!important; gap:10px!important; }
 
-      /* Jobs grid — 3 columns on mobile so 7 items fit cleanly (2+2+2+1) */
-      .jgrid { grid-template-columns:repeat(3,1fr) !important; gap:4px 8px; }
-      .jt { font-size:11px; }
-      .jnl { font-size:7px; letter-spacing:1px; }
-      .jnv { font-size:10px; }
+      .jobs { grid-template-columns:1fr; }
+      .job { padding:14px 16px; }
+      .jhero-v { font-size:30px; }
+      .jstats { gap:6px; }
+      .jstat-v { font-size:10px; }
 
-      /* MUST WORK — compact on mobile */
-      .jr { 
-        width:100%; min-width:unset; border-left:2px solid var(--accent); 
-        border-top:none; padding:7px 12px; margin-top:8px; 
-        display:flex; align-items:center; justify-content:space-between; 
-        text-align:left;
-      }
-      .jrl { margin-bottom:0; margin-right:8px; font-size:8px; }
-      .jrv { font-size:18px; }
-      .jrs { display:none; }
-
-      .wi { gap:0; }
-      .wi > div { padding-right:12px; margin-right:12px; }
+      .wi { grid-template-columns:repeat(3,1fr); gap:10px; }
       .wi-v { font-size:14px; }
-      .tf-btn { padding:3px 7px; font-size:8px; }
+      .tf-btn { padding:3px 7px; font-size:9px; }
       .modal { margin:12px; }
-      .logo-text { display:none; }
-      .rank-current-icon { font-size:36px; }
-      .rank-current-name { font-size:14px; }
-      #badgesContent { grid-template-columns:repeat(3,1fr) !important; }
-      footer { font-size:8px; letter-spacing:1px; word-spacing:2px; flex-direction:column; }
+
+      .grank-path { padding:0 0 22px; }
+      .grank-node { min-width:66px; }
+      .grank-dot { width:38px; height:38px; font-size:18px; }
+      .grank-node.current .grank-dot { width:46px; height:46px; font-size:22px; }
+      .grank-current-icon { width:60px; height:60px; font-size:40px; }
+      .grank-current-name { font-size:16px; }
+      .grank-line { margin-bottom:34px; }
+
+      #badgesContent { grid-template-columns:repeat(3,1fr)!important; gap:16px 10px!important; }
+      .badge-circle { width:52px; height:52px; font-size:22px; }
+
+      footer { font-size:9px; letter-spacing:0.8px; flex-direction:column; align-items:flex-start; }
     }
   </style>
 </head>
@@ -483,67 +601,26 @@
       </button>
     </div>
 
-    <div id="pnlBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:16px 18px;margin-bottom:8px"></div>
-
-    <div id="fearGreedBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:16px 18px;margin-bottom:8px">
-      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:14px">MARKET SENTIMENT</div>
-      <div id="fearGreedContent"></div>
-    </div>
-
-    <div id="badgesBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:16px 18px;margin-bottom:8px">
-      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:14px">YOUR BADGES</div>
-      <div id="badgesContent" style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px 8px;"></div>
-    </div>
-
-    <div id="streakBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:16px 18px;margin-bottom:8px">
-      <div id="streakContent"></div>
-    </div>
-
-    <div id="pnlCalendarBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);padding:16px 18px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L CALENDAR</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <button onclick="calPrevMonth()" style="background:transparent;border:1px solid var(--bdr);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9664;</button>
-          <span id="calMonthLabel" style="font-size:10px;color:var(--text);letter-spacing:1px;min-width:90px;text-align:center"></span>
-          <button onclick="calNextMonth()" style="background:transparent;border:1px solid var(--bdr);padding:2px 8px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9654;</button>
-        </div>
+    <!-- ─── GARUT WEALTH RANK (MOVED UP — priority #2) ─── -->
+    <div class="sec-l">GARUT WEALTH RANK</div>
+    <div id="garutRankBox" style="padding:20px 18px;position:relative;overflow:hidden">
+      <div id="garutRankContent">
+        <div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>
       </div>
-      <div id="pnlCalendarGrid"></div>
     </div>
 
-    <div id="atplBox" style="display:none;background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:16px 18px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">ALL TIME P&amp;L</div>
-        <button onclick="fetchInitialValue()" id="atplRefresh" style="background:transparent;border:1px solid var(--bdr2);padding:3px 10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px">↻ SYNC</button>
-      </div>
-      <div id="atplContent"><div style="font-size:10px;color:var(--text3)">Connect wallet to load on-chain data...</div></div>
-    </div>
-
-    <div class="chart-card" id="chartCard" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="sec-l" style="margin-bottom:0;flex:1">PORTFOLIO VALUE</div>
-        <div style="display:flex;gap:3px;align-items:center">
-          <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
-          <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
-          <button onclick="setTf('1D')" id="tf1D" class="tf-btn">1D</button>
-          <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
-          <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
-          <button onclick="setTf('ALL')" id="tfALL" class="tf-btn tf-active">ALL</button>
-          <button onclick="syncChart()" class="tf-btn" style="margin-left:8px;border-color:var(--bdr2);color:var(--accent)" title="Sync chart">↺</button>
-        </div>
-      </div>
-      <canvas id="portfolioChart" style="max-height:220px"></canvas>
-    </div>
-
-    <div class="sec-l" style="text-align:center">TOP 1% WEALTH TARGET</div>
+    <!-- ─── TOP 1% WEALTH TARGET ─── -->
+    <div class="sec-l">TOP 1% WEALTH TARGET</div>
     <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px"></div>
 
-    <!-- Garut Wealth Rank -->
-    <div class="sec-l" style="margin-top:10px">GARUT WEALTH RANK</div>
-    <div id="garutRankBox" style="background:var(--bg2);border:1px solid var(--bdr);padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden">
-      <div id="garutRankContent">
-        <div style="font-size:10px;color:var(--text3);text-align:center;padding:10px 0">Connect wallet to see your Garut rank</div>
-      </div>
+    <!-- ─── JOBS COMPARISON (MOVED UP — priority #3, core value prop) ─── -->
+    <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
+    <div class="jobs" id="jobsBox"></div>
+
+    <!-- Insight tied to Jobs -->
+    <div class="fact" id="factBox" style="display:none">
+      <div class="fact-icon">&#128161;</div>
+      <div><div class="fact-t">INSIGHT</div><div class="fact-b" id="factTxt"></div></div>
     </div>
 
     <!-- Retire Calculator Hidden -->
@@ -557,33 +634,82 @@
       <div id="retireDetail"></div>
     </div>
 
-    <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
-    <div class="jobs" id="jobsBox"></div>
+    <!-- ─── PERFORMANCE TRACKING (priority #4) ─── -->
+    <div class="sec-l" id="secLabelPerf" style="display:none">PERFORMANCE</div>
 
-    <div class="fact" id="factBox" style="display:none">
-      <div style="font-size:20px">&#128161;</div>
-      <div><div class="fact-t">INSIGHT</div><div class="fact-b" id="factTxt"></div></div>
+    <div id="pnlBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px"></div>
+
+    <div id="atplBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase">ALL TIME P&amp;L</div>
+        <button onclick="fetchInitialValue()" id="atplRefresh" style="background:transparent;border:1px solid var(--bdr2);border-radius:8px;padding:5px 12px;color:var(--text2);font-family:'IBM Plex Sans',sans-serif;font-size:10px;cursor:pointer;letter-spacing:0.5px;font-weight:500">↻ SYNC</button>
+      </div>
+      <div id="atplContent"><div style="font-size:11px;color:var(--text3)">Connect wallet to load on-chain data...</div></div>
     </div>
 
-    <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:2px solid var(--accent);padding:16px 18px;margin-top:16px;margin-bottom:6px">
-      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px">SUPPORT CRYPTORETIRE</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+    <div class="chart-card" id="chartCard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="sec-l" style="margin:0;flex:1">PORTFOLIO VALUE</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
+          <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
+          <button onclick="setTf('1D')" id="tf1D" class="tf-btn">1D</button>
+          <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
+          <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
+          <button onclick="setTf('ALL')" id="tfALL" class="tf-btn tf-active">ALL</button>
+          <button onclick="syncChart()" class="tf-btn" style="margin-left:6px;border-color:var(--bdr2);color:var(--accent)" title="Sync chart">↺</button>
+        </div>
+      </div>
+      <canvas id="portfolioChart" style="max-height:220px"></canvas>
+    </div>
+
+    <!-- ─── ACHIEVEMENTS (badges + streak) ─── -->
+    <div id="badgesBox" style="display:none;padding:20px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase;margin-bottom:16px">YOUR BADGES</div>
+      <div id="badgesContent" style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px 10px;"></div>
+    </div>
+
+    <div id="streakBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px">
+      <div id="streakContent"></div>
+    </div>
+
+    <div id="pnlCalendarBox" style="display:none;padding:18px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase">P&amp;L CALENDAR</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button onclick="calPrevMonth()" style="background:transparent;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9664;</button>
+          <span id="calMonthLabel" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);letter-spacing:0.5px;min-width:90px;text-align:center"></span>
+          <button onclick="calNextMonth()" style="background:transparent;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9654;</button>
+        </div>
+      </div>
+      <div id="pnlCalendarGrid"></div>
+    </div>
+
+    <!-- ─── MARKET CONTEXT (moved to bottom) ─── -->
+    <div id="fearGreedBox" style="display:none;padding:18px 20px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase;margin-bottom:14px">MARKET SENTIMENT</div>
+      <div id="fearGreedContent"></div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:14px;padding:18px 20px;margin-top:20px;margin-bottom:6px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase;margin-bottom:14px">SUPPORT CRYPTORETIRE</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
         <div>
-          <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">SOLANA (SOL)</div>
-          <div style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;font-weight:600">SOLANA (SOL)</div>
+          <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
             <span id="donateAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('sol')" title="Click to copy">5u7ng...JgA</span>
           </div>
         </div>
-        <button onclick="copyDonate('sol')" style="background:transparent;border:1px solid var(--bdr2);padding:6px 14px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY SOL</button>
+        <button onclick="copyDonate('sol')" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:7px 14px;color:var(--text2);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;letter-spacing:0.5px;font-weight:500;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr)';this.style.color='var(--text2)'">COPY SOL</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:10px;border-top:1px solid var(--bdr)">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:12px;border-top:1px solid var(--bdr)">
         <div>
-          <div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">EVM (ETH/BSC/POLYGON)</div>
-          <div style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;font-weight:600">EVM (ETH/BSC/POLYGON)</div>
+          <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace">
             <span id="donateEvmAddr" style="color:var(--text);cursor:pointer" onclick="copyDonate('evm')" title="Click to copy">0x1503...3E3a</span>
           </div>
         </div>
-        <button onclick="copyDonate('evm')" style="background:transparent;border:1px solid var(--bdr2);padding:6px 14px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr2)';this.style.color='var(--text2)'">COPY EVM</button>
+        <button onclick="copyDonate('evm')" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:7px 14px;color:var(--text2);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;letter-spacing:0.5px;font-weight:500;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr)';this.style.color='var(--text2)'">COPY EVM</button>
       </div>
     </div>
     <footer id="footerEl">
@@ -1470,7 +1596,7 @@
       if (!box) return;
       const val = total || 0;
       if (val <= 0) {
-        box.innerHTML = '<div style="font-size:10px;color:var(--text3);text-align:center;padding:10px 0">Connect wallet to see your Garut rank</div>';
+        box.innerHTML = '<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>';
         return;
       }
 
@@ -1489,72 +1615,55 @@
 
       let html = '';
 
-      // Current rank banner
-      html += '<div class="rank-current-banner">'
-        + '<div class="rank-current-icon">'+currentRank.icon+'</div>'
-        + '<div class="rank-current-name" style="color:'+currentRank.color+'">'+currentRank.name+'</div>'
-        + '<div class="rank-current-sub">'+currentRank.desc+'</div>'
+      // Current rank hero (big centered)
+      html += '<div class="grank-current-hero">'
+        + '<div class="grank-current-icon">'+currentRank.icon+'</div>'
+        + '<div class="grank-current-name" style="color:'+currentRank.color+'">'+currentRank.name+'</div>'
+        + '<div class="grank-current-sub">'+currentRank.desc+'</div>'
         + '</div>';
+
+      // Horizontal path — game-style level progression
+      html += '<div class="grank-path">';
+      GARUT_RANKS.forEach((rank, i) => {
+        const achieved = val >= rank.target && i !== currentRankIdx;
+        const isCurrent = i === currentRankIdx;
+        const status = isCurrent ? 'current' : achieved ? 'achieved' : 'locked';
+        html += '<div class="grank-node '+status+'">'
+          + '<div class="grank-dot" style="'+(isCurrent?'border-color:'+rank.color+';':'')+'">'+rank.icon+'</div>'
+          + '<div class="grank-label">'+rank.name+'</div>'
+          + '<div class="grank-target">'+fi(rank.target)+'</div>'
+          + '</div>';
+        // Line between nodes (not after last)
+        if (i < GARUT_RANKS.length - 1) {
+          const lineStatus = val >= GARUT_RANKS[i+1].target ? 'completed' : 'locked';
+          html += '<div class="grank-line '+lineStatus+'"></div>';
+        }
+      });
+      html += '</div>';
 
       // Progress to next
       if (nextRank) {
         const shortAmt = nextRank.target - val;
-        html += '<div style="background:var(--bg3);border:1px solid var(--bdr2);padding:12px 14px;margin-bottom:14px">'
-          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-            + '<div style="font-size:10px;color:var(--text2)">Next: <span style="color:var(--accent);font-weight:700">'+nextRank.icon+' '+nextRank.name+'</span></div>'
-            + '<div style="font-size:10px;color:var(--accent)">'+pct.toFixed(1)+'%</div>'
+        html += '<div class="grank-progress-bar">'
+          + '<div class="grank-progress-header">'
+            + '<div class="grank-next-label">Next: <strong>'+nextRank.icon+' '+nextRank.name+'</strong></div>'
+            + '<div class="grank-pct">'+pct.toFixed(1)+'%</div>'
           + '</div>'
-          + '<div class="rank-prog"><div class="rank-prog-fill" id="garutProgFill" style="width:0%"></div></div>'
-          + '<div style="font-size:9px;color:var(--red);margin-top:6px">Short: <span style="font-weight:700">'+fi(shortAmt)+'</span></div>'
+          + '<div class="grank-progress-track"><div class="grank-progress-fill" id="garutProgFill" style="width:0%"></div></div>'
+          + '<div class="grank-short">Short: <strong>'+fi(shortAmt)+'</strong></div>'
           + '</div>';
       } else {
-        html += '<div style="background:rgba(20,241,149,0.08);border:1px solid rgba(20,241,149,0.3);padding:10px 14px;margin-bottom:14px;text-align:center">'
-          + '<div style="font-size:11px;color:var(--green);font-weight:700">👑 HIGHEST RANK ACHIEVED!</div>'
+        html += '<div style="background:rgba(20,241,149,0.08);border:1px solid rgba(20,241,149,0.3);padding:14px;border-radius:12px;text-align:center">'
+          + '<div style="font-size:12px;color:var(--green);font-weight:700">👑 HIGHEST RANK ACHIEVED!</div>'
           + '</div>';
       }
 
-      // All ranks list
-      html += '<div style="display:flex;flex-direction:column;gap:4px">';
-      GARUT_RANKS.slice(1).forEach((rank, i) => {
-        const rankIdx = i + 1;
-        const achieved = val >= rank.target;
-        const isCurrent = rankIdx === currentRankIdx;
-        const status = achieved ? 'achieved' : (isCurrent ? 'current' : 'locked');
-        const badgeClass = achieved ? 'done' : (isCurrent ? 'now' : 'next');
-        const badgeText = achieved ? '✓ ACHIEVED' : (isCurrent ? '● CURRENT' : 'LOCKED');
-        const rankPct = isCurrent && nextRank
-          ? Math.min(100, ((val - rank.target) / (GARUT_RANKS[rankIdx+1]?.target - rank.target || 1)) * 100)
-          : achieved ? 100 : 0;
-
-        html += '<div class="rank-card '+status+'">'
-          + '<div class="rank-icon">'+rank.icon+'</div>'
-          + '<div class="rank-info">'
-            + '<div class="rank-name" style="color:'+rank.color+'">'+rank.name+'</div>'
-            + '<div class="rank-desc">'+rank.desc+'</div>'
-            + '<div class="rank-target">Target: '+fi(rank.target)+'</div>'
-            + (isCurrent && nextRank ? '<div class="rank-prog"><div class="rank-prog-fill" id="garutProg'+rankIdx+'" style="width:0%"></div></div>' : '')
-          + '</div>'
-          + '<div class="rank-badge '+badgeClass+'">'+badgeText+'</div>'
-          + '</div>';
-      });
-      html += '</div>';
-
       box.innerHTML = html;
 
-      // Animate progress bars
+      // Animate progress bar
       setTimeout(() => {
         const mainFill = document.getElementById('garutProgFill');
         if (mainFill) mainFill.style.width = pct + '%';
-        GARUT_RANKS.slice(1).forEach((_, i) => {
-          const rankIdx = i + 1;
-          const fill = document.getElementById('garutProg'+rankIdx);
-          if (fill) {
-            const rPct = rankIdx === currentRankIdx && nextRank
-              ? Math.min(100, ((val - GARUT_RANKS[rankIdx].target) / (GARUT_RANKS[rankIdx+1]?.target - GARUT_RANKS[rankIdx].target || 1)) * 100)
-              : val >= GARUT_RANKS[rankIdx].target ? 100 : 0;
-            fill.style.width = rPct + '%';
-          }
-        });
       }, 200);
     }
     function renderJobs() {
@@ -1562,22 +1671,33 @@
       const maxSalary = Math.max(...src.map(j=>j.salary));
       const minSalary = Math.min(...src.map(j=>j.salary));
       src.forEach(job=>{
-        const perDetik=job.salary/30/24/3600, perJam=job.salary/30/24, perHari=job.salary/30, perMinggu=job.salary/4.33, perBulan=job.salary, perTahun=job.salary*12, per35thn=job.salary*420;
-        const days=total>0?total/perHari:null, uid='b'+job.pct;
+        const perJam=job.salary/30/24, perHari=job.salary/30, perBulan=job.salary, perTahun=job.salary*12;
+        const days = total>0 ? total/perHari : null, uid='b'+job.pct;
         const barPct = 20 + ((job.salary - minSalary) / (maxSalary - minSalary)) * 80;
+        // Smart unit — pick best unit for the duration
+        let heroV = '--', heroU = 'MUST WORK';
+        if (days !== null) {
+          if (days < 1) { heroV = Math.ceil(days*24); heroU = heroV===1?'HOUR TO EARN':'HOURS TO EARN'; }
+          else if (days < 30) { heroV = Math.ceil(days); heroU = heroV===1?'DAY TO EARN':'DAYS TO EARN'; }
+          else if (days < 365) { heroV = Math.ceil(days/30); heroU = heroV===1?'MONTH TO EARN':'MONTHS TO EARN'; }
+          else { heroV = (days/365).toFixed(1); heroU = 'YEARS TO EARN'; }
+        }
         const div=document.createElement('div'); div.className='job';
-        div.innerHTML='<div class="jl"><div class="jt">'+job.title+'</div><div class="jc">'+job.company+'</div><div class="jgrid">'
-          +'<div><div class="jnl">SEC</div><div class="jnv">'+fi(perDetik)+'</div></div>'
-          +'<div><div class="jnl">HOUR</div><div class="jnv">'+fi(Math.round(perJam))+'</div></div>'
-          +'<div><div class="jnl">DAY</div><div class="jnv">'+fi(Math.round(perHari))+'</div></div>'
-          +'<div><div class="jnl">WEEK</div><div class="jnv">'+fi(Math.round(perMinggu))+'</div></div>'
-          +'<div><div class="jnl">MONTH</div><div class="jnv">'+fi(perBulan)+'</div></div>'
-          +'<div><div class="jnl">YEAR</div><div class="jnv">'+fi(perTahun)+'</div></div>'
-          +'<div><div class="jnl">35 YEARS</div><div class="jnv">'+fi(per35thn)+'</div></div>'
-          +'</div><div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div></div>'
-          +'<div class="jr"><div class="jrl">MUST WORK</div><div class="jrv">'+(days?fd(days):'--')+'</div>'
-          +'</div>';
-        box.appendChild(div); setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=barPct.toFixed(1)+'%';},150);
+        div.innerHTML=
+          '<div><div class="jt">'+job.title+'</div>'
+          +'<div class="jc">'+job.company+'</div></div>'
+          +'<div class="jhero">'
+            +'<div class="jhero-v">'+heroV+'</div>'
+            +'<div class="jhero-u">'+heroU+'</div>'
+          +'</div>'
+          +'<div class="jstats">'
+            +'<div class="jstat"><div class="jstat-l">Hour</div><div class="jstat-v">'+fi(Math.round(perJam))+'</div></div>'
+            +'<div class="jstat"><div class="jstat-l">Month</div><div class="jstat-v">'+fi(perBulan)+'</div></div>'
+            +'<div class="jstat"><div class="jstat-l">Year</div><div class="jstat-v">'+fi(perTahun)+'</div></div>'
+          +'</div>'
+          +'<div class="bw"><div class="bf" id="'+uid+'" style="width:0%"></div></div>';
+        box.appendChild(div);
+        setTimeout(()=>{const b=document.getElementById(uid);if(b)b.style.width=barPct.toFixed(1)+'%';},150);
       });
     }
     function renderFact(sol) {
