@@ -1726,10 +1726,12 @@
 
         if(totalLockedIDR>0) {
           const curSolIDR = solIDR > 0 ? solIDR : 1385337;
-          const lockedSOL = totalLockedIDR / curSolIDR;
-          const freeSol   = window._solBalance || 0;
-          const totalSOL  = freeSol + lockedSOL;
-          total = (freeSol * curSolIDR) + totalLockedIDR;
+          // IMPORTANT: use += so we preserve SPL token value already in `total`.
+          // Before this line, total = (sol * solIDR) + SPL tokens (from fetchTokens).
+          // Adding locked IDR here gives the full portfolio value.
+          total += totalLockedIDR;
+          const totalSOL = total / curSolIDR; // recompute from final total
+          window._totalWithTokens = total;
           document.getElementById('wSol').textContent  = totalSOL.toFixed(4)+' SOL';
           document.getElementById('wSolV').textContent = fi(total);
           document.getElementById('wIdr').textContent  = fi(total);
