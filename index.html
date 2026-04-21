@@ -450,7 +450,7 @@
           <div class="btn-cw-icon">&#9678;</div>
           Connect Wallet
         </button>
-        <div style="margin-top:10px;font-size:11px;color:#4a5568">Support: Phantom Wallet</div>
+        <div style="margin-top:10px;font-size:11px;color:#4a5568">Support: Phantom, Solflare, Backpack, Jupiter, Glow</div>
       </div>
       <div id="isConn" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -475,7 +475,7 @@
     <div class="hero demo-overlay" id="heroBox">
       <div class="demo-watermark" id="demoWatermark">DEMO</div>
       <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
-      <div class="hero-v" id="heroV" style="opacity:0.25">Rp 12.0 Jt</div>
+      <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 M</div>
       <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
       <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -1113,12 +1113,81 @@
     }
 
     // ── Wallet ──────────────────────────────────────────────
-    const WALLETS=[{name:'Phantom',desc:'Phantom Wallet',icon:'&#128123;',bg:'#1a1535',get:()=>{if(window.phantom?.solana?.isPhantom)return window.phantom.solana;if(window.solana?.isPhantom)return window.solana;return null;}}];
+    const WALLETS = [
+      {
+        name:'Phantom', desc:'Phantom Wallet', icon:'&#128123;', bg:'#1a0a33',
+        url:'https://phantom.app/',
+        get:()=>{
+          if(window.phantom?.solana?.isPhantom) return window.phantom.solana;
+          if(window.solana?.isPhantom) return window.solana;
+          return null;
+        }
+      },
+      {
+        name:'Solflare', desc:'Solflare Wallet', icon:'&#9728;&#65039;', bg:'#fc7537',
+        url:'https://solflare.com/',
+        get:()=>{
+          if(window.solflare?.isSolflare) return window.solflare;
+          return null;
+        }
+      },
+      {
+        name:'Backpack', desc:'Backpack Wallet', icon:'&#127960;&#65039;', bg:'#e33e3e',
+        url:'https://backpack.app/',
+        get:()=>{
+          if(window.backpack?.isBackpack) return window.backpack;
+          if(window.xnft?.solana) return window.xnft.solana;
+          return null;
+        }
+      },
+      {
+        name:'Jupiter', desc:'Jupiter Mobile', icon:'&#129680;', bg:'#9945ff',
+        url:'https://jup.ag/mobile',
+        get:()=>{
+          // Jupiter primarily works via wallet-standard / mobile QR
+          if(window.Jupiter?.solana) return window.Jupiter.solana;
+          if(window.jupiter?.solana) return window.jupiter.solana;
+          // wallet-standard fallback
+          try{
+            const apiProvider = window.navigator?.wallets;
+            if(apiProvider && typeof apiProvider.get === 'function'){
+              const wallets = apiProvider.get() || [];
+              const jup = wallets.find(w => /jupiter/i.test(w.name||''));
+              if(jup && jup.features && jup.features['solana:signTransaction']) return jup;
+            }
+          }catch(e){}
+          return null;
+        }
+      },
+      {
+        name:'Glow', desc:'Glow Wallet', icon:'&#10024;', bg:'#2a1a4a',
+        url:'https://glow.app/',
+        get:()=>{
+          if(window.glowSolana) return window.glowSolana;
+          if(window.glow?.solana) return window.glow.solana;
+          return null;
+        }
+      }
+    ];
     function openModal() {
       const list=document.getElementById('wList'); list.innerHTML='';
-      WALLETS.forEach(w=>{ const p=w.get(),ok=!!p; const btn=document.createElement('button'); btn.className='w-btn'; btn.disabled=!ok;
-        btn.innerHTML='<div class="w-icon" style="background:'+w.bg+'">'+w.icon+'</div><div><div class="w-name">'+w.name+'</div><div class="w-desc">'+w.desc+'</div></div><span class="w-badge '+(ok?'detected':'install')+'">'+(ok?'Detected':'Not installed')+'</span>';
-        if(ok) btn.onclick=()=>doConnect(w); list.appendChild(btn); });
+      WALLETS.forEach(w=>{
+        const p=w.get(), ok=!!p;
+        const btn=document.createElement('button');
+        btn.className='w-btn';
+        if(!ok) btn.style.opacity='0.7';
+        const badgeText = ok ? 'Detected' : 'Install';
+        btn.innerHTML='<div class="w-icon" style="background:'+w.bg+'">'+w.icon+'</div>'
+          +'<div style="flex:1;text-align:left"><div class="w-name">'+w.name+'</div><div class="w-desc">'+w.desc+'</div></div>'
+          +'<span class="w-badge '+(ok?'detected':'install')+'">'+badgeText+'</span>';
+        if(ok){
+          btn.onclick=()=>doConnect(w);
+        } else {
+          btn.onclick=()=>window.open(w.url,'_blank','noopener,noreferrer');
+          btn.title='Click to install '+w.name;
+        }
+        list.appendChild(btn);
+      });
       document.getElementById('overlay').style.display='flex';
     }
     function closeModal(){ document.getElementById('overlay').style.display='none'; }
@@ -1154,7 +1223,7 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 12.0 Jt'; document.getElementById('heroV').style.opacity='0.25';
+      document.getElementById('heroV').textContent='Rp 1 M'; document.getElementById('heroV').style.opacity='0.25';
       document.getElementById('heroS').textContent='Connect wallet to see your real data';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
