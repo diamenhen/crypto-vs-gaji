@@ -49,8 +49,10 @@
       font-family:'IBM Plex Sans',system-ui,sans-serif;
       -webkit-font-smoothing:antialiased; min-height:100vh;
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(153,69,255,0.12), transparent 70%),
-        radial-gradient(ellipse 60% 40% at 100% 10%, rgba(20,241,149,0.04), transparent 60%);
+        radial-gradient(ellipse 700px 500px at 8% 5%, rgba(153,69,255,0.22), transparent 55%),
+        radial-gradient(ellipse 600px 500px at 95% 18%, rgba(20,241,149,0.12), transparent 55%),
+        radial-gradient(ellipse 800px 600px at 50% 55%, rgba(98,155,255,0.08), transparent 60%),
+        radial-gradient(ellipse 500px 400px at 90% 95%, rgba(255,181,71,0.05), transparent 60%);
       background-attachment:fixed;
     }
     .mono { font-family:'IBM Plex Mono',monospace; font-feature-settings:'tnum'; }
@@ -107,10 +109,11 @@
 
     /* ── STATUS BAR ── */
     .status-bar {
-      background:var(--bg2); border:1px solid var(--bdr); border-radius:10px;
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px;
       padding:8px 14px; display:flex; gap:18px; align-items:center; flex-wrap:wrap;
       font-family:'IBM Plex Mono',monospace;
       font-size:10px; color:var(--text3); letter-spacing:1px; margin-bottom:12px;
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
     }
     .status-bar span { color:var(--accent); font-weight:600; }
     #clockEl { margin-left:auto; color:var(--text2); }
@@ -119,28 +122,30 @@
     .ticker { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
     @media(min-width:760px){ .ticker { grid-template-columns:repeat(6,1fr); } }
     .tick {
-      background:var(--bg2); border:1px solid var(--bdr); border-radius:10px;
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px;
       padding:12px 14px; transition:all 0.2s;
       position:relative; overflow:hidden;
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
     }
     .tick::before {
       content:''; position:absolute; top:0; left:0; right:0; height:2px;
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity:0.4;
+      opacity:0.5;
     }
-    .tick:hover { border-color:var(--bdr2); transform:translateY(-1px); }
+    .tick:hover { border-color:var(--bdr2); transform:translateY(-1px); background:rgba(255,255,255,0.05); }
     .tick-label { font-size:9px; color:var(--text2); letter-spacing:1.5px; font-weight:600; margin-bottom:6px; text-transform:uppercase; font-family:'IBM Plex Sans',sans-serif; }
     .tick-val { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; color:var(--text); letter-spacing:-0.3px; }
     .tick-chg { font-family:'IBM Plex Mono',monospace; font-size:10px; margin-top:3px; font-weight:500; letter-spacing:0.3px; }
     .up { color:var(--green); } .dn { color:var(--red); }
 
-    /* ── CARD BASE ── */
+    /* ── CARD BASE (Glass) ── */
     .c-card, .chart-card, #pnlBox, #fearGreedBox, #badgesBox, #streakBox,
     #pnlCalendarBox, #atplBox, #garutRankBox, .fact {
-      background:var(--bg2)!important; border:1px solid var(--bdr)!important; border-radius:14px!important;
+      background:rgba(255,255,255,0.03)!important; border:1px solid rgba(255,255,255,0.07)!important; border-radius:16px!important;
       margin-bottom:14px!important; transition:border-color 0.2s;
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
     }
-    .c-card.on { border-color:rgba(20,241,149,0.25)!important; background:linear-gradient(180deg, rgba(20,241,149,0.03), var(--bg2))!important; }
+    .c-card.on { border-color:rgba(20,241,149,0.25)!important; background:rgba(20,241,149,0.03)!important; }
     .c-label {
       font-family:'IBM Plex Sans',sans-serif;
       font-size:11px; color:var(--text2); letter-spacing:1.5px; font-weight:600;
@@ -244,6 +249,51 @@
     .install { background:rgba(255,255,255,0.03); color:var(--text3); border:1px solid var(--bdr); }
     .modal-cancel { width:calc(100% - 28px); margin:4px 14px 14px; background:transparent; border:1px solid var(--bdr); border-radius:10px; padding:11px; color:var(--text2); font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; display:block; transition:all 0.15s; }
     .modal-cancel:hover { border-color:var(--red); color:var(--red); }
+
+    /* ── JUPITER GRID LAYOUTS (asymmetric) ── */
+    .hero-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:12px; margin-bottom:14px; align-items:stretch; }
+    .hero-grid .hero { margin-bottom:0!important; }
+    .hero-grid .hero-v { font-size:clamp(32px,5.5vw,58px)!important; }
+    .side-stats { display:flex; flex-direction:column; gap:8px; }
+    .side-stat {
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:14px;
+      padding:14px 16px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      min-height:70px;
+      transition:all 0.2s;
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      position:relative; overflow:hidden;
+    }
+    .side-stat::before {
+      content:''; position:absolute; top:-30px; right:-30px; width:80px; height:80px;
+      background:radial-gradient(circle, rgba(153,69,255,0.12), transparent 70%);
+      pointer-events:none;
+    }
+    .side-stat:hover { border-color:var(--bdr2); background:rgba(255,255,255,0.05); }
+    .ss-label { font-family:'IBM Plex Sans',sans-serif; font-size:9px; color:var(--text2); letter-spacing:1.5px; text-transform:uppercase; font-weight:600; margin-bottom:6px; position:relative; }
+    .ss-value { font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600; letter-spacing:-0.4px; color:var(--text); line-height:1.15; position:relative; }
+    .ss-sub { font-family:'IBM Plex Mono',monospace; font-size:10px; margin-top:3px; position:relative; }
+
+    .rank-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:16px; margin-bottom:14px; align-items:start; }
+    .rank-grid .sec-l { margin:0 0 10px!important; }
+    .rank-grid > div { min-width:0; }
+    .rank-grid #garutRankBox { margin-bottom:0!important; }
+    .rank-grid #targetBox { grid-template-columns:1fr!important; gap:10px!important; margin-bottom:0!important; }
+    .rank-grid #targetBox > div { min-height:unset!important; padding:16px 18px!important; }
+
+    @media(max-width:900px){
+      .hero-grid { grid-template-columns:1fr; }
+      .rank-grid { grid-template-columns:1fr; }
+      .rank-grid #targetBox { grid-template-columns:1fr 1fr!important; }
+    }
+    @media(max-width:600px){
+      .rank-grid #targetBox { grid-template-columns:1fr!important; }
+    }
 
     /* ── SECTION LABEL ── */
     .sec-l {
@@ -590,28 +640,48 @@
       </div>
     </div>
 
-    <div class="hero demo-overlay" id="heroBox">
-      <div class="demo-watermark" id="demoWatermark">DEMO</div>
-      <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
-      <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 M</div>
-      <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
-      <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        Share to X/Twitter
-      </button>
-    </div>
-
-    <!-- ─── GARUT WEALTH RANK (MOVED UP — priority #2) ─── -->
-    <div class="sec-l">GARUT WEALTH RANK</div>
-    <div id="garutRankBox" style="padding:20px 18px;position:relative;overflow:hidden">
-      <div id="garutRankContent">
-        <div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>
+    <div class="hero-grid">
+      <div class="hero demo-overlay" id="heroBox">
+        <div class="demo-watermark" id="demoWatermark">DEMO</div>
+        <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
+        <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 M</div>
+        <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
+        <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Share to X/Twitter
+        </button>
+      </div>
+      <div class="side-stats">
+        <div class="side-stat">
+          <div class="ss-label">P&amp;L Today</div>
+          <div class="ss-value" id="ssPnl">--</div>
+        </div>
+        <div class="side-stat">
+          <div class="ss-label">All-Time P&amp;L</div>
+          <div class="ss-value" id="ssAtpl">--</div>
+        </div>
+        <div class="side-stat">
+          <div class="ss-label">Your Rank</div>
+          <div class="ss-value" id="ssRank" style="font-family:'IBM Plex Sans',sans-serif;font-size:15px">🔒 <span style="color:var(--text3);font-size:13px">Connect</span></div>
+        </div>
       </div>
     </div>
 
-    <!-- ─── TOP 1% WEALTH TARGET ─── -->
-    <div class="sec-l">TOP 1% WEALTH TARGET</div>
-    <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px"></div>
+    <!-- ─── GARUT + TOP 1% (side-by-side Jupiter-style grid) ─── -->
+    <div class="rank-grid">
+      <div>
+        <div class="sec-l">GARUT WEALTH RANK</div>
+        <div id="garutRankBox" style="padding:20px 18px;position:relative;overflow:hidden">
+          <div id="garutRankContent">
+            <div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-l">TOP 1% TARGETS</div>
+        <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"></div>
+      </div>
+    </div>
 
     <!-- ─── JOBS COMPARISON (MOVED UP — priority #3, core value prop) ─── -->
     <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
@@ -1402,7 +1472,11 @@
       document.getElementById('atplBox').style.display='none';
       document.getElementById('fearGreedBox').style.display='none';
       const grc = document.getElementById('garutRankContent');
-      if (grc) grc.innerHTML='<div style="font-size:10px;color:var(--text3);text-align:center;padding:10px 0">Connect wallet to see your Garut rank</div>';
+      if (grc) grc.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>';
+      // Reset side stats
+      const ssPnl = document.getElementById('ssPnl'); if (ssPnl) ssPnl.innerHTML='--';
+      const ssAtpl = document.getElementById('ssAtpl'); if (ssAtpl) ssAtpl.innerHTML='--';
+      const ssRank = document.getElementById('ssRank'); if (ssRank) ssRank.innerHTML='🔒 <span style="color:var(--text3);font-size:13px">Connect</span>';
       renderJobs(); renderTargets(); calcRetire();
     }
     async function loadBalance(publicKey) {
@@ -1461,7 +1535,7 @@
         document.getElementById('wIdr').textContent  = fi(total);
         document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
         document.getElementById('retireCurrent').value = Math.round(total);
-        updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank();
+        updateChart(total); updatePnL(total); renderAllTimePnL(total); renderGarutRank(); renderSideStats();
         renderJobs(); renderTargets(); calcRetire(); renderBadges(); renderStreak(); updateCurrencyDisplay();
         renderFact(parseFloat(document.getElementById('wSol').textContent) || sol);
         // Auto-fetch initial value from on-chain — use cache if already synced
@@ -1547,7 +1621,7 @@
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); renderGarutRank(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL); renderBadges(); renderStreak(); updateCurrencyDisplay();
+          renderJobs(); renderTargets(); renderGarutRank(); renderSideStats(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL); renderBadges(); renderStreak(); updateCurrencyDisplay();
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
@@ -1590,6 +1664,60 @@
       { icon:'💎', name:'Garut Conglomerate', desc:'Equivalent to top officials & major business owners', target:15000000000, color:'#00d4ff' },
       { icon:'👑', name:'King of Garut',      desc:'Wealthiest person in Garut',       target:100000000000,color:'#9945ff' },
     ];
+
+    // ── Side Stats (Jupiter grid layout) ────────────────────
+    function renderSideStats() {
+      const ssPnl = document.getElementById('ssPnl');
+      const ssAtpl = document.getElementById('ssAtpl');
+      const ssRank = document.getElementById('ssRank');
+      if (!ssPnl) return;
+
+      if (total <= 0) {
+        ssPnl.innerHTML = '--';
+        ssAtpl.innerHTML = '--';
+        if (ssRank) ssRank.innerHTML = '🔒 <span style="color:var(--text3);font-size:13px">Connect</span>';
+        return;
+      }
+
+      // P&L Today
+      if (pnlData.length > 0) {
+        const today = pnlData[pnlData.length-1];
+        const prev = pnlData.length > 1 ? pnlData[pnlData.length-2] : null;
+        const pl = prev ? total - prev.close : total - today.open;
+        const up = pl >= 0;
+        const col = up ? 'var(--green)' : 'var(--red)';
+        const pct = prev && prev.close > 0 ? (pl/prev.close*100) : (today.open > 0 ? (pl/today.open*100) : 0);
+        ssPnl.innerHTML = '<span style="color:'+col+'">'+(up?'+':'')+fi(pl)+'</span>'
+          + '<div class="ss-sub" style="color:'+col+'">'+(up?'+':'')+pct.toFixed(2)+'%</div>';
+      } else {
+        ssPnl.innerHTML = '<span style="color:var(--text2)">No data</span>';
+      }
+
+      // All-Time P&L
+      try {
+        const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
+        if (cached && cached.initialIDR > 0) {
+          const multiplier = total / cached.initialIDR;
+          const pl = total - cached.initialIDR;
+          const up = multiplier >= 1;
+          const col = up ? 'var(--green)' : 'var(--red)';
+          ssAtpl.innerHTML = '<span style="color:'+col+'">'+multiplier.toFixed(2)+'x</span>'
+            + '<div class="ss-sub" style="color:'+col+'">'+(up?'+':'')+fi(pl)+'</div>';
+        } else {
+          ssAtpl.innerHTML = '<span style="color:var(--text2);font-size:14px">Syncing...</span>';
+        }
+      } catch(e) { ssAtpl.innerHTML = '--'; }
+
+      // Current Garut Rank
+      if (ssRank) {
+        let idx = 0;
+        for (let i = GARUT_RANKS.length - 1; i >= 0; i--) {
+          if (total >= GARUT_RANKS[i].target) { idx = i; break; }
+        }
+        const r = GARUT_RANKS[idx];
+        ssRank.innerHTML = '<span style="font-size:22px">'+r.icon+'</span> <span style="font-family:\'IBM Plex Sans\',sans-serif;font-size:14px;font-weight:600;color:'+r.color+'">'+r.name+'</span>';
+      }
+    }
 
     function renderGarutRank() {
       const box = document.getElementById('garutRankContent');
