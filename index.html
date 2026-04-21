@@ -667,21 +667,15 @@
       </div>
     </div>
 
-    <!-- ─── GARUT + TOP 1% (side-by-side Jupiter-style grid) ─── -->
-    <div class="rank-grid">
-      <div>
-        <div class="sec-l">GARUT WEALTH RANK</div>
-        <div id="garutRankBox" style="padding:20px 18px;position:relative;overflow:hidden">
-          <div id="garutRankContent">
-            <div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="sec-l">TOP 1% TARGETS</div>
-        <div id="targetBox" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"></div>
+    <!-- ─── WEALTH JOURNEY (Garut tiers + national/global benchmarks integrated) ─── -->
+    <div class="sec-l">WEALTH JOURNEY</div>
+    <div id="garutRankBox" style="padding:20px 18px;position:relative;overflow:hidden;margin-bottom:14px">
+      <div id="garutRankContent">
+        <div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your wealth journey</div>
       </div>
     </div>
+    <!-- Hidden stub for legacy renderTargets() -->
+    <div id="targetBox" style="display:none"></div>
 
     <!-- ─── JOBS COMPARISON (MOVED UP — priority #3, core value prop) ─── -->
     <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
@@ -1472,7 +1466,7 @@
       document.getElementById('atplBox').style.display='none';
       document.getElementById('fearGreedBox').style.display='none';
       const grc = document.getElementById('garutRankContent');
-      if (grc) grc.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>';
+      if (grc) grc.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your wealth journey</div>';
       // Reset side stats
       const ssPnl = document.getElementById('ssPnl'); if (ssPnl) ssPnl.innerHTML='--';
       const ssAtpl = document.getElementById('ssAtpl'); if (ssAtpl) ssAtpl.innerHTML='--';
@@ -1657,12 +1651,14 @@
 
     // ── Garut Wealth Rank ────────────────────────────────────
     const GARUT_RANKS = [
-      { icon:'🌱', name:'Common Folk',        desc:'General public of Garut',          target:0,           color:'#8892a8' },
-      { icon:'🥉', name:'Middle Class',       desc:'Entered middle class of Garut',    target:100000000,   color:'#cd7f32' },
-      { icon:'🥈', name:'Garut Wealthy',      desc:'Top 10% wealth in Garut',          target:500000000,   color:'#a0a0a0' },
-      { icon:'🥇', name:'Garut Elite',        desc:'Top 1% wealth in Garut',           target:3000000000,  color:'#ffd700' },
-      { icon:'💎', name:'Garut Conglomerate', desc:'Equivalent to top officials & major business owners', target:15000000000, color:'#00d4ff' },
-      { icon:'👑', name:'King of Garut',      desc:'Wealthiest person in Garut',       target:100000000000,color:'#9945ff' },
+      { icon:'🌱', name:'Common Folk',        desc:'General public of Garut',          target:0,           color:'#8892a8', tier:'garut' },
+      { icon:'🥉', name:'Middle Class',       desc:'Entered middle class of Garut',    target:100000000,   color:'#cd7f32', tier:'garut' },
+      { icon:'🥈', name:'Garut Wealthy',      desc:'Top 10% wealth in Garut',          target:500000000,   color:'#a0a0a0', tier:'garut' },
+      { icon:'🇮🇩', name:'Top 1% Indonesia',   desc:'National benchmark — top 1% net worth (~$60K)', target:1020000000,  color:'#9945ff', tier:'benchmark' },
+      { icon:'🥇', name:'Garut Elite',        desc:'Top 1% wealth in Garut',           target:3000000000,  color:'#ffd700', tier:'garut' },
+      { icon:'💎', name:'Garut Conglomerate', desc:'Equivalent to top officials & major business owners', target:15000000000, color:'#00d4ff', tier:'garut' },
+      { icon:'🌍', name:'Top 1% Global',       desc:'Global benchmark — top 1% net worth (~$1M)',    target:17000000000, color:'#9945ff', tier:'benchmark' },
+      { icon:'👑', name:'King of Garut',      desc:'Wealthiest person in Garut',       target:100000000000,color:'#ff8a4c', tier:'garut' },
     ];
 
     // ── Side Stats (Jupiter grid layout) ────────────────────
@@ -1724,7 +1720,7 @@
       if (!box) return;
       const val = total || 0;
       if (val <= 0) {
-        box.innerHTML = '<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your Garut rank</div>';
+        box.innerHTML = '<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your wealth journey</div>';
         return;
       }
 
@@ -1755,11 +1751,14 @@
       GARUT_RANKS.forEach((rank, i) => {
         const achieved = val >= rank.target && i !== currentRankIdx;
         const isCurrent = i === currentRankIdx;
+        const isBenchmark = rank.tier === 'benchmark';
         const status = isCurrent ? 'current' : achieved ? 'achieved' : 'locked';
-        html += '<div class="grank-node '+status+'">'
-          + '<div class="grank-dot" style="'+(isCurrent?'border-color:'+rank.color+';':'')+'">'+rank.icon+'</div>'
+        const benchmarkStyle = isBenchmark && !isCurrent ? 'box-shadow:0 0 0 1.5px rgba(153,69,255,0.45),0 0 14px rgba(153,69,255,0.2);' : '';
+        html += '<div class="grank-node '+status+(isBenchmark?' benchmark':'')+'">'
+          + '<div class="grank-dot" style="'+(isCurrent?'border-color:'+rank.color+';':'')+benchmarkStyle+'">'+rank.icon+'</div>'
           + '<div class="grank-label">'+rank.name+'</div>'
           + '<div class="grank-target">'+fi(rank.target)+'</div>'
+          + (isBenchmark ? '<div style="font-size:8px;color:#9945ff;letter-spacing:1.5px;margin-top:3px;font-weight:700">★ BENCHMARK</div>' : '')
           + '</div>';
         // Line between nodes (not after last)
         if (i < GARUT_RANKS.length - 1) {
