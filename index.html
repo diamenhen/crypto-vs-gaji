@@ -671,7 +671,7 @@
       <div class="hero demo-overlay" id="heroBox">
         <div class="demo-watermark" id="demoWatermark">DEMO</div>
         <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
-        <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 M</div>
+        <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 Miliar</div>
         <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
         <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -913,6 +913,16 @@
       if (n>=1e9)  return 'Rp '+(n/1e9).toFixed(2)+' M';
       if (n>=1e6)  return 'Rp '+(n/1e6).toFixed(1)+' Jt';
       return 'Rp '+n.toLocaleString('id-ID');
+    }
+    // fi_delta — for P&L deltas: always signed, always abbreviated (rb/Jt/M/T)
+    function fi_delta(n) {
+      const abs = Math.abs(n);
+      const sign = n >= 0 ? '+' : '-';
+      if (abs >= 1e12) return sign+'Rp '+(abs/1e12).toFixed(2)+' T';
+      if (abs >= 1e9)  return sign+'Rp '+(abs/1e9).toFixed(2)+' M';
+      if (abs >= 1e6)  return sign+'Rp '+(abs/1e6).toFixed(1)+' Jt';
+      if (abs >= 1e3)  return sign+'Rp '+Math.round(abs/1e3)+' rb';
+      return sign+'Rp '+Math.round(abs);
     }
     function fd(d) {
       if (d<1) { const j=Math.ceil(d*24); return j<1?'<1 hr':j+' hr'; }
@@ -1505,7 +1515,7 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 1 M'; document.getElementById('heroV').style.opacity='0.25';
+      document.getElementById('heroV').textContent='Rp 1 Miliar'; document.getElementById('heroV').style.opacity='0.25';
       document.getElementById('heroS').textContent='Connect wallet to see your real data';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
@@ -1738,7 +1748,7 @@
         const up = pl >= 0;
         const col = up ? 'var(--green)' : 'var(--red)';
         const pct = prev && prev.close > 0 ? (pl/prev.close*100) : (today.open > 0 ? (pl/today.open*100) : 0);
-        ssPnl.innerHTML = '<span style="color:'+col+'">'+(up?'+':'')+fi(pl)+'</span>'
+        ssPnl.innerHTML = '<span style="color:'+col+'">'+fi_delta(pl)+'</span>'
           + '<div class="ss-sub" style="color:'+col+'">'+(up?'+':'')+pct.toFixed(2)+'%</div>';
       } else {
         ssPnl.innerHTML = '<span style="color:var(--text2)">No data</span>';
@@ -1753,7 +1763,7 @@
           const up = multiplier >= 1;
           const col = up ? 'var(--green)' : 'var(--red)';
           ssAtpl.innerHTML = '<span style="color:'+col+'">'+multiplier.toFixed(2)+'x</span>'
-            + '<div class="ss-sub" style="color:'+col+'">'+(up?'+':'')+fi(pl)+'</div>';
+            + '<div class="ss-sub" style="color:'+col+'">'+fi_delta(pl)+'</div>';
         } else {
           ssAtpl.innerHTML = '<span style="color:var(--text2);font-size:14px">Syncing...</span>';
         }
@@ -1857,7 +1867,7 @@
         const days = total>0 ? total/perHari : null, uid='b'+job.pct;
         const barPct = 20 + ((job.salary - minSalary) / (maxSalary - minSalary)) * 80;
         // Smart unit — pick best unit for the duration
-        let heroV = '--', heroU = 'MUST WORK';
+        let heroV = '—', heroU = 'CONNECT WALLET';
         if (days !== null) {
           if (days < 1) { heroV = Math.ceil(days*24); heroU = heroV===1?'HOUR TO EARN':'HOURS TO EARN'; }
           else if (days < 30) { heroV = Math.ceil(days); heroU = heroV===1?'DAY TO EARN':'DAYS TO EARN'; }
@@ -1908,7 +1918,7 @@
             const sign = up ? '+' : '';
             const plHours = Math.ceil(Math.abs(pl) / (bestJob.salary / 30 / 24));
             const plDays = Math.ceil(plHours / 24);
-            pnlInsight = '📊 Today\'s P&L: <strong style="color:'+col+'">'+sign+fi(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>)'
+            pnlInsight = '📊 Today\'s P&L: <strong style="color:'+col+'">'+fi_delta(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>)'
               + ' — equivalent to <strong>'+plHours+' hours</strong> or about <strong>'+plDays+' days of work</strong> as a '+bestJob.title+' at '+bestJob.company
               + (up ? ' 🚀' : ' 💪');
           }
@@ -1989,7 +1999,7 @@
           const sgn   = up ? '+' : '';
           if (todayDate) todayDate.textContent = '· ' + today.date;
           todayCol.innerHTML =
-            '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+sgn+fi(pl)+'</div>'
+            '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+fi_delta(pl)+'</div>'
             +'<div style="font-size:12px;color:'+col+';font-weight:600;margin-top:4px">'+sgn+pct.toFixed(2)+'%</div>'
             +'<div style="font-size:10px;color:var(--text3);margin-top:10px;letter-spacing:0.3px">Open: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+fi(today.open)+'</span></div>';
         } else {
@@ -2013,7 +2023,7 @@
             const multiplier = (total / cached.initialIDR).toFixed(2);
             if (atDate) atDate.textContent = '· since ' + cached.initialDate;
             atCol.innerHTML =
-              '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+sgn+fi(pl)+'</div>'
+              '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+fi_delta(pl)+'</div>'
               +'<div style="font-size:12px;color:'+col+';font-weight:600;margin-top:4px">'+sgn+pct.toFixed(1)+'% &middot; '+multiplier+'x</div>'
               +'<div style="font-size:10px;color:var(--text3);margin-top:10px;letter-spacing:0.3px">Initial: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+fi(cached.initialIDR)+'</span></div>'
               +'<div style="font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.3px">Entry: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+cached.initialSOL.toFixed(4)+' SOL</span> @ <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">$'+cached.initialPriceUSD.toFixed(2)+'</span></div>';
@@ -2039,7 +2049,7 @@
             hist += '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;align-items:center">'
               + '<span style="color:var(--text2)">'+d.date+'</span>'
               + '<span style="color:var(--text);font-weight:600;font-family:\'IBM Plex Mono\',monospace">'+fi(d.close)+'</span>'
-              + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right;font-family:\'IBM Plex Mono\',monospace">'+(dp>=0?'+':'')+fi(dp)+'</span>'
+              + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right;font-family:\'IBM Plex Mono\',monospace">'+fi_delta(dp)+'</span>'
               + '<span style="color:'+dc+';font-size:10px;min-width:50px;text-align:right">'+(dp>=0?'+':'')+dpPct+'%</span>'
               + '</div>';
           });
