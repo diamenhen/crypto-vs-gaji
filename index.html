@@ -230,6 +230,11 @@
       -webkit-background-clip:text; background-clip:text;
       -webkit-text-fill-color:transparent;
     }
+    .hero-v.is-demo {
+      font-family:'IBM Plex Sans',sans-serif;
+      font-weight:700;
+      letter-spacing:-1.5px;
+    }
     .hero-s { position:relative; font-size:12px; color:var(--text2); margin-bottom:4px; letter-spacing:0.2px; }
 
     /* ── MODAL ── */
@@ -671,7 +676,7 @@
       <div class="hero demo-overlay" id="heroBox">
         <div class="demo-watermark" id="demoWatermark">DEMO</div>
         <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
-        <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 Miliar</div>
+        <div class="hero-v is-demo" id="heroV" style="opacity:0.25">Rp 1 Miliar</div>
         <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
         <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -1506,6 +1511,7 @@
       document.getElementById('onboardBox').style.display='none';
       document.getElementById('demoWatermark').style.display='none';
       document.getElementById('heroV').style.opacity='1';
+      document.getElementById('heroV').classList.remove('is-demo');
       // Mark step 1 done
       document.getElementById('ob1').className='onboard-num done';
     }
@@ -1515,7 +1521,7 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 1 Miliar'; document.getElementById('heroV').style.opacity='0.25';
+      document.getElementById('heroV').textContent='Rp 1 Miliar'; document.getElementById('heroV').style.opacity='0.25'; document.getElementById('heroV').classList.add('is-demo');
       document.getElementById('heroS').textContent='Connect wallet to see your real data';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
