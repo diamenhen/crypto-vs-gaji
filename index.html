@@ -15,7 +15,8 @@
   <meta name="twitter:title" content="CryptoRetire — Crypto vs Gaji Indonesia">
   <meta name="twitter:description" content="Track nilai crypto vs gaji Indonesia. Realtime SOL tracker + Garut Wealth Rank.">
   <meta name="twitter:site" content="@AriantheChain">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMGQwZjE1Ii8+CiAgPHBvbHlnb24gcG9pbnRzPSIxNiwyIDMwLDE2IDE2LDMwIDIsMTYiIGZpbGw9IiM5OTQ1ZmYiLz4KPC9zdmc+">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB4PSI2IiB5PSI3OCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzE0ZjE5NSIvPjxyZWN0IHg9IjIxIiB5PSI2NiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjI4IiByeD0iMiIgZmlsbD0iIzE0ZjE5NSIvPjxyZWN0IHg9IjM2IiB5PSI1NCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iMiIgZmlsbD0iIzk5NDVmZiIvPjxyZWN0IHg9IjUxIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjUyIiByeD0iMiIgZmlsbD0iIzk5NDVmZiIvPjxyZWN0IHg9IjY2IiB5PSIyOCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjY2IiByeD0iMiIgZmlsbD0iI2ZmOGE0YyIvPjxjaXJjbGUgY3g9IjczIiBjeT0iMTgiIHI9IjYiIGZpbGw9IiNmZjhhNGMiLz48L3N2Zz4=">
+  <meta name="theme-color" content="#9945ff">
   <!-- Bloomberg Dark: IBM Plex Mono, muted tones -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -71,13 +72,11 @@
     }
     .logo { display:flex; align-items:center; gap:12px; }
     .logo-icon {
-      background:linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
-      color:#fff; width:40px; height:40px; border-radius:10px;
+      width:40px; height:40px;
       display:flex; align-items:center; justify-content:center;
-      font-size:18px; font-weight:700; letter-spacing:-1px;
-      box-shadow: 0 4px 20px rgba(153,69,255,0.3);
+      background:transparent; padding:0;
     }
-    .logo-icon::after { content:'◆'; }
+    .logo-icon svg { width:38px; height:38px; display:block; filter:drop-shadow(0 2px 8px rgba(153,69,255,0.25)); }
     .logo-text { display:flex; flex-direction:column; }
     .logo-title { font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600; letter-spacing:-0.3px; }
     .logo-title span { color:var(--accent); }
@@ -596,7 +595,7 @@
   <div class="container">
     <header>
       <div class="logo">
-        <div class="logo-icon"></div>
+        <div class="logo-icon"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="CryptoRetire"><title>CryptoRetire</title><rect x="6" y="78" width="14" height="16" rx="2" fill="#14f195"/><rect x="21" y="66" width="14" height="28" rx="2" fill="#14f195"/><rect x="36" y="54" width="14" height="40" rx="2" fill="#9945ff"/><rect x="51" y="42" width="14" height="52" rx="2" fill="#9945ff"/><rect x="66" y="28" width="14" height="66" rx="2" fill="#ff8a4c"/><circle cx="73" cy="18" r="6" fill="#ff8a4c"/></svg></div>
         <div class="logo-text">
           <div class="logo-title">Crypto<span>Retire</span></div>
           <div class="logo-sub"></div>
