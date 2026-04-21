@@ -1725,21 +1725,23 @@
         // ── End SatoshiLock ──
 
         if(totalLockedIDR>0) {
-          const curSolIDR = solIDR > 0 ? solIDR : 1385337;
-          // IMPORTANT: use += so we preserve SPL token value already in `total`.
-          // Before this line, total = (sol * solIDR) + SPL tokens (from fetchTokens).
-          // Adding locked IDR here gives the full portfolio value.
+          // Accumulate locks into total (fetchTokens already added SPL).
+          // total at this point = (nativeSOL * solIDR) + SPL tokens
+          // After this: total = (nativeSOL * solIDR) + SPL + locks = full portfolio
           total += totalLockedIDR;
-          const totalSOL = total / curSolIDR; // recompute from final total
           window._totalWithTokens = total;
-          document.getElementById('wSol').textContent  = totalSOL.toFixed(4)+' SOL';
+
+          // Display field "SOL" shows NATIVE SOL balance only (not portfolio/solPrice).
+          // window._solBalance was set in loadBalance from actual on-chain getBalance.
+          const freeSol = window._solBalance || 0;
+          document.getElementById('wSol').textContent  = freeSol.toFixed(4)+' SOL';
           document.getElementById('wSolV').textContent = fi(total);
           document.getElementById('wIdr').textContent  = fi(total);
           document.getElementById('wUsdV').textContent = '~$'+(total/USD_IDR).toLocaleString('en',{maximumFractionDigits:0});
           document.getElementById('heroV').textContent = fi(total);
           document.getElementById('heroS').textContent='';
           document.getElementById('retireCurrent').value = Math.round(total);
-          renderJobs(); renderTargets(); renderGarutRank(); renderSideStats(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(totalSOL); renderBadges(); renderStreak(); updateCurrencyDisplay();
+          renderJobs(); renderTargets(); renderGarutRank(); renderSideStats(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(freeSol); renderBadges(); renderStreak(); updateCurrencyDisplay();
         }
       } catch(e){ console.error('fetchLockedTokens:',e); }
     }
