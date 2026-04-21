@@ -977,14 +977,31 @@
         const data=await r.json();
         const accounts=(data.result?.value||[]).map(a=>({mint:a.account.data.parsed.info.mint,amount:a.account.data.parsed.info.tokenAmount.uiAmount||0})).filter(t=>t.amount>0);
         if (!accounts.length) return;
-        const POPULAR={'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':{sym:'USDC'},'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':{sym:'USDT'},'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN':{sym:'JUP'},'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263':{sym:'BONK'},'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm':{sym:'WIF'}};
+        const POPULAR={
+          'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':{sym:'USDC'},
+          'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':{sym:'USDT'},
+          'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN':{sym:'JUP'},
+          'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263':{sym:'BONK'},
+          'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm':{sym:'WIF'},
+          'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3':{sym:'PYTH'},
+          'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL':{sym:'JTO'},
+          '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R':{sym:'RAY'},
+          'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So':{sym:'MSOL'},
+          'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn':{sym:'JITOSOL'}
+        };
         const pills=document.getElementById('tokenPills');
         pills.innerHTML=''; let tokenTotal=0;
         for (const token of accounts.slice(0,8)) {
           const info=POPULAR[token.mint]; if (!info) continue;
           let priceUSD=0;
-          if (info.sym==='USDC'||info.sym==='USDT') { priceUSD=1; }
-          else { try{const pr=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+info.sym+'USDT');if(pr.ok){const pd=await pr.json();priceUSD=parseFloat(pd.price);}}catch(e){} }
+          if (info.sym==='USDC'||info.sym==='USDT') {
+            priceUSD=1;
+          } else if (info.sym==='MSOL'||info.sym==='JITOSOL') {
+            // Liquid staking: price ≈ SOL price (close enough; exact rate is ~1.05-1.15 SOL per LST)
+            priceUSD=solUSD||0;
+          } else {
+            try{const pr=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+info.sym+'USDT');if(pr.ok){const pd=await pr.json();priceUSD=parseFloat(pd.price);}}catch(e){}
+          }
           const valueIDR=token.amount*priceUSD*USD_IDR; tokenTotal+=valueIDR;
           const pill=document.createElement('div'); pill.className='token-pill';
           pill.innerHTML='<span class="token-pill-sym">'+info.sym+'</span><span class="token-pill-val">'+token.amount.toLocaleString('id-ID',{maximumFractionDigits:2})+' · '+fi(valueIDR)+'</span>';
