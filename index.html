@@ -1571,7 +1571,7 @@
         document.getElementById('tChgI').textContent = 'realtime';
         document.getElementById('tChgU').className = 'tick-chg up';
         document.getElementById('tChgU').textContent = 'realtime';
-        total = sol * solIDR; window._solBalance = sol; window._totalWithTokens = total;
+        total = sol * solIDR; window._solBalance = sol; window._totalWithTokens = total; window._totalLocked = 0;
         document.getElementById('wSol').textContent = sol.toFixed(4)+' SOL';
         // Update IDR values
         const updateIDR = () => {
@@ -1614,7 +1614,10 @@
       for(const b of bytes) n=n*256n+BigInt(b); let s='';
       while(n>0n){s=A[Number(n%58n)]+s;n=n/58n;} for(const b of bytes){if(b!==0)break;s='1'+s;} return s;
     }
+    let _loadingLocks = false;
     async function fetchLockedTokens(publicKey) {
+      if (_loadingLocks) return;
+      _loadingLocks = true;
       try {
         const JUP_LOCK='LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn', HELIUS='https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
         let accounts=[];
@@ -1697,7 +1700,7 @@
               const view = new DataView(bytes.buffer);
               const mintAddr = encodeBase58(bytes.slice(72, 104));
               const amount = Number(view.getBigUint64(104, true));
-              const withdrawn = Number(view.getBigUint64(162, true));
+              const withdrawn = Number(view.getBigUint64(112, true));  // VERIFIED: offset 112 (not 162)
               const remaining = Math.max(amount - withdrawn, 0);
               if (remaining === 0) continue;
               let valueIDR = 0, symbol = 'TOKEN';
@@ -1724,15 +1727,18 @@
         } catch(e) { console.error('SatoshiLock fetch failed:', e); }
         // ── End SatoshiLock ──
 
-        if(totalLockedIDR>0) {
-          // Accumulate locks into total (fetchTokens already added SPL).
-          // total at this point = (nativeSOL * solIDR) + SPL tokens
-          // After this: total = (nativeSOL * solIDR) + SPL + locks = full portfolio
-          total += totalLockedIDR;
+        // IDEMPOTENT: subtract previous cached lock value (if any) before adding
+        // the freshly computed one. This way, if loadBalance is already running
+        // and has total = (SOL + SPL + previousLocks), calling this again
+        // correctly replaces the lock component without double-counting.
+        const prevLocked = window._totalLocked || 0;
+        total = total - prevLocked + totalLockedIDR;
+        window._totalLocked = totalLockedIDR;
+
+        if(totalLockedIDR>0 || prevLocked>0) {
           window._totalWithTokens = total;
 
-          // Display field "SOL" shows NATIVE SOL balance only (not portfolio/solPrice).
-          // window._solBalance was set in loadBalance from actual on-chain getBalance.
+          // Display field "SOL" shows NATIVE SOL balance only.
           const freeSol = window._solBalance || 0;
           document.getElementById('wSol').textContent  = freeSol.toFixed(4)+' SOL';
           document.getElementById('wSolV').textContent = fi(total);
@@ -1743,7 +1749,7 @@
           document.getElementById('retireCurrent').value = Math.round(total);
           renderJobs(); renderTargets(); renderGarutRank(); renderSideStats(); calcRetire(); updateChart(total); updatePnL(total); renderAllTimePnL(total); renderFact(freeSol); renderBadges(); renderStreak(); updateCurrencyDisplay();
         }
-      } catch(e){ console.error('fetchLockedTokens:',e); }
+      } catch(e){ console.error('fetchLockedTokens:',e); } finally { _loadingLocks = false; }
     }
 
     // ── Target Top 1% ───────────────────────────────────────
