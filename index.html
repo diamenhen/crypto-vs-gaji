@@ -1113,6 +1113,56 @@
     }
 
     // ── Wallet ──────────────────────────────────────────────
+    // Wallet-Standard protocol detector — modern Solana wallets (Jupiter, newer Phantom, etc.)
+    // register themselves via 'wallet-standard:register-wallet' event instead of legacy window globals.
+    const _wsWallets = [];
+    (function initWalletStandard() {
+      const register = (wallet) => {
+        if (wallet && !_wsWallets.includes(wallet)) _wsWallets.push(wallet);
+      };
+      try {
+        window.addEventListener('wallet-standard:register-wallet', (event) => {
+          try { event.detail({ register }); } catch(e) {}
+        });
+        window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', {
+          detail: { register }
+        }));
+      } catch(e) { console.warn('[wallet-standard] init failed:', e); }
+    })();
+
+    // Adapt a wallet-standard wallet to the legacy Phantom-style provider interface
+    function adaptWSWallet(ws) {
+      const connectFeat    = ws.features?.['standard:connect'];
+      const disconnectFeat = ws.features?.['standard:disconnect'];
+      let account = null;
+      const pkObj = () => account ? { toString: () => encodeBase58(account.publicKey) } : null;
+      return {
+        isWalletStandard: true,
+        _wsName: ws.name,
+        get publicKey() { return pkObj(); },
+        async connect() {
+          if (!connectFeat) throw new Error(ws.name + ' does not support connect');
+          const r = await connectFeat.connect();
+          account = r.accounts?.[0];
+          if (!account) throw new Error('No account returned from ' + ws.name);
+          return { publicKey: pkObj() };
+        },
+        async disconnect() {
+          try { if (disconnectFeat) await disconnectFeat.disconnect(); } catch(e){}
+          account = null;
+        }
+      };
+    }
+
+    // Find a wallet-standard wallet by name pattern (Solana chain only)
+    function findWSWallet(namePattern) {
+      const found = _wsWallets.find(w =>
+        namePattern.test(w.name || '') &&
+        (w.chains || []).some(c => String(c).toLowerCase().includes('solana'))
+      );
+      return found ? adaptWSWallet(found) : null;
+    }
+
     const WALLETS = [
       {
         name:'Phantom', desc:'Phantom Wallet', icon:'&#128123;', bg:'#1a0a33',
@@ -1120,7 +1170,7 @@
         get:()=>{
           if(window.phantom?.solana?.isPhantom) return window.phantom.solana;
           if(window.solana?.isPhantom) return window.solana;
-          return null;
+          return findWSWallet(/phantom/i);
         }
       },
       {
@@ -1128,7 +1178,7 @@
         url:'https://solflare.com/',
         get:()=>{
           if(window.solflare?.isSolflare) return window.solflare;
-          return null;
+          return findWSWallet(/solflare/i);
         }
       },
       {
@@ -1137,26 +1187,15 @@
         get:()=>{
           if(window.backpack?.isBackpack) return window.backpack;
           if(window.xnft?.solana) return window.xnft.solana;
-          return null;
+          return findWSWallet(/backpack/i);
         }
       },
       {
-        name:'Jupiter', desc:'Jupiter Mobile', icon:'&#129680;', bg:'#9945ff',
-        url:'https://jup.ag/mobile',
+        name:'Jupiter', desc:'Jupiter Wallet', icon:'&#129680;', bg:'#9945ff',
+        url:'https://chromewebstore.google.com/detail/jupiter-wallet/iledlaeogohbilgbfhmbgkgmpplbfboh',
         get:()=>{
-          // Jupiter primarily works via wallet-standard / mobile QR
-          if(window.Jupiter?.solana) return window.Jupiter.solana;
-          if(window.jupiter?.solana) return window.jupiter.solana;
-          // wallet-standard fallback
-          try{
-            const apiProvider = window.navigator?.wallets;
-            if(apiProvider && typeof apiProvider.get === 'function'){
-              const wallets = apiProvider.get() || [];
-              const jup = wallets.find(w => /jupiter/i.test(w.name||''));
-              if(jup && jup.features && jup.features['solana:signTransaction']) return jup;
-            }
-          }catch(e){}
-          return null;
+          // Jupiter Wallet only exposes itself via wallet-standard
+          return findWSWallet(/jupiter/i);
         }
       },
       {
@@ -1165,7 +1204,7 @@
         get:()=>{
           if(window.glowSolana) return window.glowSolana;
           if(window.glow?.solana) return window.glow.solana;
-          return null;
+          return findWSWallet(/glow/i);
         }
       }
     ];
