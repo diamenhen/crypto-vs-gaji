@@ -295,6 +295,33 @@
       .rank-grid #targetBox { grid-template-columns:1fr!important; }
     }
 
+    /* ── CAL + STREAK side-by-side ── */
+    .cal-streak-grid { display:grid; grid-template-columns:1fr 1.3fr; gap:14px; margin-bottom:14px; align-items:start; }
+    .cal-streak-grid > div { margin-bottom:0!important; min-width:0; }
+    @media(max-width:900px){ .cal-streak-grid { grid-template-columns:1fr; } }
+
+    /* ── PNL OVERVIEW 2-col ── */
+    .pnl-split { display:grid; grid-template-columns:1fr 1fr; gap:20px; padding-top:14px; border-top:1px solid var(--bdr); }
+    .pnl-split > div:nth-child(2) { border-left:1px solid var(--bdr); padding-left:20px; }
+    @media(max-width:600px){
+      .pnl-split { grid-template-columns:1fr; gap:18px; }
+      .pnl-split > div:nth-child(2) { border-left:none; border-top:1px solid var(--bdr); padding-left:0; padding-top:18px; }
+    }
+    .pnl-btn {
+      background:transparent; border:1px solid var(--bdr2); border-radius:8px;
+      padding:5px 12px; color:var(--text2); font-family:'IBM Plex Sans',sans-serif;
+      font-size:10px; cursor:pointer; letter-spacing:0.5px; font-weight:500;
+      transition:all 0.15s;
+    }
+    .pnl-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* ── BADGES GRID (expanded to 8 = Wealth Journey tiers) ── */
+    #badgesContent { grid-template-columns:repeat(8,1fr)!important; gap:14px 6px!important; }
+    @media(max-width:900px){ #badgesContent { grid-template-columns:repeat(4,1fr)!important; } }
+    .badge-circle.benchmark.unlocked {
+      box-shadow:0 0 0 2px rgba(153,69,255,0.45),0 0 16px rgba(153,69,255,0.25)!important;
+    }
+
     /* ── SECTION LABEL ── */
     .sec-l {
       font-family:'IBM Plex Sans',sans-serif;
@@ -677,7 +704,24 @@
     <!-- Hidden stub for legacy renderTargets() -->
     <div id="targetBox" style="display:none"></div>
 
-    <!-- ─── JOBS COMPARISON (MOVED UP — priority #3, core value prop) ─── -->
+    <!-- ─── PORTFOLIO CHART (moved UP — shows growth right after wealth rank) ─── -->
+    <div class="chart-card" id="chartCard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="sec-l" style="margin:0;flex:1">PORTFOLIO VALUE</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
+          <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
+          <button onclick="setTf('1D')" id="tf1D" class="tf-btn">1D</button>
+          <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
+          <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
+          <button onclick="setTf('ALL')" id="tfALL" class="tf-btn tf-active">ALL</button>
+          <button onclick="syncChart()" class="tf-btn" style="margin-left:6px;border-color:var(--bdr2);color:var(--accent)" title="Sync chart">↺</button>
+        </div>
+      </div>
+      <canvas id="portfolioChart" style="max-height:220px"></canvas>
+    </div>
+
+    <!-- ─── JOBS COMPARISON ─── -->
     <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
     <div class="jobs" id="jobsBox"></div>
 
@@ -698,55 +742,64 @@
       <div id="retireDetail"></div>
     </div>
 
-    <!-- ─── PERFORMANCE TRACKING (priority #4) ─── -->
-    <div class="sec-l" id="secLabelPerf" style="display:none">PERFORMANCE</div>
-
-    <div id="pnlBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px"></div>
-
-    <div id="atplBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase">ALL TIME P&amp;L</div>
-        <button onclick="fetchInitialValue()" id="atplRefresh" style="background:transparent;border:1px solid var(--bdr2);border-radius:8px;padding:5px 12px;color:var(--text2);font-family:'IBM Plex Sans',sans-serif;font-size:10px;cursor:pointer;letter-spacing:0.5px;font-weight:500">↻ SYNC</button>
-      </div>
-      <div id="atplContent"><div style="font-size:11px;color:var(--text3)">Connect wallet to load on-chain data...</div></div>
-    </div>
-
-    <div class="chart-card" id="chartCard" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="sec-l" style="margin:0;flex:1">PORTFOLIO VALUE</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <button onclick="setTf('1H')" id="tf1H" class="tf-btn">1H</button>
-          <button onclick="setTf('4H')" id="tf4H" class="tf-btn">4H</button>
-          <button onclick="setTf('1D')" id="tf1D" class="tf-btn">1D</button>
-          <button onclick="setTf('7D')" id="tf7D" class="tf-btn">7D</button>
-          <button onclick="setTf('30D')" id="tf30D" class="tf-btn">30D</button>
-          <button onclick="setTf('ALL')" id="tfALL" class="tf-btn tf-active">ALL</button>
-          <button onclick="syncChart()" class="tf-btn" style="margin-left:6px;border-color:var(--bdr2);color:var(--accent)" title="Sync chart">↺</button>
+    <!-- ─── PERFORMANCE TRACKING — MERGED P&L OVERVIEW (Today + All-Time) ─── -->
+    <div id="pnlOverviewBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase">P&amp;L OVERVIEW</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="exportPnLCSV()" class="pnl-btn" title="Export P&L history as CSV">↓ CSV</button>
+          <button onclick="fetchInitialValue()" id="pnlSyncBtn" class="pnl-btn">↻ SYNC</button>
         </div>
       </div>
-      <canvas id="portfolioChart" style="max-height:220px"></canvas>
+      <!-- Shared current value -->
+      <div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;font-weight:600">CURRENT VALUE</div>
+        <div id="pnlCurrent" style="font-family:'IBM Plex Mono',monospace;font-size:clamp(20px,4vw,26px);font-weight:700;color:var(--text);letter-spacing:-0.5px;line-height:1.1">Rp --</div>
+      </div>
+      <!-- Today | All-Time split -->
+      <div class="pnl-split">
+        <div>
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:9px;color:var(--accent);letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:8px">TODAY <span id="pnlTodayDate" style="color:var(--text3);font-weight:500;margin-left:4px;font-size:9px"></span></div>
+          <div id="pnlTodayCol">--</div>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:9px;color:var(--accent);letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:8px">ALL TIME <span id="pnlAllTimeDate" style="color:var(--text3);font-weight:500;margin-left:4px;font-size:9px"></span></div>
+          <div id="pnlAllTimeCol">--</div>
+        </div>
+      </div>
+      <!-- Previous days history -->
+      <div id="pnlHistory" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:8px">PREVIOUS DAYS</div>
+        <div id="pnlHistoryContent"></div>
+      </div>
+    </div>
+    <!-- Legacy hidden stubs (functions still call these, safe no-ops) -->
+    <div id="pnlBox" style="display:none"></div>
+    <div id="atplBox" style="display:none"></div>
+
+    <!-- ─── STREAK + CALENDAR side-by-side grid ─── -->
+    <div class="cal-streak-grid" id="calStreakWrap" style="display:none">
+      <div id="streakBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px">
+        <div id="streakContent"></div>
+      </div>
+      <div id="pnlCalendarBox" style="display:none;padding:18px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase">P&amp;L CALENDAR</div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <button onclick="calPrevMonth()" style="background:transparent;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9664;</button>
+            <span id="calMonthLabel" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);letter-spacing:0.5px;min-width:90px;text-align:center"></span>
+            <button onclick="calNextMonth()" style="background:transparent;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9654;</button>
+          </div>
+        </div>
+        <div id="pnlCalendarGrid"></div>
+      </div>
     </div>
 
-    <!-- ─── ACHIEVEMENTS (badges + streak) ─── -->
+    <!-- ─── ACHIEVEMENTS (badges — now synced with Wealth Journey) ─── -->
     <div id="badgesBox" style="display:none;padding:20px">
       <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase;margin-bottom:16px">YOUR BADGES</div>
-      <div id="badgesContent" style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px 10px;"></div>
-    </div>
-
-    <div id="streakBox" style="display:none;border-left:3px solid var(--accent);padding:18px 20px">
-      <div id="streakContent"></div>
-    </div>
-
-    <div id="pnlCalendarBox" style="display:none;padding:18px 20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--accent);letter-spacing:2px;font-weight:600;text-transform:uppercase">P&amp;L CALENDAR</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <button onclick="calPrevMonth()" style="background:transparent;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9664;</button>
-          <span id="calMonthLabel" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);letter-spacing:0.5px;min-width:90px;text-align:center"></span>
-          <button onclick="calNextMonth()" style="background:transparent;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;">&#9654;</button>
-        </div>
-      </div>
-      <div id="pnlCalendarGrid"></div>
+      <div id="badgesContent" style="display:grid;gap:18px 6px;"></div>
     </div>
 
     <!-- ─── MARKET CONTEXT (moved to bottom) ─── -->
@@ -1463,7 +1516,9 @@
       document.getElementById('streakBox').style.display='none';
       document.getElementById('pnlBox').style.display='none';
       document.getElementById('pnlCalendarBox').style.display='none';
-      document.getElementById('atplBox').style.display='none';
+      document.getElementById('atplBox') && (document.getElementById('atplBox').style.display='none');
+      document.getElementById('pnlOverviewBox') && (document.getElementById('pnlOverviewBox').style.display='none');
+      document.getElementById('calStreakWrap') && (document.getElementById('calStreakWrap').style.display='none');
       document.getElementById('fearGreedBox').style.display='none';
       const grc = document.getElementById('garutRankContent');
       if (grc) grc.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:20px 0">Connect wallet to see your wealth journey</div>';
@@ -1900,109 +1955,139 @@
       renderStreak();
     }
 
-    function renderPnL(cur) {
-      const box = document.getElementById('pnlBox');
-      if (!box || pnlData.length < 1) { if(box) box.style.display='none'; return; }
-      box.style.display = 'block';
-      const today = pnlData[pnlData.length-1];
-      const prev  = pnlData.length > 1 ? pnlData[pnlData.length-2] : null;
-      const pl    = prev ? cur - prev.close : cur - today.open;
-      const pct   = prev && prev.close > 0 ? (pl/prev.close*100) : 0;
-      const up    = pl >= 0;
-      const col   = up ? 'var(--green)' : '#ff5c7a';
-      const sgn   = up ? '+' : '';
-      let hist = '';
-      // Show all days except today (last entry), oldest first → newest at bottom
-      const histRows = [...pnlData].slice(-8); // up to 8 entries
-      // Remove today (last item) from history display
-      const histWithoutToday = histRows.slice(0, histRows.length - 1);
-      if (histWithoutToday.length > 0) {
-        // Show oldest first
-        histWithoutToday.forEach((d) => {
-          const dp = d.close - d.open;
-          const dc = dp >= 0 ? 'var(--green)' : '#ff5c7a';
-          const dpPct = d.open > 0 ? (dp / d.open * 100).toFixed(1) : '0.0';
-          hist += '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;align-items:center">'
-            + '<span style="color:var(--text2)">'+d.date+'</span>'
-            + '<span style="color:var(--text);font-weight:600">'+fi(d.close)+'</span>'
-            + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right">'+(dp>=0?'+':'')+fi(dp)+'</span>'
-            + '<span style="color:'+dc+';font-size:10px;min-width:50px;text-align:right">'+(dp>=0?'+':'')+dpPct+'%</span>'
-            + '</div>';
-        });
-      }
-      box.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
-          +'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase">P&amp;L TODAY</div>'
-          +'<div style="font-size:9px;color:var(--text3);letter-spacing:1px">'+today.date+'</div>'
-        +'</div>'
-        +'<div class="pnl-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:'+(hist?'16px':'4px')+'">'
-          +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">PROFIT/LOSS</div>'
-            +'<div style="font-size:clamp(14px,4vw,20px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1">'+sgn+fi(pl)+'</div>'
-            +'<div style="font-size:11px;color:'+col+';margin-top:4px;font-weight:600">'+sgn+pct.toFixed(2)+'%</div></div>'
-          +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">CURRENT</div>'
-            +'<div style="font-size:clamp(14px,4vw,20px);font-weight:700;color:var(--text);letter-spacing:-0.5px;line-height:1.1">'+fi(cur)+'</div></div>'
-          +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">OPEN TODAY</div>'
-            +'<div style="font-size:clamp(14px,4vw,20px);font-weight:700;color:var(--text2);letter-spacing:-0.5px;line-height:1.1">'+fi(today.open)+'</div></div>'
-        +'</div>'
-        +(hist?'<div style="font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:8px;padding-top:12px;border-top:1px solid var(--bdr)">PREVIOUS DAYS</div>'+hist:'');
-    }
+    function renderPnL(cur) { renderPnLOverview(); }
 
     // ── All Time P&L (Birdeye + Helius) ─────────────────────
     const BIRDEYE_KEY = '0c38a69c78f5472d99946fdee39a3d5d';
     const SOL_MINT    = 'So11111111111111111111111111111111111111112';
     const HELIUS_RPC  = 'https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
 
-    function renderAllTimePnL(currentTotal) {
-      if (!currentTotal || currentTotal <= 0) return;
-      const box = document.getElementById('atplBox');
+    function renderAllTimePnL(currentTotal) { renderPnLOverview(); }
+
+    // ── Unified P&L Overview (merges Today + All-Time) ──────
+    function renderPnLOverview() {
+      const box = document.getElementById('pnlOverviewBox');
       if (!box) return;
+      if (total <= 0) { box.style.display='none'; return; }
       box.style.display = 'block';
-      const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
-      if (!cached) {
-        document.getElementById('atplContent').innerHTML =
-          '<div style="font-size:10px;color:var(--text3);padding:4px 0"><span class="spin"></span> Fetching on-chain data...</div>';
-        return;
+
+      // Current value (shared)
+      const cv = document.getElementById('pnlCurrent');
+      if (cv) cv.textContent = fi(total);
+
+      // ── Today column ──
+      const todayCol = document.getElementById('pnlTodayCol');
+      const todayDate = document.getElementById('pnlTodayDate');
+      if (todayCol) {
+        if (pnlData.length > 0) {
+          const today = pnlData[pnlData.length-1];
+          const prev  = pnlData.length > 1 ? pnlData[pnlData.length-2] : null;
+          const pl    = prev ? total - prev.close : total - today.open;
+          const pct   = prev && prev.close > 0 ? (pl/prev.close*100) : (today.open > 0 ? (pl/today.open*100) : 0);
+          const up    = pl >= 0;
+          const col   = up ? 'var(--green)' : '#ff5c7a';
+          const sgn   = up ? '+' : '';
+          if (todayDate) todayDate.textContent = '· ' + today.date;
+          todayCol.innerHTML =
+            '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+sgn+fi(pl)+'</div>'
+            +'<div style="font-size:12px;color:'+col+';font-weight:600;margin-top:4px">'+sgn+pct.toFixed(2)+'%</div>'
+            +'<div style="font-size:10px;color:var(--text3);margin-top:10px;letter-spacing:0.3px">Open: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+fi(today.open)+'</span></div>';
+        } else {
+          if (todayDate) todayDate.textContent = '';
+          todayCol.innerHTML = '<div style="font-size:11px;color:var(--text3)">No data yet today</div>';
+        }
       }
-      const { initialIDR, initialDate, initialSOL, initialPriceUSD } = cached;
-      const pl = currentTotal - initialIDR;
-      const pct = (pl / initialIDR * 100);
-      const up = pl >= 0;
-      const col = up ? 'var(--green)' : '#ff5c7a';
-      const sgn = up ? '+' : '';
-      const multiplier = (currentTotal / initialIDR).toFixed(2);
-      document.getElementById('atplContent').innerHTML =
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:10px">'
-          +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">INITIAL</div>'
-            +'<div style="font-size:clamp(13px,3.5vw,20px);font-weight:700;color:var(--text2);letter-spacing:-0.5px;line-height:1.1">'+fi(initialIDR)+'</div>'
-            +'<div style="font-size:9px;color:var(--text3);margin-top:4px;letter-spacing:0.5px">'+initialDate+'</div></div>'
-          +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">CURRENT</div>'
-            +'<div style="font-size:clamp(13px,3.5vw,20px);font-weight:700;color:var(--text);letter-spacing:-0.5px;line-height:1.1">'+fi(currentTotal)+'</div></div>'
-          +'<div><div style="font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">ALL TIME P&amp;L</div>'
-            +'<div style="font-size:clamp(13px,3.5vw,20px);font-weight:700;color:'+col+';white-space:nowrap;letter-spacing:-0.5px;line-height:1.1">'+sgn+fi(pl)+'</div>'
-            +'<div style="font-size:11px;color:'+col+';margin-top:4px;font-weight:600">'+sgn+pct.toFixed(1)+'% &middot; '+multiplier+'x</div></div>'
-        +'</div>'
-        +'<div style="font-size:9px;color:var(--text3);padding-top:8px;border-top:1px solid var(--bdr);letter-spacing:0.5px">Entry: <span style="color:var(--text2)">'+initialSOL.toFixed(4)+' SOL</span> @ <span style="color:var(--text2)">$'+initialPriceUSD.toFixed(2)+'</span></div>';
+
+      // ── All-Time column ──
+      const atCol = document.getElementById('pnlAllTimeCol');
+      const atDate = document.getElementById('pnlAllTimeDate');
+      if (atCol) {
+        try {
+          const cached = JSON.parse(localStorage.getItem('cr_initial_data') || 'null');
+          if (cached && cached.initialIDR > 0) {
+            const pl = total - cached.initialIDR;
+            const pct = (pl / cached.initialIDR * 100);
+            const up = pl >= 0;
+            const col = up ? 'var(--green)' : '#ff5c7a';
+            const sgn = up ? '+' : '';
+            const multiplier = (total / cached.initialIDR).toFixed(2);
+            if (atDate) atDate.textContent = '· since ' + cached.initialDate;
+            atCol.innerHTML =
+              '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+sgn+fi(pl)+'</div>'
+              +'<div style="font-size:12px;color:'+col+';font-weight:600;margin-top:4px">'+sgn+pct.toFixed(1)+'% &middot; '+multiplier+'x</div>'
+              +'<div style="font-size:10px;color:var(--text3);margin-top:10px;letter-spacing:0.3px">Initial: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+fi(cached.initialIDR)+'</span></div>'
+              +'<div style="font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.3px">Entry: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+cached.initialSOL.toFixed(4)+' SOL</span> @ <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">$'+cached.initialPriceUSD.toFixed(2)+'</span></div>';
+          } else {
+            if (atDate) atDate.textContent = '';
+            atCol.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:4px 0"><span class="spin"></span> Syncing on-chain data... click SYNC →</div>';
+          }
+        } catch(e) { atCol.innerHTML = '<div style="font-size:11px;color:var(--text3)">--</div>'; }
+      }
+
+      // ── Previous days history ──
+      const histBox = document.getElementById('pnlHistory');
+      const histContent = document.getElementById('pnlHistoryContent');
+      if (histBox && histContent) {
+        const histRows = [...pnlData].slice(-8);
+        const histWithoutToday = histRows.slice(0, histRows.length - 1);
+        if (histWithoutToday.length > 0) {
+          let hist = '';
+          histWithoutToday.forEach((d) => {
+            const dp = d.close - d.open;
+            const dc = dp >= 0 ? 'var(--green)' : '#ff5c7a';
+            const dpPct = d.open > 0 ? (dp / d.open * 100).toFixed(1) : '0.0';
+            hist += '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;align-items:center">'
+              + '<span style="color:var(--text2)">'+d.date+'</span>'
+              + '<span style="color:var(--text);font-weight:600;font-family:\'IBM Plex Mono\',monospace">'+fi(d.close)+'</span>'
+              + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right;font-family:\'IBM Plex Mono\',monospace">'+(dp>=0?'+':'')+fi(dp)+'</span>'
+              + '<span style="color:'+dc+';font-size:10px;min-width:50px;text-align:right">'+(dp>=0?'+':'')+dpPct+'%</span>'
+              + '</div>';
+          });
+          histBox.style.display = 'block';
+          histContent.innerHTML = hist;
+        } else {
+          histBox.style.display = 'none';
+        }
+      }
+    }
+
+    // ── Export P&L as CSV ───────────────────────────────────
+    function exportPnLCSV() {
+      if (!pnlData.length) { alert('No P&L data to export yet.'); return; }
+      let csv = 'Date,Open (IDR),Close (IDR),P&L (IDR),P&L %\n';
+      pnlData.forEach((d) => {
+        const pl = d.close - d.open;
+        const pct = d.open > 0 ? (pl / d.open * 100).toFixed(2) : '0.00';
+        csv += '"'+d.date+'",'+Math.round(d.open)+','+Math.round(d.close)+','+Math.round(pl)+','+pct+'\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cryptoretire-pnl-' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     }
 
     async function fetchInitialValue() {
-      const btn = document.getElementById('atplRefresh');
-      const content = document.getElementById('atplContent');
-      const box = document.getElementById('atplBox');
+      const btn = document.getElementById('pnlSyncBtn');
+      const content = document.getElementById('pnlAllTimeCol');
+      const box = document.getElementById('pnlOverviewBox');
       if (!box) return;
       box.style.display = 'block';
 
       // Get wallet public key
       const pk = provider?.publicKey?.toString();
-      if (!pk) { content.innerHTML = '<div style="font-size:10px;color:var(--red)">Connect wallet first</div>'; return; }
+      if (!pk) { if(content) content.innerHTML = '<div style="font-size:10px;color:var(--red)">Connect wallet first</div>'; return; }
 
       if (btn) { btn.textContent = '⏳ Loading...'; btn.disabled = true; }
-      content.innerHTML = '<div style="font-size:10px;color:var(--text3)">Fetching on-chain history...</div>';
+      if (content) content.innerHTML = '<div style="font-size:10px;color:var(--text3)"><span class="spin"></span> Fetching on-chain history...</div>';
 
       try {
         // Step 1: Get oldest transaction signature via Helius
         let oldest = null;
         let before = null;
-        content.innerHTML = '<div style="font-size:10px;color:var(--text3)">Finding first transaction...</div>';
+        if (content) content.innerHTML = '<div style="font-size:10px;color:var(--text3)"><span class="spin"></span> Finding first transaction...</div>';
 
         // Paginate to find the oldest tx (max 5 pages = ~500 txs)
         for (let i = 0; i < 5; i++) {
@@ -2092,7 +2177,7 @@
         renderChart();
       } catch(e) {
         console.error('fetchInitialValue:', e);
-        content.innerHTML = '<div style="font-size:10px;color:var(--red)">Error: '+e.message+'<br><span style="color:var(--text3)">Try again or check console</span></div>';
+        if (content) content.innerHTML = '<div style="font-size:10px;color:#ff5c7a">Error: '+e.message+'<br><span style="color:var(--text3)">Try again or check console</span></div>';
       } finally {
         if (btn) { btn.textContent = '↻ SYNC'; btn.disabled = false; }
       }
@@ -2119,6 +2204,8 @@
       if (!box || !grid) return;
       if (!pnlData || pnlData.length === 0) { box.style.display='none'; return; }
       box.style.display = 'block';
+      const wrap = document.getElementById('calStreakWrap');
+      if (wrap) wrap.style.display = 'grid';
 
       document.getElementById('calMonthLabel').textContent = MONTHS[calMonth] + ' ' + calYear;
 
@@ -2256,6 +2343,8 @@
 
       if (pnlData.length === 0) { box.style.display='none'; return; }
       box.style.display = 'block';
+      const wrap = document.getElementById('calStreakWrap');
+      if (wrap) wrap.style.display = 'grid';
 
       // Last 7 days bar chart — show even if only 1-2 bars
       const last7 = sorted.slice(-7);
@@ -2345,15 +2434,24 @@
       } catch(e) { console.error('fetchFearGreed:', e); }
     }
 
-    // ── Badges ────────────────────────────────────────────────
-    const BADGES = [
-      { icon:'🌱', label:'FIRST SOL',  threshold:0,          color:'#14f195' },
-      { icon:'💰', label:'Rp 1 JT',    threshold:1000000,    color:'#9945ff' },
-      { icon:'🚀', label:'Rp 10 JT',   threshold:10000000,   color:'#9945ff' },
-      { icon:'💎', label:'Rp 50 JT',   threshold:50000000,   color:'#ffd700' },
-      { icon:'👑', label:'Rp 100 JT',  threshold:100000000,  color:'#00d4ff' },
-      { icon:'🏆', label:'Rp 500 JT',  threshold:500000000,  color:'#9945ff' },
-    ];
+    // ── Badges (synced with WEALTH JOURNEY tiers) ─────────────
+    const BADGE_LABELS = {
+      'Common Folk':'FIRST SOL',
+      'Middle Class':'MIDDLE',
+      'Garut Wealthy':'WEALTHY',
+      'Top 1% Indonesia':'TOP 1% ID',
+      'Garut Elite':'ELITE',
+      'Garut Conglomerate':'CONGLO',
+      'Top 1% Global':'TOP 1% GBL',
+      'King of Garut':'KING',
+    };
+    const BADGES = GARUT_RANKS.map(r => ({
+      icon: r.icon,
+      label: BADGE_LABELS[r.name] || r.name.toUpperCase(),
+      threshold: r.target,
+      color: r.color,
+      isBenchmark: r.tier === 'benchmark',
+    }));
     function renderBadges() {
       const box = document.getElementById('badgesBox');
       const content = document.getElementById('badgesContent');
@@ -2361,8 +2459,9 @@
       box.style.display = 'block';
       content.innerHTML = BADGES.map(b => {
         const unlocked = total >= b.threshold || b.threshold === 0;
+        const bmClass = b.isBenchmark ? ' benchmark' : '';
         return '<div class="badge-item">'
-          +'<div class="badge-circle '+(unlocked?'unlocked':'locked')+'" style="'+(unlocked?'border-color:'+b.color+';background:'+b.color+'22':'')+'">'
+          +'<div class="badge-circle '+(unlocked?'unlocked':'locked')+bmClass+'" style="'+(unlocked?'border-color:'+b.color+';background:'+b.color+'22':'')+'">'
             +'<span style="font-size:20px;">'+b.icon+'</span>'
           +'</div>'
           +'<div class="badge-lbl '+(unlocked?'unlocked':'locked')+'" style="'+(unlocked?'color:'+b.color:'')+'">'+b.label+'</div>'
