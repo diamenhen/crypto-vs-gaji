@@ -15,8 +15,7 @@
   <meta name="twitter:title" content="CryptoRetire — Crypto vs Gaji Indonesia">
   <meta name="twitter:description" content="Track nilai crypto vs gaji Indonesia. Realtime SOL tracker + Garut Wealth Rank.">
   <meta name="twitter:site" content="@AriantheChain">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB4PSI2IiB5PSI3OCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzE0ZjE5NSIvPjxyZWN0IHg9IjIxIiB5PSI2NiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjI4IiByeD0iMiIgZmlsbD0iIzE0ZjE5NSIvPjxyZWN0IHg9IjM2IiB5PSI1NCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iMiIgZmlsbD0iIzk5NDVmZiIvPjxyZWN0IHg9IjUxIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjUyIiByeD0iMiIgZmlsbD0iIzk5NDVmZiIvPjxyZWN0IHg9IjY2IiB5PSIyOCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjY2IiByeD0iMiIgZmlsbD0iI2ZmOGE0YyIvPjxjaXJjbGUgY3g9IjczIiBjeT0iMTgiIHI9IjYiIGZpbGw9IiNmZjhhNGMiLz48L3N2Zz4=">
-  <meta name="theme-color" content="#9945ff">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMGQwZjE1Ii8+CiAgPHBvbHlnb24gcG9pbnRzPSIxNiwyIDMwLDE2IDE2LDMwIDIsMTYiIGZpbGw9IiM5OTQ1ZmYiLz4KPC9zdmc+">
   <!-- Bloomberg Dark: IBM Plex Mono, muted tones -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -72,11 +71,13 @@
     }
     .logo { display:flex; align-items:center; gap:12px; }
     .logo-icon {
-      width:40px; height:40px;
+      background:linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+      color:#fff; width:40px; height:40px; border-radius:10px;
       display:flex; align-items:center; justify-content:center;
-      background:transparent; padding:0;
+      font-size:18px; font-weight:700; letter-spacing:-1px;
+      box-shadow: 0 4px 20px rgba(153,69,255,0.3);
     }
-    .logo-icon svg { width:38px; height:38px; display:block; filter:drop-shadow(0 2px 8px rgba(153,69,255,0.25)); }
+    .logo-icon::after { content:'◆'; }
     .logo-text { display:flex; flex-direction:column; }
     .logo-title { font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600; letter-spacing:-0.3px; }
     .logo-title span { color:var(--accent); }
@@ -228,11 +229,6 @@
       background:linear-gradient(180deg, var(--text), #b0b8cc);
       -webkit-background-clip:text; background-clip:text;
       -webkit-text-fill-color:transparent;
-    }
-    .hero-v.is-demo {
-      font-family:'IBM Plex Sans',sans-serif;
-      font-weight:700;
-      letter-spacing:-1.5px;
     }
     .hero-s { position:relative; font-size:12px; color:var(--text2); margin-bottom:4px; letter-spacing:0.2px; }
 
@@ -595,7 +591,7 @@
   <div class="container">
     <header>
       <div class="logo">
-        <div class="logo-icon"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="CryptoRetire"><title>CryptoRetire</title><rect x="6" y="78" width="14" height="16" rx="2" fill="#14f195"/><rect x="21" y="66" width="14" height="28" rx="2" fill="#14f195"/><rect x="36" y="54" width="14" height="40" rx="2" fill="#9945ff"/><rect x="51" y="42" width="14" height="52" rx="2" fill="#9945ff"/><rect x="66" y="28" width="14" height="66" rx="2" fill="#ff8a4c"/><circle cx="73" cy="18" r="6" fill="#ff8a4c"/></svg></div>
+        <div class="logo-icon"></div>
         <div class="logo-text">
           <div class="logo-title">Crypto<span>Retire</span></div>
           <div class="logo-sub"></div>
@@ -675,7 +671,7 @@
       <div class="hero demo-overlay" id="heroBox">
         <div class="demo-watermark" id="demoWatermark">DEMO</div>
         <div class="hero-l">YOUR TOTAL CRYPTO VALUE (IDR)</div>
-        <div class="hero-v is-demo" id="heroV" style="opacity:0.25">Rp 1 Miliar</div>
+        <div class="hero-v" id="heroV" style="opacity:0.25">Rp 1 M</div>
         <div class="hero-s" id="heroS">Connect wallet to see your real data</div>
         <button class="btn-share" id="btnShare" onclick="shareTwitter()" style="display:none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -917,16 +913,6 @@
       if (n>=1e9)  return 'Rp '+(n/1e9).toFixed(2)+' M';
       if (n>=1e6)  return 'Rp '+(n/1e6).toFixed(1)+' Jt';
       return 'Rp '+n.toLocaleString('id-ID');
-    }
-    // fi_delta — for P&L deltas: always signed, always abbreviated (rb/Jt/M/T)
-    function fi_delta(n) {
-      const abs = Math.abs(n);
-      const sign = n >= 0 ? '+' : '-';
-      if (abs >= 1e12) return sign+'Rp '+(abs/1e12).toFixed(2)+' T';
-      if (abs >= 1e9)  return sign+'Rp '+(abs/1e9).toFixed(2)+' M';
-      if (abs >= 1e6)  return sign+'Rp '+(abs/1e6).toFixed(1)+' Jt';
-      if (abs >= 1e3)  return sign+'Rp '+Math.round(abs/1e3)+' rb';
-      return sign+'Rp '+Math.round(abs);
     }
     function fd(d) {
       if (d<1) { const j=Math.ceil(d*24); return j<1?'<1 hr':j+' hr'; }
@@ -1510,7 +1496,6 @@
       document.getElementById('onboardBox').style.display='none';
       document.getElementById('demoWatermark').style.display='none';
       document.getElementById('heroV').style.opacity='1';
-      document.getElementById('heroV').classList.remove('is-demo');
       // Mark step 1 done
       document.getElementById('ob1').className='onboard-num done';
     }
@@ -1520,7 +1505,7 @@
       document.getElementById('notConn').style.display='block'; document.getElementById('isConn').style.display='none';
       document.getElementById('cCard').classList.remove('on');
       document.getElementById('btnConn').innerHTML='<div class="btn-cw-icon">&#9678;</div> Connect Wallet'; document.getElementById('btnConn').disabled=false;
-      document.getElementById('heroV').textContent='Rp 1 Miliar'; document.getElementById('heroV').style.opacity='0.25'; document.getElementById('heroV').classList.add('is-demo');
+      document.getElementById('heroV').textContent='Rp 1 M'; document.getElementById('heroV').style.opacity='0.25';
       document.getElementById('heroS').textContent='Connect wallet to see your real data';
       document.getElementById('btnShare').style.display='none'; document.getElementById('tokenPills').style.display='none'; document.getElementById('tokenPills').innerHTML='';
       document.getElementById('factBox').style.display='none'; document.getElementById('chartCard').style.display='none';
@@ -1619,6 +1604,7 @@
         const JUP_LOCK='LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn', HELIUS='https://mainnet.helius-rpc.com/?api-key=108d940a-3471-4463-bb13-83e30d82de55';
         let accounts=[];
         for (const offset of [72,8]) { const r=await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getProgramAccounts',params:[JUP_LOCK,{commitment:'confirmed',encoding:'base64',filters:[{memcmp:{offset,bytes:publicKey}}]}]})}); const d=await r.json(); if(d.result?.length>0){accounts=d.result;break;} }
+        if(!accounts.length) return;
         let totalLockedIDR=0;
 
         for (const acc of accounts) {
@@ -1671,59 +1657,6 @@
 
           } catch(e){}
         }
-
-        // ── SatoshiLock — custom vesting program by Arian the Chain ──
-        // VERIFIED account layout (171 bytes):
-        //   72: mint (32 bytes), 104: amount (u64), 162: withdrawn (u64)
-        try {
-          const SATOSHI_LOCK = 'CE7vQdyjXSEvPdeEdrmbEpM8hSPZi2L4MKAWi26kpZ2H';
-          const SOL_MINT = 'So11111111111111111111111111111111111111112';
-          const seenSatoshi = new Set();
-          const satoshiAccounts = [];
-          for (const offset of [8, 40]) {
-            const r = await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getProgramAccounts',params:[SATOSHI_LOCK,{commitment:'confirmed',encoding:'base64',filters:[{memcmp:{offset,bytes:publicKey}}]}]})});
-            const d = await r.json();
-            if (d.result?.length > 0) {
-              for (const a of d.result) {
-                if (!seenSatoshi.has(a.pubkey)) { seenSatoshi.add(a.pubkey); satoshiAccounts.push(a); }
-              }
-            }
-          }
-          for (const acc of satoshiAccounts) {
-            try {
-              const raw = atob(acc.account.data[0]);
-              const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-              if (bytes.length < 171) continue;
-              const view = new DataView(bytes.buffer);
-              const mintAddr = encodeBase58(bytes.slice(72, 104));
-              const amount = Number(view.getBigUint64(104, true));
-              const withdrawn = Number(view.getBigUint64(162, true));
-              const remaining = Math.max(amount - withdrawn, 0);
-              if (remaining === 0) continue;
-              let valueIDR = 0, symbol = 'TOKEN';
-              if (mintAddr === SOL_MINT) {
-                const uiAmount = remaining / 1e9;
-                const curSolIDR = solIDR > 0 ? solIDR : 1385337;
-                valueIDR = uiAmount * curSolIDR;
-                symbol = 'SOL';
-              } else {
-                try {
-                  const tr = await fetch(HELIUS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getAsset',params:{id:mintAddr}})});
-                  const td = await tr.json();
-                  const decimals = td.result?.token_info?.decimals ?? 6;
-                  const priceUSD = td.result?.token_info?.price_info?.price_per_token ?? 0;
-                  symbol = td.result?.content?.metadata?.symbol || mintAddr.slice(0, 6);
-                  const uiAmount = remaining / Math.pow(10, decimals);
-                  valueIDR = uiAmount * priceUSD * USD_IDR;
-                } catch(e) {}
-              }
-              console.log('SatoshiLock:', symbol, 'remaining:', remaining, 'valueIDR:', valueIDR);
-              totalLockedIDR += valueIDR;
-            } catch(e) { console.warn('SatoshiLock parse:', e.message); }
-          }
-        } catch(e) { console.error('SatoshiLock fetch failed:', e); }
-        // ── End SatoshiLock ──
-
         if(totalLockedIDR>0) {
           const curSolIDR = solIDR > 0 ? solIDR : 1385337;
           const lockedSOL = totalLockedIDR / curSolIDR;
@@ -1805,7 +1738,7 @@
         const up = pl >= 0;
         const col = up ? 'var(--green)' : 'var(--red)';
         const pct = prev && prev.close > 0 ? (pl/prev.close*100) : (today.open > 0 ? (pl/today.open*100) : 0);
-        ssPnl.innerHTML = '<span style="color:'+col+'">'+fi_delta(pl)+'</span>'
+        ssPnl.innerHTML = '<span style="color:'+col+'">'+(up?'+':'')+fi(pl)+'</span>'
           + '<div class="ss-sub" style="color:'+col+'">'+(up?'+':'')+pct.toFixed(2)+'%</div>';
       } else {
         ssPnl.innerHTML = '<span style="color:var(--text2)">No data</span>';
@@ -1820,7 +1753,7 @@
           const up = multiplier >= 1;
           const col = up ? 'var(--green)' : 'var(--red)';
           ssAtpl.innerHTML = '<span style="color:'+col+'">'+multiplier.toFixed(2)+'x</span>'
-            + '<div class="ss-sub" style="color:'+col+'">'+fi_delta(pl)+'</div>';
+            + '<div class="ss-sub" style="color:'+col+'">'+(up?'+':'')+fi(pl)+'</div>';
         } else {
           ssAtpl.innerHTML = '<span style="color:var(--text2);font-size:14px">Syncing...</span>';
         }
@@ -1924,7 +1857,7 @@
         const days = total>0 ? total/perHari : null, uid='b'+job.pct;
         const barPct = 20 + ((job.salary - minSalary) / (maxSalary - minSalary)) * 80;
         // Smart unit — pick best unit for the duration
-        let heroV = '—', heroU = 'CONNECT WALLET';
+        let heroV = '--', heroU = 'MUST WORK';
         if (days !== null) {
           if (days < 1) { heroV = Math.ceil(days*24); heroU = heroV===1?'HOUR TO EARN':'HOURS TO EARN'; }
           else if (days < 30) { heroV = Math.ceil(days); heroU = heroV===1?'DAY TO EARN':'DAYS TO EARN'; }
@@ -1975,7 +1908,7 @@
             const sign = up ? '+' : '';
             const plHours = Math.ceil(Math.abs(pl) / (bestJob.salary / 30 / 24));
             const plDays = Math.ceil(plHours / 24);
-            pnlInsight = '📊 Today\'s P&L: <strong style="color:'+col+'">'+fi_delta(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>)'
+            pnlInsight = '📊 Today\'s P&L: <strong style="color:'+col+'">'+sign+fi(pl)+'</strong> (<strong style="color:'+col+'">'+sign+pct.toFixed(2)+'%</strong>)'
               + ' — equivalent to <strong>'+plHours+' hours</strong> or about <strong>'+plDays+' days of work</strong> as a '+bestJob.title+' at '+bestJob.company
               + (up ? ' 🚀' : ' 💪');
           }
@@ -2056,7 +1989,7 @@
           const sgn   = up ? '+' : '';
           if (todayDate) todayDate.textContent = '· ' + today.date;
           todayCol.innerHTML =
-            '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+fi_delta(pl)+'</div>'
+            '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+sgn+fi(pl)+'</div>'
             +'<div style="font-size:12px;color:'+col+';font-weight:600;margin-top:4px">'+sgn+pct.toFixed(2)+'%</div>'
             +'<div style="font-size:10px;color:var(--text3);margin-top:10px;letter-spacing:0.3px">Open: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+fi(today.open)+'</span></div>';
         } else {
@@ -2080,7 +2013,7 @@
             const multiplier = (total / cached.initialIDR).toFixed(2);
             if (atDate) atDate.textContent = '· since ' + cached.initialDate;
             atCol.innerHTML =
-              '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+fi_delta(pl)+'</div>'
+              '<div style="font-size:clamp(18px,3.8vw,24px);font-weight:700;color:'+col+';letter-spacing:-0.5px;line-height:1.1;font-family:\'IBM Plex Mono\',monospace">'+sgn+fi(pl)+'</div>'
               +'<div style="font-size:12px;color:'+col+';font-weight:600;margin-top:4px">'+sgn+pct.toFixed(1)+'% &middot; '+multiplier+'x</div>'
               +'<div style="font-size:10px;color:var(--text3);margin-top:10px;letter-spacing:0.3px">Initial: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+fi(cached.initialIDR)+'</span></div>'
               +'<div style="font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.3px">Entry: <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">'+cached.initialSOL.toFixed(4)+' SOL</span> @ <span style="color:var(--text2);font-family:\'IBM Plex Mono\',monospace">$'+cached.initialPriceUSD.toFixed(2)+'</span></div>';
@@ -2106,7 +2039,7 @@
             hist += '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;align-items:center">'
               + '<span style="color:var(--text2)">'+d.date+'</span>'
               + '<span style="color:var(--text);font-weight:600;font-family:\'IBM Plex Mono\',monospace">'+fi(d.close)+'</span>'
-              + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right;font-family:\'IBM Plex Mono\',monospace">'+fi_delta(dp)+'</span>'
+              + '<span style="color:'+dc+';font-weight:700;min-width:80px;text-align:right;font-family:\'IBM Plex Mono\',monospace">'+(dp>=0?'+':'')+fi(dp)+'</span>'
               + '<span style="color:'+dc+';font-size:10px;min-width:50px;text-align:right">'+(dp>=0?'+':'')+dpPct+'%</span>'
               + '</div>';
           });
