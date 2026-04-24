@@ -106,6 +106,301 @@
     }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
 
+    /* ── PROFILE SEARCH ── */
+    .profile-search {
+      flex: 1; max-width: 360px; margin: 0 16px;
+      position: relative;
+    }
+    .profile-search-input-wrap {
+      display: flex; align-items: center;
+      background: var(--bg2); border: 1px solid var(--bdr);
+      border-radius: 8px; height: 36px; padding: 0 4px 0 12px;
+      transition: all 0.15s;
+    }
+    .profile-search-input-wrap:focus-within {
+      border-color: var(--bdr2);
+      box-shadow: 0 0 0 3px rgba(153,69,255,0.08);
+    }
+    .profile-search-icon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; color: var(--text3); margin-right: 8px;
+      pointer-events: none;
+    }
+    .profile-search input {
+      flex: 1; min-width: 0; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px; padding: 6px 0; letter-spacing: 0.2px;
+    }
+    .profile-search input::placeholder { color: var(--text3); font-size: 11px; }
+    .profile-search input:disabled { opacity: 0.5; }
+    .profile-search-btn {
+      background: var(--accent); color: #fff; border: none;
+      padding: 0 12px; height: 28px; border-radius: 5px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 600; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .profile-search-btn:hover { background: var(--accent2); }
+    .profile-search-btn:disabled { background: var(--bg3); color: var(--text3); cursor: wait; }
+    .profile-search-error {
+      position: absolute; top: 100%; left: 0; right: 0;
+      margin-top: 6px; padding: 6px 12px;
+      background: rgba(255,92,122,0.1); border: 1px solid rgba(255,92,122,0.25);
+      border-radius: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: var(--red);
+      letter-spacing: 0.5px;
+      animation: errorIn 0.2s ease-out;
+      z-index: 5;
+    }
+    @keyframes errorIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .profile-search.shake .profile-search-input-wrap {
+      animation: shake 0.4s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    @media (max-width: 680px) {
+      header { flex-wrap: wrap; gap: 8px; }
+      .profile-search { order: 3; flex: 0 0 100%; margin: 4px 0 0 0; max-width: 100%; }
+    }
+
+    /* ── PROFILE HERO (readonly mode) ── */
+    .profile-hero {
+      background: linear-gradient(135deg, rgba(153,69,255,0.08) 0%, rgba(20,241,149,0.04) 100%);
+      border: 1px solid rgba(153,69,255,0.2);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+      animation: heroIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    @keyframes heroIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .profile-hero::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 10%, var(--accent) 50%, transparent 90%);
+      opacity: 0.5;
+    }
+    .profile-hero-overline {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .profile-hero-overline::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
+    }
+    .profile-hero-body {
+      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    }
+    .profile-hero-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 22px; font-weight: 600; color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(153,69,255,0.3);
+    }
+    .profile-hero-info { flex: 1; min-width: 200px; }
+    .profile-hero-name {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 22px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.3px;
+      margin-bottom: 2px;
+    }
+    .profile-hero-handle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px; color: var(--text2);
+      margin-bottom: 6px; display: inline-block;
+      text-decoration: none; transition: color 0.15s;
+    }
+    .profile-hero-handle:hover { color: var(--accent); }
+    .profile-hero-bio {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px; color: var(--text2); line-height: 1.5;
+    }
+    .profile-hero-tagline {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-style: italic; font-size: 12px; color: var(--text3);
+      margin-top: 4px;
+    }
+    .profile-hero-meta {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: var(--text3); letter-spacing: 0.5px;
+    }
+    .profile-hero-meta-item { display: flex; align-items: center; gap: 6px; }
+    .profile-hero-meta-val { color: var(--text2); font-weight: 500; }
+    @media (max-width: 680px) {
+      .profile-hero-body { flex-direction: column; align-items: flex-start; }
+      .profile-hero-meta { align-items: flex-start; margin-top: 8px; }
+    }
+
+    /* ── NOT FOUND CARD ── */
+    .profile-notfound {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,92,122,0.25);
+      border-radius: 14px;
+      padding: 48px 24px; margin-bottom: 12px;
+      text-align: center;
+      animation: heroIn 0.4s ease-out;
+    }
+    .profile-notfound-overline {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px; color: var(--red);
+      margin-bottom: 14px;
+    }
+    .profile-notfound-title {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 24px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+    .profile-notfound-msg {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px; color: var(--text2); line-height: 1.6;
+      max-width: 440px; margin: 0 auto 20px;
+    }
+    .profile-notfound-btn {
+      display: inline-block;
+      background: var(--bg2); border: 1px solid var(--bdr);
+      padding: 10px 20px; border-radius: 8px;
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      text-decoration: none; transition: all 0.15s;
+    }
+    .profile-notfound-btn:hover { background: var(--bg3); border-color: var(--bdr2); }
+
+    /* ── FEATURED PROJECTS + CURATOR NOTES ── */
+    .curator-mount { margin: 14px 0; }
+    .featured-projects { margin-bottom: 14px; }
+    .featured-projects-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 600;
+      color: var(--text3); letter-spacing: 2px;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .featured-projects-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--bdr) 0%, transparent 100%);
+    }
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .featured-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .featured-card:hover {
+      background: rgba(153,69,255,0.05);
+      border-color: var(--bdr2);
+      transform: translateY(-1px);
+    }
+    .featured-card::after {
+      content: '↗';
+      position: absolute;
+      top: 12px; right: 14px;
+      font-size: 11px; color: var(--text3);
+      transition: all 0.15s;
+    }
+    .featured-card:hover::after { color: var(--accent); transform: translate(2px, -2px); }
+    .featured-card-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 2px;
+    }
+    .featured-card-name {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.2px;
+    }
+    .featured-card-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; font-weight: 600; letter-spacing: 1px;
+      padding: 2px 6px; border-radius: 3px;
+      background: rgba(153,69,255,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(153,69,255,0.2);
+    }
+    .featured-card-tag[data-tag="SOL"] {
+      background: rgba(20,241,149,0.1);
+      color: var(--green);
+      border-color: rgba(20,241,149,0.2);
+    }
+    .featured-card-tag[data-tag="EVM"] {
+      background: rgba(255,181,71,0.1);
+      color: var(--amber);
+      border-color: rgba(255,181,71,0.25);
+    }
+    .featured-card-desc {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px; color: var(--text2); line-height: 1.4;
+    }
+    .curator-notes { display: flex; flex-direction: column; gap: 10px; }
+    .curator-note {
+      background: linear-gradient(135deg, rgba(153,69,255,0.04) 0%, rgba(20,241,149,0.02) 100%);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 22px 18px 24px;
+      position: relative;
+    }
+    .curator-note::before {
+      content: '"';
+      position: absolute;
+      left: 14px; top: 6px;
+      font-size: 48px;
+      color: var(--accent);
+      opacity: 0.18;
+      font-family: Georgia, serif;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .curator-note-overline {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 600; letter-spacing: 2px;
+      color: var(--accent); margin-bottom: 10px;
+    }
+    .curator-note-body {
+      font-family: Georgia, 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 17px; line-height: 1.55;
+      color: var(--text); margin: 0;
+    }
+    .curator-note-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      letter-spacing: 1px; margin-top: 12px;
+    }
+
     /* ── STATUS BAR ── */
     .status-bar {
       background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px;
@@ -601,11 +896,27 @@
           <div class="logo-sub"></div>
         </div>
       </div>
+      <div class="profile-search" id="profileSearch">
+        <div class="profile-search-input-wrap">
+          <span class="profile-search-icon">⌕</span>
+          <input
+            type="text"
+            id="profileSearchInput"
+            placeholder="Search @username or wallet address"
+            autocomplete="off"
+            spellcheck="false"
+            onkeydown="if(event.key==='Enter')handleProfileSearch()"
+          />
+          <button class="profile-search-btn" id="profileSearchBtn" onclick="handleProfileSearch()">GO</button>
+        </div>
+      </div>
       <div class="header-right">
         <button id="currBtn" onclick="toggleCurrency()" style="background:transparent;border:none;border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:0 16px;height:40px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all 0.15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">IDR</button>
         <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       </div>
     </header>
+
+    <div id="profileHeroMount"></div>
 
     <div class="status-bar">
       SYS:<span>ONLINE</span> &nbsp; NET:<span>SOLANA MAINNET</span> &nbsp; DATA:<span>BINANCE API</span> &nbsp; REFRESH:<span>30S</span>
@@ -724,6 +1035,8 @@
       </div>
       <canvas id="portfolioChart" style="max-height:220px"></canvas>
     </div>
+
+    <div id="curatorMount"></div>
 
     <!-- ─── JOBS COMPARISON ─── -->
     <div class="sec-l" id="secLabelJobs">HIGH-PAYING JOBS IN INDONESIA COMPARISON</div>
@@ -925,8 +1238,364 @@
       return { parseRoute, fetchProfileByHandle, fetchProfileByAddress, init };
     })();
 
-    // Kick off router immediately. Other components check window.__PROFILE_VIEW__ when they render.
-    ProfileRouter.init();
+    // Kick off router immediately. Then render profile UI based on resolved mode.
+    ProfileRouter.init().then(renderProfileView);
+
+    // ── Profile View Renderer ──────────────────────────────
+    // Reads window.__PROFILE_VIEW__ (set by ProfileRouter) and injects hero/404 card.
+    // Called once after init. Owner mode leaves mount empty (home page unchanged).
+    function renderProfileView() {
+      const view = window.__PROFILE_VIEW__;
+      const mount = document.getElementById('profileHeroMount');
+      if (!mount || !view) return;
+
+      if (view.mode === 'readonly' && view.profile) {
+        mount.innerHTML = renderHeroCard(view.profile);
+        activateReadOnlyMode(view.profile);
+      } else if (view.mode === 'notfound') {
+        mount.innerHTML = renderNotFoundCard(view.route);
+      } else {
+        mount.innerHTML = '';
+      }
+    }
+
+    function _escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function renderHeroCard(profile) {
+      const name = profile.display_name || profile.handle || '?';
+      const initials = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const joinedFmt = profile.joined_date
+        ? new Date(profile.joined_date).toLocaleDateString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric',
+          }).toUpperCase()
+        : '—';
+      const twUrl = profile.twitter ? 'https://x.com/' + encodeURIComponent(profile.twitter) : null;
+      const esc = _escapeHtml;
+
+      return (
+        '<div class="profile-hero">'
+        + '<div class="profile-hero-overline">VIEWING LEDGER · READ-ONLY</div>'
+        + '<div class="profile-hero-body">'
+        +   '<div class="profile-hero-avatar">' + esc(initials) + '</div>'
+        +   '<div class="profile-hero-info">'
+        +     '<div class="profile-hero-name">' + esc(name) + '</div>'
+        +     (twUrl
+              ? '<a href="' + twUrl + '" target="_blank" rel="noopener" class="profile-hero-handle">@' + esc(profile.twitter) + '</a>'
+              : '<div class="profile-hero-handle">@' + esc(profile.handle) + '</div>')
+        +     (profile.bio ? '<div class="profile-hero-bio">' + esc(profile.bio) + '</div>' : '')
+        +     (profile.tagline ? '<div class="profile-hero-tagline">' + esc(profile.tagline) + '</div>' : '')
+        +   '</div>'
+        +   '<div class="profile-hero-meta">'
+        +     (profile.location
+              ? '<div class="profile-hero-meta-item"><span>LOC:</span><span class="profile-hero-meta-val">' + esc(profile.location) + '</span></div>'
+              : '')
+        +     '<div class="profile-hero-meta-item"><span>SINCE:</span><span class="profile-hero-meta-val">' + joinedFmt + '</span></div>'
+        +   '</div>'
+        + '</div>'
+        + '</div>'
+      );
+    }
+
+    function renderNotFoundCard(route) {
+      const val = (route && route.value) || '';
+      const isEVM = /^0x[a-fA-F0-9]{40}$/.test(val);
+      const isSol = !isEVM && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
+      const label = (isEVM || isSol)
+        ? val.slice(0, 6) + '...' + val.slice(-4)
+        : '@' + val;
+      const esc = _escapeHtml;
+
+      return (
+        '<div class="profile-notfound">'
+        + '<div class="profile-notfound-overline">ERR · 404 · PROFILE NOT FOUND</div>'
+        + '<div class="profile-notfound-title">Ledger not registered</div>'
+        + '<div class="profile-notfound-msg">'
+        +   '<span style="font-family:\'IBM Plex Mono\',monospace;color:var(--text);">' + esc(label) + '</span> '
+        +   'is not in the curated registry yet. Reach out to '
+        +   '<a href="https://x.com/AriantheChain" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">@AriantheChain</a> '
+        +   'to request inclusion.'
+        + '</div>'
+        + '<a href="/" class="profile-notfound-btn">← BACK TO HOME</a>'
+        + '</div>'
+      );
+    }
+
+    // ── Read-Only Mode Activator ───────────────────────────
+    // Transforms dashboard into "viewing someone else's ledger" mode:
+    //   1. Blocks Supabase writes (monkey-patch fetch) — prevents visitors from
+    //      spamming the profile owner's portfolio_history / pnl_data tables.
+    //   2. Hides onboarding + connect-wallet UI.
+    //   3. Fakes "connected" state using profile's primary Solana wallet.
+    //   4. Updates status bar + share button to reflect viewing mode.
+    //   5. Triggers loadBalance() so portfolio data loads without user connecting.
+    function activateReadOnlyMode(profile) {
+      try {
+        const solWallets = (profile.wallets && profile.wallets.solana) || [];
+        const primary = solWallets.find(w => w && w.primary) || solWallets[0];
+        if (!primary || !primary.address) {
+          console.warn('[readonly] No Solana wallet in profile — skipping');
+          return;
+        }
+        const address = primary.address;
+        const walletLabel = primary.label || 'Main';
+
+        // Global flag — checked by monkey-patched fetch below
+        window.__CR_READONLY__ = true;
+
+        // Monkey-patch fetch ONCE to block writes to Supabase while readonly.
+        // Idempotent — only wraps the original fetch once per page load.
+        if (!window.__CR_FETCH_PATCHED__) {
+          const _origFetch = window.fetch.bind(window);
+          window.fetch = function(url, opts) {
+            opts = opts || {};
+            const method = (opts.method || 'GET').toUpperCase();
+            const urlStr = typeof url === 'string' ? url : (url && url.url) || '';
+            if (window.__CR_READONLY__ && method !== 'GET' && urlStr.indexOf(SB_URL) === 0) {
+              console.log('[readonly] blocked ' + method + ' ' + urlStr.replace(SB_URL, ''));
+              return Promise.resolve(new Response('[]', {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+              }));
+            }
+            return _origFetch(url, opts);
+          };
+          window.__CR_FETCH_PATCHED__ = true;
+        }
+
+        // Hide onboarding + demo + connect button sections
+        const hide = (id) => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        };
+        hide('onboardBox');
+        hide('notConn');
+        hide('demoWatermark');
+
+        // Show "connected" state UI (mimics wallet-connected look)
+        const isConn = document.getElementById('isConn');
+        const cCard = document.getElementById('cCard');
+        if (isConn) isConn.style.display = 'block';
+        if (cCard) cCard.classList.add('on');
+
+        // Fill address display with profile wallet, show wallet label
+        const addrTxt = document.getElementById('addrTxt');
+        const wNameTxt = document.getElementById('wNameTxt');
+        if (addrTxt) addrTxt.textContent = address.slice(0, 5) + '...' + address.slice(-4);
+        if (wNameTxt) wNameTxt.textContent = walletLabel.toUpperCase();
+
+        // Hide disconnect button — not applicable for visitors
+        const dcBtn = document.querySelector('.btn-dc');
+        if (dcBtn) dcBtn.style.display = 'none';
+
+        // Update c-card label to reflect viewing mode
+        const cLabel = document.querySelector('#cCard .c-label');
+        if (cLabel) cLabel.textContent = 'PROFILE WALLET · ' + walletLabel.toUpperCase();
+
+        // De-demo hero value display (ready to be filled by loadBalance)
+        const heroV = document.getElementById('heroV');
+        if (heroV) {
+          heroV.style.opacity = '1';
+          heroV.classList.remove('is-demo');
+        }
+        const heroS = document.getElementById('heroS');
+        if (heroS) {
+          heroS.textContent = 'Loading ' + (profile.display_name || '@' + profile.handle) + "'s portfolio...";
+        }
+
+        // Mark onboard step 1 as done (visual consistency if exposed elsewhere)
+        const ob1 = document.getElementById('ob1');
+        if (ob1) ob1.className = 'onboard-num done';
+
+        // Rewrite status bar — visitor context
+        const statusBar = document.querySelector('.status-bar');
+        if (statusBar) {
+          const clock = document.getElementById('clockEl');
+          statusBar.innerHTML =
+            'VIEWING:<span>@' + _escapeHtml(profile.handle) + '</span> &nbsp; ' +
+            'MODE:<span style="color:var(--green)">READ-ONLY</span> &nbsp; ' +
+            'NET:<span>SOLANA MAINNET</span> &nbsp; ' +
+            'DATA:<span>SUPABASE</span>';
+          if (clock) statusBar.appendChild(clock);
+        }
+
+        // Override shareTwitter — share profile URL, not generic "my portfolio"
+        window.shareTwitter = function() {
+          const url = window.location.origin + '/u/' + profile.handle;
+          const twHandle = profile.twitter ? '@' + profile.twitter : profile.display_name;
+          const text = encodeURIComponent(
+            "Check out " + twHandle + "'s crypto ledger on CryptoRetire\n\n"
+          );
+          window.open(
+            'https://twitter.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent(url),
+            '_blank'
+          );
+        };
+
+        // Trigger balance load — writes blocked by fetch patch; reads still work
+        if (typeof loadBalance === 'function') {
+          loadBalance(address).catch(e => console.error('[readonly] loadBalance failed:', e));
+        } else {
+          console.warn('[readonly] loadBalance() not found — call aborted');
+        }
+
+        // Render editorial layer: featured projects + curator notes
+        renderCuratorExtras(profile);
+
+        console.log('[readonly] activated for @' + profile.handle + ' · wallet: ' + walletLabel);
+      } catch (e) {
+        console.error('[activateReadOnlyMode] failed:', e);
+      }
+    }
+
+    // ── Curator Extras Renderer ────────────────────────────
+    // Injects Featured Projects grid + Curator's Notes pull-quotes into #curatorMount.
+    // Data sourced from profile.featured (array) and profile.curator_notes (map).
+    function renderCuratorExtras(profile) {
+      const mount = document.getElementById('curatorMount');
+      if (!mount || !profile) return;
+
+      const featured = Array.isArray(profile.featured) ? profile.featured : [];
+      const notes = profile.curator_notes || {};
+      const noteEntries = Object.keys(notes)
+        .map(k => [k, notes[k]])
+        .filter(([k, v]) => v && v.note);
+
+      if (!featured.length && !noteEntries.length) {
+        mount.innerHTML = '';
+        return;
+      }
+
+      const esc = _escapeHtml;
+      let html = '<div class="curator-mount">';
+
+      // Featured projects grid
+      if (featured.length) {
+        html += '<div class="featured-projects">';
+        html += '<div class="featured-projects-label">FEATURED PROJECTS</div>';
+        html += '<div class="featured-grid">';
+        for (const f of featured) {
+          if (!f || !f.name) continue;
+          const tag = f.tag
+            ? '<span class="featured-card-tag" data-tag="' + esc(f.tag) + '">' + esc(f.tag) + '</span>'
+            : '';
+          const hrefAttr = f.url
+            ? 'href="' + esc(f.url) + '" target="_blank" rel="noopener"'
+            : 'href="#"';
+          html += (
+            '<a class="featured-card" ' + hrefAttr + '>'
+            + '<div class="featured-card-header">'
+            +   '<div class="featured-card-name">' + esc(f.name) + '</div>'
+            +   tag
+            + '</div>'
+            + (f.description ? '<div class="featured-card-desc">' + esc(f.description) + '</div>' : '')
+            + '</a>'
+          );
+        }
+        html += '</div></div>';
+      }
+
+      // Curator's notes pull-quotes
+      if (noteEntries.length) {
+        html += '<div class="curator-notes">';
+        for (const [symbol, data] of noteEntries) {
+          const dateFmt = data.date
+            ? new Date(data.date).toLocaleDateString('en-GB', {
+                day: '2-digit', month: 'short', year: 'numeric',
+              }).toUpperCase()
+            : '';
+          html += (
+            '<div class="curator-note">'
+            + '<div class="curator-note-overline">— CURATOR\'S NOTE · ' + esc(String(symbol).toUpperCase()) + '</div>'
+            + '<p class="curator-note-body">' + esc(data.note) + '</p>'
+            + (dateFmt ? '<div class="curator-note-date">' + dateFmt + '</div>' : '')
+            + '</div>'
+          );
+        }
+        html += '</div>';
+      }
+
+      html += '</div>';
+      mount.innerHTML = html;
+    }
+
+    // ── Profile Search Handler ─────────────────────────────
+    // Wired to the #profileSearch input in the header. Handles:
+    //   - @handle or handle  → fetch by handle, redirect to /u/handle
+    //   - 0x... (EVM)        → reverse-lookup, redirect to /u/handle if matched
+    //   - base58 (Solana)    → reverse-lookup, redirect to /u/handle if matched
+    //   - anything else      → inline error with shake animation
+    async function handleProfileSearch() {
+      const input = document.getElementById('profileSearchInput');
+      const btn = document.getElementById('profileSearchBtn');
+      const container = document.getElementById('profileSearch');
+      if (!input || !container) return;
+
+      const raw = input.value.trim();
+      if (!raw) return;
+
+      // Clear any previous error
+      const oldErr = container.querySelector('.profile-search-error');
+      if (oldErr) oldErr.remove();
+
+      const normalized = raw.replace(/^@/, '').trim();
+      const isEVM = /^0x[a-fA-F0-9]{40}$/.test(normalized);
+      const isSolana = !isEVM && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(normalized);
+
+      // Disable UI during async lookup
+      input.disabled = true;
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      try {
+        let profile = null;
+
+        if (isEVM || isSolana) {
+          // Reverse-lookup: address → profile
+          profile = await ProfileRouter.fetchProfileByAddress(normalized);
+          if (profile) {
+            window.location.href = '/u/' + profile.handle;
+            return;
+          }
+          showProfileSearchError(container, 'Address not in curated registry.');
+          return;
+        }
+
+        // Treat as handle
+        const handle = normalized.toLowerCase();
+        profile = await ProfileRouter.fetchProfileByHandle(handle);
+        if (profile) {
+          window.location.href = '/u/' + handle;
+        } else {
+          showProfileSearchError(container, '@' + handle + ' is not in the curated registry.');
+        }
+      } catch (e) {
+        console.error('[handleProfileSearch] failed:', e);
+        showProfileSearchError(container, 'Search failed. Try again.');
+      } finally {
+        input.disabled = false;
+        btn.disabled = false;
+        btn.textContent = 'GO';
+      }
+    }
+
+    function showProfileSearchError(container, message) {
+      container.classList.remove('shake');
+      void container.offsetWidth; // force reflow to restart animation
+      container.classList.add('shake');
+
+      const err = document.createElement('div');
+      err.className = 'profile-search-error';
+      err.textContent = '→ ' + message;
+      container.appendChild(err);
+
+      setTimeout(() => {
+        if (err.parentNode) err.remove();
+      }, 4000);
+    }
 
     async function sbFetch(path, method='GET', body=null) {
       const opts = { method, headers: {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'} };
