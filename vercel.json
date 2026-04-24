@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/u/:handle", "destination": "/index.html" },
+    { "source": "/address/:addr", "destination": "/index.html" }
+  ]
+}

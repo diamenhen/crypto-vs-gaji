@@ -844,6 +844,90 @@
     const SB_URL = 'https://geessxwsamrqwqsawrgm.supabase.co';
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZXNzeHdzYW1ycXdxc2F3cmdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MDQ0NzQsImV4cCI6MjA5MjA4MDQ3NH0.DchMndI0kKj2YsVbabJdnFG33O0kJvPZcHJGeerQOD8';
 
+    // ── Profile Router ──────────────────────────────────────
+    // Parses /u/:handle URLs → loads profile from Supabase profiles table.
+    // Sets window.__PROFILE_VIEW__ global for other components to read.
+    const ProfileRouter = (() => {
+      // Parse current pathname. Returns { type, value } or null for home route.
+      function parseRoute() {
+        const path = window.location.pathname;
+        const handleMatch = path.match(/^\/u\/([^/?#]+)\/?$/);
+        if (handleMatch) {
+          return { type: 'handle', value: decodeURIComponent(handleMatch[1]).toLowerCase() };
+        }
+        const addressMatch = path.match(/^\/address\/([^/?#]+)\/?$/);
+        if (addressMatch) {
+          return { type: 'address', value: decodeURIComponent(addressMatch[1]) };
+        }
+        return null;
+      }
+
+      // Fetch profile by handle from Supabase.
+      async function fetchProfileByHandle(handle) {
+        const url = `${SB_URL}/rest/v1/profiles?handle=eq.${encodeURIComponent(handle)}&limit=1`;
+        try {
+          const r = await fetch(url, {
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY },
+          });
+          if (!r.ok) return null;
+          const data = await r.json();
+          return data && data.length ? data[0] : null;
+        } catch (e) {
+          console.error('[ProfileRouter] fetchProfileByHandle failed:', e);
+          return null;
+        }
+      }
+
+      // Fetch profile by wallet address (reverse lookup across all chains).
+      async function fetchProfileByAddress(address) {
+        const addr = address.trim();
+        const chains = ['solana', 'ethereum', 'base', 'bsc'];
+        for (const chain of chains) {
+          const filter = encodeURIComponent(`[{"address":"${addr}"}]`);
+          const url = `${SB_URL}/rest/v1/profiles?wallets->${chain}=cs.${filter}&limit=1`;
+          try {
+            const r = await fetch(url, {
+              headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY },
+            });
+            if (!r.ok) continue;
+            const data = await r.json();
+            if (data && data.length) return data[0];
+          } catch (e) {
+            console.error(`[ProfileRouter] fetchProfileByAddress (${chain}) failed:`, e);
+          }
+        }
+        return null;
+      }
+
+      // Initialize — parse route, fetch profile, set global state.
+      async function init() {
+        const route = parseRoute();
+        if (!route) {
+          window.__PROFILE_VIEW__ = { mode: 'owner', profile: null, route: null };
+          console.log('[ProfileRouter] Home route — owner mode');
+          return;
+        }
+        let profile = null;
+        if (route.type === 'handle') {
+          profile = await fetchProfileByHandle(route.value);
+        } else if (route.type === 'address') {
+          profile = await fetchProfileByAddress(route.value);
+        }
+        if (profile) {
+          window.__PROFILE_VIEW__ = { mode: 'readonly', profile, route };
+          console.log('[ProfileRouter] Loaded profile:', profile.handle);
+        } else {
+          window.__PROFILE_VIEW__ = { mode: 'notfound', profile: null, route };
+          console.warn('[ProfileRouter] Profile not found for:', route);
+        }
+      }
+
+      return { parseRoute, fetchProfileByHandle, fetchProfileByAddress, init };
+    })();
+
+    // Kick off router immediately. Other components check window.__PROFILE_VIEW__ when they render.
+    ProfileRouter.init();
+
     async function sbFetch(path, method='GET', body=null) {
       const opts = { method, headers: {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'} };
       if (body) opts.body = JSON.stringify(body);
